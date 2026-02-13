@@ -10,7 +10,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import joblib
 import os
-from pathlib import Path
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -18,53 +17,11 @@ from pathlib import Path
 st.set_page_config(
     page_title="Churn Prediction - Samuel Maia",
     page_icon="🔮",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-
 # ============================================================================
-# FUNÇÕES DE CARREGAMENTO
-# ============================================================================
-
-@st.cache_resource
-def load_models():
-    """Carrega os modelos treinados"""
-    models = {}
-    model_paths = {
-        'LogisticRegression': 'models/LogisticRegression.joblib',
-        'RandomForest': 'models/RandomForest.joblib',
-        'GradientBoosting': 'models/GradientBoosting.joblib',
-        'preprocessor': 'models/preprocessor.joblib'
-    }
-
-    for name, path in model_paths.items():
-        if os.path.exists(path):
-            try:
-                models[name] = joblib.load(path)
-                print(f"✅ Carregado: {name}")
-            except Exception as e:
-                print(f"❌ Erro ao carregar {name}: {e}")
-
-    return models
-
-
-@st.cache_data
-def load_data():
-    """Carrega os dados"""
-    path = 'data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv'
-
-    if os.path.exists(path):
-        df = pd.read_csv(path)
-        # Tratar TotalCharges
-        df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
-        df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
-        return df
-    return None
-
-
-# ============================================================================
-# CABEÇALHO
+# TÍTULO
 # ============================================================================
 st.markdown("""
 <h1 style='text-align: center; color: #667EEA;'>
@@ -80,36 +37,29 @@ st.markdown("""
 # SIDEBAR
 # ============================================================================
 with st.sidebar:
-    st.image("https://via.placeholder.com/300x150/667EEA/FFFFFF?text=Churn+Prediction", use_container_width=True)
-
     st.markdown("## 📊 Status")
 
-    # Carregar dados e modelos
-    with st.spinner("🔄 Carregando..."):
-        data = load_data()
-        models = load_models()
-
-    # Status dos dados
-    if data is not None:
-        st.success(f"✅ Dados: {len(data)} registros")
+    # Verificar dados
+    data_path = 'data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv'
+    if os.path.exists(data_path):
+        df = pd.read_csv(data_path)
+        df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+        df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
+        st.success(f"✅ Dados: {len(df)} registros")
     else:
-        st.error("❌ Dados não encontrados")
+        df = None
+        st.error("❌ Dataset não encontrado")
 
-    # Status dos modelos
-    model_count = len([m for m in models.keys() if m != 'preprocessor'])
-    if model_count > 0:
-        st.success(f"✅ Modelos: {model_count} disponíveis")
-
-        # Seleção de modelo
-        model_names = [m for m in models.keys() if m != 'preprocessor']
-        selected_model = st.selectbox(
-            "🤖 Selecione o modelo:",
-            model_names,
-            index=0
-        )
+    # Verificar modelos
+    model_path = 'models/LogisticRegression.joblib'
+    if os.path.exists(model_path):
+        model = joblib.load(model_path)
+        st.success("✅ Modelo carregado")
+        model_loaded = True
     else:
-        st.error("❌ Nenhum modelo encontrado")
-        selected_model = None
+        model = None
+        model_loaded = False
+        st.error("❌ Modelo não encontrado")
 
     st.markdown("---")
 
@@ -127,7 +77,7 @@ with st.sidebar:
 # CORPO PRINCIPAL
 # ============================================================================
 
-if data is None:
+if df is None:
     st.error("""
     ### ❌ Dataset não encontrado
 
@@ -139,18 +89,18 @@ if data is None:
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("Total Clientes", f"{len(data):,}")
+    st.metric("Total Clientes", f"{len(df):,}")
 
 with col2:
-    churn_rate = (data['Churn'].value_counts().get('Yes', 0) / len(data)) * 100
+    churn_rate = (df['Churn'].value_counts().get('Yes', 0) / len(df)) * 100
     st.metric("Taxa de Churn", f"{churn_rate:.1f}%")
 
 with col3:
-    avg_monthly = data['MonthlyCharges'].mean()
+    avg_monthly = df['MonthlyCharges'].mean()
     st.metric("Média Mensal", f"${avg_monthly:.2f}")
 
 with col4:
-    avg_tenure = data['tenure'].mean()
+    avg_tenure = df['tenure'].mean()
     st.metric("Média Tenure", f"{avg_tenure:.1f} meses")
 
 # Gráficos
@@ -159,7 +109,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📊 Distribuição de Churn")
-    churn_counts = data['Churn'].value_counts()
+    churn_counts = df['Churn'].value_counts()
     fig1 = px.pie(
         values=churn_counts.values,
         names=churn_counts.index,
@@ -170,8 +120,8 @@ with col1:
 
 with col2:
     st.subheader("📊 Churn por Contrato")
-    if 'Contract' in data.columns:
-        contract_churn = pd.crosstab(data['Contract'], data['Churn'], normalize='index') * 100
+    if 'Contract' in df.columns:
+        contract_churn = pd.crosstab(df['Contract'], df['Churn'], normalize='index') * 100
         fig2 = px.bar(
             x=contract_churn.index,
             y=contract_churn['Yes'],
@@ -181,8 +131,8 @@ with col2:
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-# Predição
-if selected_model and selected_model in models:
+# Predição (se modelo carregado)
+if model_loaded and model is not None:
     st.markdown("---")
     st.markdown("## 🔍 Predição Individual")
 
@@ -235,7 +185,6 @@ if selected_model and selected_model in models:
                 }])
 
                 # Predição
-                model = models[selected_model]
                 proba = model.predict_proba(input_data)[0][1]
 
                 # Resultado
