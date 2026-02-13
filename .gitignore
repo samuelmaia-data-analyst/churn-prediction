@@ -1,70 +1,32 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-
-# IDE
-.vscode/
-.idea/
-
-# Dados
-data/raw/*.csv
-data/processed/*.csv
-
-# Modelos
-models/*.joblib
-models/*.pkl
-
-# Relatórios
-reports/figures/*
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Logs
-*.log
-
-# Config
-.env
-
-# Dados brutos (grandes)
-/data/raw/
-*.csv
-*.zip
-
-# Arquivos locais do Python
-__pycache__/
-*.pyc
-.env
-.streamlit/secrets.toml
-
-# IDE
-.idea/
-.vscode/
-
-# .gitignore
+# Ambientes virtuais
 venv/
 .venv/
 env/
 ENV/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
 *.so
 *.egg
 *.egg-info/
 dist/
 build/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Modelos (opcional - se quiser incluir, remova do gitignore)
 *.joblib
-!models/*.joblib  # Incluir modelos no repositório
+!models/*.joblib

@@ -1,10 +1,6 @@
-# app.py (renomeie seu dashboard para app.py - é o padrão do Streamlit Cloud)
-
 """
-Churn Prediction Dashboard - Versão Streamlit Cloud
+Churn Prediction Dashboard - Streamlit Cloud
 Autor: Samuel de Andrade Maia
-GitHub: @samuelmaiapro
-LinkedIn: /in/samuelmaiapro
 """
 
 import streamlit as st
@@ -14,11 +10,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import joblib
 import os
-import urllib.request
 from pathlib import Path
 
 # ============================================================================
-# CONFIGURAÇÃO DA PÁGINA (DEVE SER O PRIMEIRO COMANDO)
+# CONFIGURAÇÃO DA PÁGINA
 # ============================================================================
 st.set_page_config(
     page_title="Churn Prediction - Samuel Maia",
@@ -27,90 +22,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 # ============================================================================
-# FUNÇÕES DE CARREGAMENTO PARA CLOUD
+# FUNÇÕES DE CARREGAMENTO
 # ============================================================================
 
 @st.cache_resource
 def load_models():
-    """
-    Carrega modelos do repositório GitHub ou local
-    """
+    """Carrega os modelos treinados"""
     models = {}
-
-    # URL base dos modelos no GitHub (substitua pelo seu usuário)
-    GITHUB_URL = "https://github.com/samuelmaiapro/churn-prediction/raw/main/models/"
-
-    model_files = {
-        'LogisticRegression': 'LogisticRegression.joblib',
-        'RandomForest': 'RandomForest.joblib',
-        'GradientBoosting': 'GradientBoosting.joblib',
-        'preprocessor': 'preprocessor.joblib'
+    model_paths = {
+        'LogisticRegression': 'models/LogisticRegression.joblib',
+        'RandomForest': 'models/RandomForest.joblib',
+        'GradientBoosting': 'models/GradientBoosting.joblib',
+        'preprocessor': 'models/preprocessor.joblib'
     }
 
-    # Criar pasta models se não existir
-    os.makedirs('models', exist_ok=True)
-
-    for model_name, filename in model_files.items():
-        local_path = f'models/{filename}'
-
-        # Tentar carregar local primeiro
-        if os.path.exists(local_path):
+    for name, path in model_paths.items():
+        if os.path.exists(path):
             try:
-                models[model_name] = joblib.load(local_path)
-                continue
-            except:
-                pass
-
-        # Se não conseguir local, tentar baixar do GitHub
-        try:
-            st.info(f"📥 Baixando {model_name} do GitHub...")
-            url = GITHUB_URL + filename
-            urllib.request.urlretrieve(url, local_path)
-            models[model_name] = joblib.load(local_path)
-            st.success(f"✅ {model_name} baixado com sucesso!")
-        except:
-            st.warning(f"⚠️ Não foi possível carregar {model_name}")
+                models[name] = joblib.load(path)
+                print(f"✅ Carregado: {name}")
+            except Exception as e:
+                print(f"❌ Erro ao carregar {name}: {e}")
 
     return models
 
+
 @st.cache_data
 def load_data():
-    """
-    Carrega dados do repositório GitHub ou local
-    """
-    # URL do dataset no GitHub
-    GITHUB_DATA_URL = "https://github.com/samuelmaiapro/churn-prediction/raw/main/data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv"
-    local_path = 'data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv'
+    """Carrega os dados"""
+    path = 'data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv'
 
-    # Criar pasta data se não existir
-    os.makedirs('data/raw', exist_ok=True)
+    if os.path.exists(path):
+        df = pd.read_csv(path)
+        # Tratar TotalCharges
+        df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+        df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
+        return df
+    return None
 
-    # Tentar carregar local primeiro
-    if os.path.exists(local_path):
-        df = pd.read_csv(local_path)
-    else:
-        # Baixar do GitHub
-        try:
-            st.info("📥 Baixando dataset do GitHub...")
-            urllib.request.urlretrieve(GITHUB_DATA_URL, local_path)
-            df = pd.read_csv(local_path)
-            st.success("✅ Dataset baixado com sucesso!")
-        except:
-            st.error("❌ Não foi possível carregar o dataset")
-            return None
-
-    # Tratamento dos dados
-    df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
-    df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
-
-    return df
 
 # ============================================================================
-# INTERFACE PRINCIPAL
+# CABEÇALHO
 # ============================================================================
-
-# Título com seu nome
 st.markdown("""
 <h1 style='text-align: center; color: #667EEA;'>
     🔮 Churn Prediction System
@@ -121,39 +76,40 @@ st.markdown("""
 <hr>
 """, unsafe_allow_html=True)
 
-# Sidebar
+# ============================================================================
+# SIDEBAR
+# ============================================================================
 with st.sidebar:
     st.image("https://via.placeholder.com/300x150/667EEA/FFFFFF?text=Churn+Prediction", use_container_width=True)
 
     st.markdown("## 📊 Status")
 
     # Carregar dados e modelos
-    with st.spinner("🔄 Carregando recursos..."):
+    with st.spinner("🔄 Carregando..."):
         data = load_data()
         models = load_models()
 
+    # Status dos dados
     if data is not None:
         st.success(f"✅ Dados: {len(data)} registros")
+    else:
+        st.error("❌ Dados não encontrados")
 
+    # Status dos modelos
     model_count = len([m for m in models.keys() if m != 'preprocessor'])
     if model_count > 0:
         st.success(f"✅ Modelos: {model_count} disponíveis")
-    else:
-        st.error("❌ Nenhum modelo encontrado")
 
-    st.markdown("---")
-
-    # Seleção de modelo
-    if model_count > 0:
+        # Seleção de modelo
         model_names = [m for m in models.keys() if m != 'preprocessor']
         selected_model = st.selectbox(
             "🤖 Selecione o modelo:",
             model_names,
-            format_func=lambda x: f"🏆 {x}" if x == 'LogisticRegression' else x
+            index=0
         )
     else:
+        st.error("❌ Nenhum modelo encontrado")
         selected_model = None
-        st.warning("⚠️ Modelos serão baixados automaticamente")
 
     st.markdown("---")
 
@@ -161,14 +117,11 @@ with st.sidebar:
     st.markdown("""
     ### 👨‍💻 Autor
     **Samuel de Andrade Maia**
-    
+
     [![GitHub](https://img.shields.io/badge/GitHub-@samuelmaiapro-181717?style=flat&logo=github)](https://github.com/samuelmaiapro)
-    
+
     [![LinkedIn](https://img.shields.io/badge/LinkedIn-@samuelmaiapro-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/samuelmaiapro)
     """)
-
-    st.markdown("---")
-    st.caption(f"🔄 Última atualização: 2024")
 
 # ============================================================================
 # CORPO PRINCIPAL
@@ -176,11 +129,9 @@ with st.sidebar:
 
 if data is None:
     st.error("""
-    ### ❌ Erro ao carregar dados
-    
-    Verifique:
-    1. Conexão com internet
-    2. Repositório GitHub público
+    ### ❌ Dataset não encontrado
+
+    Certifique-se de que o arquivo está em: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
     """)
     st.stop()
 
@@ -226,13 +177,11 @@ with col2:
             y=contract_churn['Yes'],
             title="Taxa de Churn por Tipo de Contrato",
             labels={'x': 'Tipo de Contrato', 'y': 'Taxa (%)'},
-            color_discrete_sequence=['#F87171'],
-            text_auto='.1f'
+            color_discrete_sequence=['#F87171']
         )
-        fig2.update_traces(texttemplate='%{y:.1f}%', textposition='outside')
         st.plotly_chart(fig2, use_container_width=True)
 
-# Predição (se houver modelo)
+# Predição
 if selected_model and selected_model in models:
     st.markdown("---")
     st.markdown("## 🔍 Predição Individual")
@@ -242,7 +191,7 @@ if selected_model and selected_model in models:
 
         with col1:
             gender = st.selectbox("Gênero", ["Male", "Female"])
-            senior = st.selectbox("Senior Citizen", [0, 1], format_func=lambda x: "Sim" if x == 1 else "Não")
+            senior = st.selectbox("Senior Citizen", [0, 1])
             partner = st.selectbox("Partner", ["Yes", "No"])
             dependents = st.selectbox("Dependents", ["Yes", "No"])
 
@@ -251,11 +200,12 @@ if selected_model and selected_model in models:
             contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
             paperless = st.selectbox("Paperless Billing", ["Yes", "No"])
             payment = st.selectbox("Payment Method",
-                ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"])
+                                   ["Electronic check", "Mailed check", "Bank transfer (automatic)",
+                                    "Credit card (automatic)"])
 
         with col3:
-            monthly = st.number_input("Monthly Charges ($)", 0.0, 200.0, 65.5, step=0.5)
-            total = st.number_input("Total Charges ($)", 0.0, 10000.0, 786.0, step=10.0)
+            monthly = st.number_input("Monthly Charges ($)", 0.0, 200.0, 65.5)
+            total = st.number_input("Total Charges ($)", 0.0, 10000.0, 786.0)
             internet = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
             phone = st.selectbox("Phone Service", ["Yes", "No"])
 
@@ -296,67 +246,24 @@ if selected_model and selected_model in models:
                         mode="gauge+number",
                         value=proba * 100,
                         title={'text': "Probabilidade de Churn"},
-                        gauge={
-                            'axis': {'range': [0, 100]},
-                            'bar': {'color': "#667EEA"},
-                            'steps': [
-                                {'range': [0, 30], 'color': '#d4edda'},
-                                {'range': [30, 70], 'color': '#fff3cd'},
-                                {'range': [70, 100], 'color': '#f8d7da'}
-                            ]
-                        }
+                        gauge={'axis': {'range': [0, 100]}}
                     ))
-                    fig.update_layout(height=300)
                     st.plotly_chart(fig, use_container_width=True)
 
                 with col2:
                     if proba >= 0.5:
-                        st.error(f"""
-                        ### ⚠️ Alto Risco
-                        **Probabilidade:** {proba:.1%}
-                        
-                        **Recomendação:** Ação imediata de retenção
-                        """)
+                        st.error(f"### ⚠️ Alto Risco\nProbabilidade: {proba:.1%}")
                     else:
-                        st.success(f"""
-                        ### ✅ Baixo Risco
-                        **Probabilidade:** {proba:.1%}
-                        
-                        **Recomendação:** Manter qualidade do serviço
-                        """)
-
-                    st.caption(f"Modelo: {selected_model}")
+                        st.success(f"### ✅ Baixo Risco\nProbabilidade: {proba:.1%}")
 
             except Exception as e:
-                st.error(f"Erro na predição: {str(e)}")
-
-# Resultados dos modelos
-st.markdown("---")
-st.markdown("## 📈 Performance dos Modelos")
-
-performance_data = pd.DataFrame({
-    'Modelo': ['LogisticRegression', 'RandomForest', 'GradientBoosting'],
-    'Acurácia': [0.8055, 0.8070, 0.8006],
-    'Precisão': [0.6572, 0.6711, 0.6505],
-    'Recall': [0.5588, 0.5348, 0.5374],
-    'F1-Score': [0.6040, 0.5952, 0.5886],
-    'ROC-AUC': [0.8420, 0.8427, 0.8362]
-})
-
-st.dataframe(
-    performance_data.style.highlight_max(axis=0, subset=['Acurácia', 'Precisão', 'Recall', 'F1-Score', 'ROC-AUC']),
-    use_container_width=True
-)
+                st.error(f"Erro: {str(e)}")
 
 # Rodapé
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #666; padding: 2rem;'>
+<div style='text-align: center; color: #666; padding: 1rem;'>
     <p>Desenvolvido com ❤️ por <strong>Samuel de Andrade Maia</strong></p>
-    <p>
-        <a href='https://github.com/samuelmaiapro' target='_blank'>GitHub</a> • 
-        <a href='https://linkedin.com/in/samuelmaiapro' target='_blank'>LinkedIn</a>
-    </p>
-    <p style='font-size: 0.8rem;'>© 2024 - Churn Prediction System</p>
+    <p>© 2024 - Churn Prediction System</p>
 </div>
 """, unsafe_allow_html=True)
