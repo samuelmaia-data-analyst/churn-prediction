@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Dados
+data/raw/*.csv
+data/processed/*.csv
+
+# Modelos
+models/*.joblib
+models/*.pkl
+
+# Relatórios
+reports/figures/*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Config
+.env
