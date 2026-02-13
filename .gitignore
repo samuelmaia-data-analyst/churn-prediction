@@ -31,3 +31,40 @@ reports/figures/*
 
 # Config
 .env
+
+# Dados brutos (grandes)
+/data/raw/
+*.csv
+*.zip
+
+# Arquivos locais do Python
+__pycache__/
+*.pyc
+.env
+.streamlit/secrets.toml
+
+# IDE
+.idea/
+.vscode/
+
+# .gitignore
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+*.joblib
+!models/*.joblib  # Incluir modelos no repositório
