@@ -1,146 +1,206 @@
-# 📊 Projeto de Predição de Churn - Telecomunicações
+<div align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=667EEA&center=true&vCenter=true&width=600&lines=%F0%9F%9A%80+Churn+Prediction+Project;%F0%9F%93%8A+Machine+Learning+Analytics;%F0%9F%8E%AF+Customer+Retention+System" alt="Typing SVG" />
+</div>
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub repo](https://img.shields.io/badge/GitHub-samuelmaiapro%2Fchurn--prediction-brightgreen)](https://github.com/samuelmaiapro/churn-prediction)
-[![Kaggle Dataset](https://img.shields.io/badge/Dataset-Kaggle-orange)](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
+<p align="center">
+  <b>Preveja quais clientes têm maior probabilidade de cancelar o serviço usando Machine Learning</b>
+</p>
 
-> **Sistema completo para prever quais clientes têm maior probabilidade de cancelar o serviço (churn) usando machine learning.**
+<p align="center">
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  </a>
+  <a href="https://scikit-learn.org/">
+    <img src="https://img.shields.io/badge/Scikit_Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" />
+  </a>
+  <a href="https://fastapi.tiangolo.com/">
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  </a>
+  <a href="https://streamlit.io/">
+    <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" />
+  </a>
+  <a href="https://pandas.pydata.org/">
+    <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" />
+  </a>
+  <a href="https://github.com/samuelmaiapro/churn-prediction">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" />
+  <img src="https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen?style=flat-square" />
+  <img src="https://img.shields.io/github/last-commit/samuelmaiapro/churn-prediction?style=flat-square" />
+  <img src="https://img.shields.io/github/stars/samuelmaiapro/churn-prediction?style=social" />
+</p>
 
 ---
 
-## 📋 Índice
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Fonte dos Dados](#-fonte-dos-dados)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Instalação](#-instalação)
-- [Como Executar](#-como-executar)
-- [Resultados](#-resultados)
-- [Tecnologias](#-tecnologias)
-- [Contribuição](#-como-contribuir)
-- [Licença](#-licença)
-- [Contato](#-contato)
+## 📊 Demonstração do Projeto
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="https://via.placeholder.com/400x200/667EEA/FFFFFF?text=Dashboard+Interativo" width="400" alt="Dashboard"/>
+        <br/>
+        <sub>📊 Dashboard Analítico</sub>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/400x200/FF6B6B/FFFFFF?text=API+REST" width="400" alt="API"/>
+        <br/>
+        <sub>⚡ API em Tempo Real</sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="https://via.placeholder.com/400x200/4ECDC4/FFFFFF?text=Predições" width="400" alt="Predictions"/>
+        <br/>
+        <sub>🎯 Predições Individuais</sub>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/400x200/FFD93D/FFFFFF?text=Análise+3D" width="400" alt="3D"/>
+        <br/>
+        <sub>📈 Visualizações 3D</sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+> **Nota:** Substitua os placeholders acima por GIFs reais do seu projeto. Você pode gravar a tela usando [ScreenToGif](https://www.screentogif.com/) ou [LICEcap](https://www.cockos.com/licecap/).
 
 ---
 
 ## 🎯 Sobre o Projeto
 
-Este projeto utiliza dados reais de uma empresa de telecomunicações para construir modelos preditivos de churn. O objetivo é identificar clientes em risco de cancelamento, permitindo ações preventivas e reduzindo a taxa de evasão.
+Este projeto utiliza **dados reais de uma empresa de telecomunicações** para construir um sistema completo de predição de churn. O objetivo é identificar clientes em risco de cancelamento, permitindo ações preventivas e reduzindo a taxa de evasão.
 
-### ⭐ Principais Funcionalidades
+### ✨ Destaques
 
-| Funcionalidade | Descrição |
-|----------------|-----------|
-| **Análise Exploratória** | Visualizações interativas dos dados |
-| **Pipeline de ML** | Pré-processamento, treinamento e avaliação |
-| **Múltiplos Modelos** | LogisticRegression, RandomForest, GradientBoosting |
-| **API REST** | FastAPI para predições em tempo real |
-| **Dashboard** | Interface interativa com Streamlit |
-| **CI/CD** | Integração contínua com GitHub Actions |
+- ✅ **Pipeline completo** de Machine Learning do zero
+- ✅ **Múltiplos modelos** comparados (LogisticRegression, RandomForest, GradientBoosting)
+- ✅ **API REST** com FastAPI para integração
+- ✅ **Dashboard interativo** com Streamlit
+- ✅ **Script de predição** em linha de comando
+- ✅ **Código modular** e profissional
+- ✅ **Testes unitários** inclusos
+
+---
+
+## 🛠️ Stack Tecnológica
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="100">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" width="50" height="50"/>
+        <br/>Python 3.10
+      </td>
+      <td align="center" width="100">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg" width="50" height="50"/>
+        <br/>Pandas
+      </td>
+      <td align="center" width="100">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg" width="50" height="50"/>
+        <br/>NumPy
+      </td>
+      <td align="center" width="100">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/matplotlib/matplotlib-original.svg" width="50" height="50"/>
+        <br/>Matplotlib
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="100">
+        <img src="https://scikit-learn.org/stable/_static/scikit-learn-logo-small.png" width="50" height="50"/>
+        <br/>Scikit-learn
+      </td>
+      <td align="center" width="100">
+        <img src="https://raw.githubusercontent.com/dmlc/web-data/master/xgboost/static/logo/xgboost_logo.png" width="50" height="50"/>
+        <br/>XGBoost
+      </td>
+      <td align="center" width="100">
+        <img src="https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png" width="50" height="50"/>
+        <br/>FastAPI
+      </td>
+      <td align="center" width="100">
+        <img src="https://streamlit.io/images/brand/streamlit-mark-color.png" width="50" height="50"/>
+        <br/>Streamlit
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
 ## 📁 Fonte dos Dados
 
 ### Dataset: Telco Customer Churn
-O dataset está disponível publicamente no Kaggle:
 
-https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-
+<div align="center">
+  <a href="https://www.kaggle.com/datasets/blastchar/telco-customer-churn">
+    <img src="https://img.shields.io/badge/Kaggle-Dataset-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white" />
+  </a>
+</div>
 
 **Arquivo:** `WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
-### 📊 Descrição do Dataset
-- **Total de registros:** 7.043 clientes
-- **Período:** Dados históricos de uma empresa de telecomunicações
-- **Variável alvo:** `Churn` (Yes/No) - indica se o cliente cancelou o serviço
+**Estatísticas:**
+- 📊 **7.043** registros de clientes
+- 📋 **21** variáveis (20 features + 1 target)
+- 🎯 **Variável alvo:** `Churn` (Yes/No)
 
-<details>
-<summary><b>📌 Clique para ver o Dicionário de Dados completo</b></summary>
+### 📌 Prévia dos Dados
 
-| Coluna | Descrição | Tipo |
-|--------|-----------|------|
-| `customerID` | ID único do cliente | Texto |
-| `gender` | Gênero (Male/Female) | Categórico |
-| `SeniorCitizen` | Indica se é idoso (0-Não, 1-Sim) | Binário |
-| `Partner` | Tem parceiro(a) (Yes/No) | Binário |
-| `Dependents` | Tem dependentes (Yes/No) | Binário |
-| `tenure` | Meses como cliente | Numérico |
-| `PhoneService` | Tem serviço de telefone (Yes/No) | Binário |
-| `MultipleLines` | Múltiplas linhas (Yes/No/No phone service) | Categórico |
-| `InternetService` | Tipo de internet (DSL/Fiber optic/No) | Categórico |
-| `OnlineSecurity` | Segurança online (Yes/No/No internet service) | Categórico |
-| `OnlineBackup` | Backup online (Yes/No/No internet service) | Categórico |
-| `DeviceProtection` | Proteção de dispositivo (Yes/No/No internet service) | Categórico |
-| `TechSupport` | Suporte técnico (Yes/No/No internet service) | Categórico |
-| `StreamingTV` | Streaming TV (Yes/No/No internet service) | Categórico |
-| `StreamingMovies` | Streaming filmes (Yes/No/No internet service) | Categórico |
-| `Contract` | Tipo de contrato (Month-to-month/One year/Two year) | Categórico |
-| `PaperlessBilling` | Fatura digital (Yes/No) | Binário |
-| `PaymentMethod` | Método de pagamento | Categórico |
-| `MonthlyCharges` | Cobrança mensal | Numérico |
-| `TotalCharges` | Cobrança total acumulada | Numérico |
-| `Churn` | Cliente cancelou? (Yes/No) - **Variável Alvo** | Binário |
+```python
+import pandas as pd
+df = pd.read_csv('data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+print(df.head())
 
-</details>
+customerID	gender	tenure	MonthlyCharges	TotalCharges	Churn
+7590-VHVEG	Female	1	29.85	29.85	No
+5575-GNVDE	Male	34	56.95	1889.5	No
+3668-QPYBK	Male	2	53.85	108.15	Yes
+🚀 Como Executar o Projeto
+📋 Pré-requisitos
 
----
+    Python 3.10 ou superior
 
-## 📁 Estrutura do Projeto
+    Git
 
-churn-prediction/ ├── .github/ │ └── workflows/ # GitHub Actions (CI/CD) ├── data/ │ ├── raw/ # Coloque o CSV aqui │ │ └── WA_Fn-UseC_-Telco-Customer-Churn.csv │ └── processed/ # Dados processados (gerado automaticamente) ├── models/ # Modelos treinados │ ├── LogisticRegression.joblib │ └── preprocessor.joblib ├── notebooks/ # Jupyter notebooks │ ├── 01_analise_exploratoria.ipynb │ └── 01_eda_analysis.ipynb ├── src/ │ ├── data/ # Módulos de dados │ │ ├── make_dataset.py │ │ └── preprocess.py │ ├── features/ # Engenharia de features │ │ └── build_features.py │ ├── models/ # Treinamento e avaliação │ │ └── train_model.py │ └── visualization/ # Visualizações (em desenvolvimento) ├── tests/ # Testes unitários │ ├── test_data.py │ ├── test_features.py │ └── test_models.py ├── .gitignore ├── config.yaml # Configurações do projeto ├── requirements.txt # Dependências ├── main.py # Pipeline principal ├── predict_customer.py # Script de predição interativo ├── api.py # API FastAPI ├── dashboard.py # Dashboard Streamlit └── README.md # Documentação
+    Ambiente virtual (recomendado)
 
+🔧 Instalação
+bash
 
----
+# Clone o repositório
+git clone https://github.com/samuelmaiapro/churn-prediction.git
+cd churn-prediction
 
-## 🔧 Instalação
+# Crie e ative o ambiente virtual
+python -m venv venv
 
-### Pré‑requisitos
-- Python 3.10+
-- Git
-- Ambiente virtual (recomendado)
+# Windows
+venv\Scripts\activate
 
-### Passo a Passo
+# Linux/Mac
+source venv/bin/activate
 
-<details>
-<summary><b>📦 Clique para expandir as instruções de instalação</b></summary>
+# Instale as dependências
+pip install -r requirements.txt
 
-1. **Clone o repositório**
-   ```bash
-   git clone https://github.com/samuelmaiapro/churn-prediction.git
-   cd churn-prediction
+# Baixe o dataset (ou coloque manualmente em data/raw/)
+# Download automático (requer conta Kaggle)
+pip install kaggle
+kaggle datasets download -d blastchar/telco-customer-churn
+unzip telco-customer-churn.zip -d data/raw/
 
-    Crie e ative um ambiente virtual
-
-    # Windows
-    python -m venv venv
-    venv\Scripts\activate
-
-    # Linux/Mac
-    python3 -m venv venv
-    source venv/bin/activate
-
-    Instale as dependências
-
-    pip install -r requirements.txt
-
-    Baixe o dataset
-
-    # Opção 1: Download manual
-    # Acesse: https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-    # Coloque o arquivo em data/raw/
-
-    # Opção 2: Via Kaggle API
-    pip install kaggle
-    kaggle datasets download -d blastchar/telco-customer-churn
-    unzip telco-customer-churn.zip -d data/raw/
-
-🚀 Como Executar
-1️⃣ Treinar o Modelo
+🎯 Treinar o Modelo
+bash
 
 python main.py
 
 Saída esperada:
+text
 
 ============================================================
  PROJETO DE PREDIÇÃO DE CHURN
@@ -162,423 +222,76 @@ Saída esperada:
 
 ✅ Melhor modelo: LogisticRegression
 
-2️⃣ Fazer Predições Interativas
+🤖 Fazer Predições
+
+Modo interativo:
+bash
 
 python predict_customer.py
 
-3️⃣ Iniciar a API REST
+API REST:
+bash
 
 uvicorn api:app --reload
+# Acesse: http://localhost:8000/docs
 
-Endpoints:
-
-    GET / - Informações da API
-    GET /health - Status da API
-    POST /predict - Predição individual
-    POST /predict/batch - Predições em lote
-
-📚 Documentação interativa: http://localhost:8000/docs
-4️⃣ Executar o Dashboard
+Dashboard:
+bash
 
 streamlit run dashboard.py
+# Acesse: http://localhost:8501
 
-🌐 Acesse: http://localhost:8501
-📈 Resultados
-Comparação dos Modelos
-Modelo 	Acurácia 	Precisão 	Recall 	F1-Score 	ROC-AUC
-LogisticRegression 	0.8055 	0.6572 	0.5588 	0.6040 	0.8420
-RandomForest 	0.8070 	0.6711 	0.5348 	0.5952 	0.8427
-GradientBoosting 	0.8006 	0.6505 	0.5374 	0.5886 	0.8362
-🏆 Modelo Escolhido: Logistic Regression
+📊 Resultados dos Modelos
+<div align="center"> <table> <tr> <th>Modelo</th> <th>Acurácia</th> <th>Precisão</th> <th>Recall</th> <th>F1-Score</th> <th>ROC-AUC</th> </tr> <tr> <td><b>LogisticRegression</b> 🏆</td> <td>0.8055</td> <td>0.6572</td> <td>0.5588</td> <td><b>0.6040</b></td> <td>0.8420</td> </tr> <tr> <td>RandomForest</td> <td>0.8070</td> <td>0.6711</td> <td>0.5348</td> <td>0.5952</td> <td><b>0.8427</b></td> </tr> <tr> <td>GradientBoosting</td> <td>0.8006</td> <td>0.6505</td> <td>0.5374</td> <td>0.5886</td> <td>0.8362</td> </tr> </table> </div>
+📈 Análise das Métricas
+<div align="center"> <img src="https://via.placeholder.com/800x400/667EEA/FFFFFF?text=Gr%C3%A1fico+de+Compara%C3%A7%C3%A3o" width="800" alt="Model Comparison"/> <br/> <sub>📊 Comparação visual dos modelos (substitua pelo seu gráfico real)</sub> </div>
+📁 Estrutura do Projeto
+text
 
-Motivos da escolha:
+📦 churn-prediction
+├── 📂 .github
+│   └── 📂 workflows          # GitHub Actions (CI/CD)
+├── 📂 data
+│   ├── 📂 raw                # Dados brutos (CSV)
+│   └── 📂 processed          # Dados processados
+├── 📂 models                 # Modelos treinados
+├── 📂 notebooks              # Jupyter notebooks
+├── 📂 src
+│   ├── 📂 data               # Carregamento e pré-processamento
+│   ├── 📂 features           # Engenharia de features
+│   └── 📂 models             # Treinamento e avaliação
+├── 📂 tests                  # Testes unitários
+├── 📄 main.py                # Pipeline principal
+├── 📄 api.py                 # API FastAPI
+├── 📄 dashboard.py           # Dashboard Streamlit
+├── 📄 predict_customer.py    # Script interativo
+├── 📄 requirements.txt       # Dependências
+├── 📄 config.yaml            # Configurações
+└── 📄 README.md              # Documentação
 
-    ✅ Melhor F1-Score (equilíbrio entre precisão e recall)
-    ✅ Alta interpretabilidade (coeficientes mostram impacto de cada feature)
-    ✅ Menor overfitting comparado a modelos complexos
+🧪 Testes
 
-🛠️ Tecnologias Utilizadas
-Categoria 	Tecnologias
-Linguagem 	Python 3.10
-Manipulação de Dados 	Pandas, NumPy
-Visualização 	Matplotlib, Seaborn, Plotly
-Machine Learning 	Scikit-learn
-APIs 	FastAPI, Uvicorn
-Dashboard 	Streamlit
-Versionamento 	Git, GitHub
-CI/CD 	GitHub Actions
-Testes 	Pytest
+Execute os testes unitários:
+bash
+
+pytest tests/ -v --cov=src
+
 🤝 Como Contribuir
 
 Contribuições são sempre bem-vindas!
 
-    Faça um fork do projeto
-    Crie uma branch para sua feature
+    Fork o projeto
 
-    git checkout -b feature/nova-feature
+    Crie uma branch (git checkout -b feature/nova-feature)
 
-    Commit suas mudanças
+    Commit suas mudanças (git commit -m 'Adiciona nova feature')
 
-    git commit -m 'Adiciona nova feature'
-
-    Push para a branch
-
-    git push origin feature/nova-feature
+    Push (git push origin feature/nova-feature)
 
     Abra um Pull Request
 
-📌 Diretrizes
-
-    Mantenha o código limpo e comentado
-    Adicione testes para novas funcionalidades
-    Atualize a documentação quando necessário
-
 📄 Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para detalhes.
-📞 Contato
-
-Samuel Maia
-
-    GitHub: @samuelmaiapro
-    E-mail: samuelmaiapro@gmail.com
-    LinkedIn: [Adicionar link]
-
-⭐ Se este projeto te ajudou, considere dar uma estrela no GitHub! ⭐
-
-🚀 Happy Coding!
-```markdown
-# 📊 Projeto de Predição de Churn - Telecomunicações
-
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub repo](https://img.shields.io/badge/GitHub-samuelmaiapro%2Fchurn--prediction-brightgreen)](https://github.com/samuelmaiapro/churn-prediction)
-[![Kaggle Dataset](https://img.shields.io/badge/Dataset-Kaggle-orange)](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
-
-> **Sistema completo para prever quais clientes têm maior probabilidade de cancelar o serviço (churn) usando machine learning.**
-
----
-
-## 📋 Índice
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Fonte dos Dados](#-fonte-dos-dados)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Instalação](#-instalação)
-- [Como Executar](#-como-executar)
-- [Resultados](#-resultados)
-- [Tecnologias](#-tecnologias)
-- [Contribuição](#-como-contribuir)
-- [Licença](#-licença)
-- [Contato](#-contato)
-
----
-
-## 🎯 Sobre o Projeto
-
-Este projeto utiliza dados reais de uma empresa de telecomunicações para construir modelos preditivos de churn. O objetivo é identificar clientes em risco de cancelamento, permitindo ações preventivas e reduzindo a taxa de evasão.
-
-### ⭐ Principais Funcionalidades
-
-| Funcionalidade | Descrição |
-|----------------|-----------|
-| **Análise Exploratória** | Visualizações interativas dos dados |
-| **Pipeline de ML** | Pré-processamento, treinamento e avaliação |
-| **Múltiplos Modelos** | LogisticRegression, RandomForest, GradientBoosting |
-| **API REST** | FastAPI para predições em tempo real |
-| **Dashboard** | Interface interativa com Streamlit |
-| **CI/CD** | Integração contínua com GitHub Actions |
-
----
-
-## 📁 Fonte dos Dados
-
-### Dataset: Telco Customer Churn
-O dataset está disponível publicamente no Kaggle:
-
-```
-https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-```
-
-**Arquivo:** `WA_Fn-UseC_-Telco-Customer-Churn.csv`
-
-### 📊 Descrição do Dataset
-- **Total de registros:** 7.043 clientes
-- **Período:** Dados históricos de uma empresa de telecomunicações
-- **Variável alvo:** `Churn` (Yes/No) - indica se o cliente cancelou o serviço
-
-<details>
-<summary><b>📌 Clique para ver o Dicionário de Dados completo</b></summary>
-
-| Coluna | Descrição | Tipo |
-|--------|-----------|------|
-| `customerID` | ID único do cliente | Texto |
-| `gender` | Gênero (Male/Female) | Categórico |
-| `SeniorCitizen` | Indica se é idoso (0-Não, 1-Sim) | Binário |
-| `Partner` | Tem parceiro(a) (Yes/No) | Binário |
-| `Dependents` | Tem dependentes (Yes/No) | Binário |
-| `tenure` | Meses como cliente | Numérico |
-| `PhoneService` | Tem serviço de telefone (Yes/No) | Binário |
-| `MultipleLines` | Múltiplas linhas (Yes/No/No phone service) | Categórico |
-| `InternetService` | Tipo de internet (DSL/Fiber optic/No) | Categórico |
-| `OnlineSecurity` | Segurança online (Yes/No/No internet service) | Categórico |
-| `OnlineBackup` | Backup online (Yes/No/No internet service) | Categórico |
-| `DeviceProtection` | Proteção de dispositivo (Yes/No/No internet service) | Categórico |
-| `TechSupport` | Suporte técnico (Yes/No/No internet service) | Categórico |
-| `StreamingTV` | Streaming TV (Yes/No/No internet service) | Categórico |
-| `StreamingMovies` | Streaming filmes (Yes/No/No internet service) | Categórico |
-| `Contract` | Tipo de contrato (Month-to-month/One year/Two year) | Categórico |
-| `PaperlessBilling` | Fatura digital (Yes/No) | Binário |
-| `PaymentMethod` | Método de pagamento | Categórico |
-| `MonthlyCharges` | Cobrança mensal | Numérico |
-| `TotalCharges` | Cobrança total acumulada | Numérico |
-| `Churn` | Cliente cancelou? (Yes/No) - **Variável Alvo** | Binário |
-
-</details>
-
----
-
-## 📁 Estrutura do Projeto
-
-```
-churn-prediction/
-├── .github/
-│   └── workflows/          # GitHub Actions (CI/CD)
-├── data/
-│   ├── raw/                 # Coloque o CSV aqui
-│   │   └── WA_Fn-UseC_-Telco-Customer-Churn.csv
-│   └── processed/           # Dados processados (gerado automaticamente)
-├── models/                  # Modelos treinados
-│   ├── LogisticRegression.joblib
-│   └── preprocessor.joblib
-├── notebooks/               # Jupyter notebooks
-│   ├── 01_analise_exploratoria.ipynb
-│   └── 01_eda_analysis.ipynb
-├── src/
-│   ├── data/                # Módulos de dados
-│   │   ├── make_dataset.py
-│   │   └── preprocess.py
-│   ├── features/            # Engenharia de features
-│   │   └── build_features.py
-│   ├── models/              # Treinamento e avaliação
-│   │   └── train_model.py
-│   └── visualization/       # Visualizações (em desenvolvimento)
-├── tests/                   # Testes unitários
-│   ├── test_data.py
-│   ├── test_features.py
-│   └── test_models.py
-├── .gitignore
-├── config.yaml              # Configurações do projeto
-├── requirements.txt         # Dependências
-├── main.py                  # Pipeline principal
-├── predict_customer.py      # Script de predição interativo
-├── api.py                   # API FastAPI
-├── dashboard.py             # Dashboard Streamlit
-└── README.md                # Documentação
-```
-
----
-
-## 🔧 Instalação
-
-### Pré‑requisitos
-- Python 3.10+
-- Git
-- Ambiente virtual (recomendado)
-
-### Passo a Passo
-
-<details>
-<summary><b>📦 Clique para expandir as instruções de instalação</b></summary>
-
-1. **Clone o repositório**
-   ```bash
-   git clone https://github.com/samuelmaiapro/churn-prediction.git
-   cd churn-prediction
-   ```
-
-2. **Crie e ative um ambiente virtual**
-   ```bash
-   # Windows
-   python -m venv venv
-   venv\Scripts\activate
-
-   # Linux/Mac
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Instale as dependências**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Baixe o dataset**
-   ```bash
-   # Opção 1: Download manual
-   # Acesse: https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-   # Coloque o arquivo em data/raw/
-
-   # Opção 2: Via Kaggle API
-   pip install kaggle
-   kaggle datasets download -d blastchar/telco-customer-churn
-   unzip telco-customer-churn.zip -d data/raw/
-   ```
-
-</details>
-
----
-
-## 🚀 Como Executar
-
-### 1️⃣ Treinar o Modelo
-```bash
-python main.py
-```
-
-**Saída esperada:**
-```
-============================================================
- PROJETO DE PREDIÇÃO DE CHURN
-============================================================
-
-1. Carregando dados...
-   ✓ Dados carregados: (7043, 21)
-
-2. Pré-processando dados...
-   ✓ Treino: (5634, 19), Teste: (1409, 19)
-
-3. Engenharia de features...
-   ✓ Features processadas: 30
-
-4. Treinando modelos...
-   LogisticRegression - F1: 0.6040, AUC: 0.8420
-   RandomForest - F1: 0.5952, AUC: 0.8427
-   GradientBoosting - F1: 0.5886, AUC: 0.8362
-
-✅ Melhor modelo: LogisticRegression
-```
-
-### 2️⃣ Fazer Predições Interativas
-```bash
-python predict_customer.py
-```
-
-### 3️⃣ Iniciar a API REST
-```bash
-uvicorn api:app --reload
-```
-**Endpoints:**
-- `GET /` - Informações da API
-- `GET /health` - Status da API
-- `POST /predict` - Predição individual
-- `POST /predict/batch` - Predições em lote
-
-📚 Documentação interativa: http://localhost:8000/docs
-
-### 4️⃣ Executar o Dashboard
-```bash
-streamlit run dashboard.py
-```
-🌐 Acesse: http://localhost:8501
-
----
-
-## 📈 Resultados
-
-### Comparação dos Modelos
-
-| Modelo | Acurácia | Precisão | Recall | F1-Score | ROC-AUC |
-|--------|----------|----------|--------|----------|---------|
-| LogisticRegression | 0.8055 | 0.6572 | 0.5588 | **0.6040** | 0.8420 |
-| RandomForest | 0.8070 | 0.6711 | 0.5348 | 0.5952 | **0.8427** |
-| GradientBoosting | 0.8006 | 0.6505 | 0.5374 | 0.5886 | 0.8362 |
-
-### 🏆 Modelo Escolhido: **Logistic Regression**
-
-**Motivos da escolha:**
-- ✅ Melhor F1-Score (equilíbrio entre precisão e recall)
-- ✅ Alta interpretabilidade (coeficientes mostram impacto de cada feature)
-- ✅ Menor overfitting comparado a modelos complexos
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-| Categoria | Tecnologias |
-|-----------|-------------|
-| **Linguagem** | Python 3.10 |
-| **Manipulação de Dados** | Pandas, NumPy |
-| **Visualização** | Matplotlib, Seaborn, Plotly |
-| **Machine Learning** | Scikit-learn |
-| **APIs** | FastAPI, Uvicorn |
-| **Dashboard** | Streamlit |
-| **Versionamento** | Git, GitHub |
-| **CI/CD** | GitHub Actions |
-| **Testes** | Pytest |
-
----
-
-## 🤝 Como Contribuir
-
-Contribuições são sempre bem-vindas!
-
-1. **Faça um fork** do projeto
-2. **Crie uma branch** para sua feature
-   ```bash
-   git checkout -b feature/nova-feature
-   ```
-3. **Commit suas mudanças**
-   ```bash
-   git commit -m 'Adiciona nova feature'
-   ```
-4. **Push para a branch**
-   ```bash
-   git push origin feature/nova-feature
-   ```
-5. **Abra um Pull Request**
-
-### 📌 Diretrizes
-- Mantenha o código limpo e comentado
-- Adicione testes para novas funcionalidades
-- Atualize a documentação quando necessário
-
----
-
-## 📄 Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
----
-
-## 📞 Contato
-
-**Samuel Maia**
-- GitHub: [@samuelmaiapro](https://github.com/samuelmaiapro)
-- E-mail: samuelmaiapro@gmail.com
-- LinkedIn: [Adicionar link]
-
----
-
-<div align="center">
-  
-⭐ **Se este projeto te ajudou, considere dar uma estrela no GitHub!** ⭐
-
-🚀 **Happy Coding!**
-
-</div>
-```
-
-## 🎨 Principais melhorias que fiz:
-
-1. **Índice** no início para facilitar navegação
-2. **Tabela de Funcionalidades** mais visual
-3. **Dicionário de dados colapsável** (`<details>`) para não poluir a visualização
-4. **Badges** mais organizados no topo
-5. **Instruções de instalação colapsáveis** para leitura opcional
-6. **Tabela de resultados** mais clara com destaque para o melhor modelo
-7. **Rodapé centralizado** com call-to-action
-8. **Emojis estratégicos** para guiar visualmente o leitor
-9. **Separadores visuais** (`---`) entre seções principais
-
-```
-
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+👨‍💻 Autor
+<div align="center"> <table> <tr> <td align="center"> <img src="https://github.com/samuelmaiapro.png" width="100" height="100" style="border-radius: 50%;" alt="Samuel Maia"/> <br/> <b>Samuel Maia</b> <br/> <a href="https://github.com/samuelmaiapro"> <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" /> </a> <br/> <sub>🚀 Desenvolvedor & Cientista de Dados</sub> </td> </tr> </table> </div><div align="center"> <h3>⭐ Se este projeto te ajudou, considere dar uma estrela! ⭐</h3> <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fsamuelmaiapro%2Fchurn-prediction&countColor=%23263759" /> <br/> <sub>Feito com ❤️ por Samuel Maia</sub> </div> ```
