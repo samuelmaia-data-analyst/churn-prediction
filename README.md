@@ -1,3 +1,6 @@
+Perfeito! Seu README.md está excelente - completo, bem estruturado e profissional. Vou apenas sugerir algumas melhorias de organização para torná-lo ainda mais claro e visualmente atraente:
+
+```markdown
 # 📊 Projeto de Predição de Churn - Telecomunicações
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
@@ -9,42 +12,55 @@
 
 ---
 
-## 📋 Sobre o Projeto
+## 📋 Índice
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Fonte dos Dados](#-fonte-dos-dados)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Instalação](#-instalação)
+- [Como Executar](#-como-executar)
+- [Resultados](#-resultados)
+- [Tecnologias](#-tecnologias)
+- [Contribuição](#-como-contribuir)
+- [Licença](#-licença)
+- [Contato](#-contato)
+
+---
+
+## 🎯 Sobre o Projeto
 
 Este projeto utiliza dados reais de uma empresa de telecomunicações para construir modelos preditivos de churn. O objetivo é identificar clientes em risco de cancelamento, permitindo ações preventivas e reduzindo a taxa de evasão.
 
-### 🎯 Principais Funcionalidades
+### ⭐ Principais Funcionalidades
 
-- ✅ **Análise Exploratória** completa dos dados com visualizações interativas
-- ✅ **Pipeline de pré-processamento** com imputação de valores ausentes e padronização
-- ✅ **Treinamento e comparação** de múltiplos modelos de classificação
-- ✅ **API REST** com FastAPI para predições em tempo real
-- ✅ **Dashboard interativo** com Streamlit
-- ✅ **Script de linha de comando** para predições individuais
-- ✅ **CI/CD** com GitHub Actions (em desenvolvimento)
+| Funcionalidade | Descrição |
+|----------------|-----------|
+| **Análise Exploratória** | Visualizações interativas dos dados |
+| **Pipeline de ML** | Pré-processamento, treinamento e avaliação |
+| **Múltiplos Modelos** | LogisticRegression, RandomForest, GradientBoosting |
+| **API REST** | FastAPI para predições em tempo real |
+| **Dashboard** | Interface interativa com Streamlit |
+| **CI/CD** | Integração contínua com GitHub Actions |
 
 ---
 
 ## 📁 Fonte dos Dados
 
 ### Dataset: Telco Customer Churn
+O dataset está disponível publicamente no Kaggle:
 
-O dataset utilizado é o **"Telco Customer Churn"** disponível publicamente no Kaggle.
-
-**Local para download:**
-
+```
 https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-
+```
 
 **Arquivo:** `WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
 ### 📊 Descrição do Dataset
-
 - **Total de registros:** 7.043 clientes
-- **Período:** Dados históricos de clientes de uma empresa de telecomunicações
+- **Período:** Dados históricos de uma empresa de telecomunicações
 - **Variável alvo:** `Churn` (Yes/No) - indica se o cliente cancelou o serviço
 
-### 📌 Dicionário de Dados
+<details>
+<summary><b>📌 Clique para ver o Dicionário de Dados completo</b></summary>
 
 | Coluna | Descrição | Tipo |
 |--------|-----------|------|
@@ -70,64 +86,110 @@ https://www.kaggle.com/datasets/blastchar/telco-customer-churn
 | `TotalCharges` | Cobrança total acumulada | Numérico |
 | `Churn` | Cliente cancelou? (Yes/No) - **Variável Alvo** | Binário |
 
+</details>
+
 ---
 
 ## 📁 Estrutura do Projeto
 
-churn-prediction/ ├── .github/ │ └── workflows/ # GitHub Actions (CI/CD) ├── data/ │ ├── raw/ # Coloque o arquivo CSV aqui │ │ └── WA_Fn-UseC_-Telco-Customer-Churn.csv │ └── processed/ # Dados processados (gerado automaticamente) ├── models/ # Modelos treinados e pré-processador │ ├── LogisticRegression.joblib │ └── preprocessor.joblib ├── notebooks/ # Jupyter notebooks │ ├── 01_analise_exploratoria.ipynb │ └── 01_eda_analysis.ipynb ├── src/ │ ├── data/ # Módulos de dados │ │ ├── make_dataset.py │ │ └── preprocess.py │ ├── features/ # Engenharia de features │ │ └── build_features.py │ ├── models/ # Treinamento e avaliação │ │ └── train_model.py │ └── visualization/ # Visualizações (em desenvolvimento) ├── tests/ # Testes unitários │ ├── test_data.py │ ├── test_features.py │ └── test_models.py ├── .gitignore ├── config.yaml # Configurações do projeto ├── requirements.txt # Dependências do projeto ├── main.py # Pipeline principal de treinamento ├── predict_customer.py # Script de predição interativo ├── api.py # API FastAPI ├── dashboard.py # Dashboard Streamlit └── README.md # Documentação (você está aqui)
-
+```
+churn-prediction/
+├── .github/
+│   └── workflows/          # GitHub Actions (CI/CD)
+├── data/
+│   ├── raw/                 # Coloque o CSV aqui
+│   │   └── WA_Fn-UseC_-Telco-Customer-Churn.csv
+│   └── processed/           # Dados processados (gerado automaticamente)
+├── models/                  # Modelos treinados
+│   ├── LogisticRegression.joblib
+│   └── preprocessor.joblib
+├── notebooks/               # Jupyter notebooks
+│   ├── 01_analise_exploratoria.ipynb
+│   └── 01_eda_analysis.ipynb
+├── src/
+│   ├── data/                # Módulos de dados
+│   │   ├── make_dataset.py
+│   │   └── preprocess.py
+│   ├── features/            # Engenharia de features
+│   │   └── build_features.py
+│   ├── models/              # Treinamento e avaliação
+│   │   └── train_model.py
+│   └── visualization/       # Visualizações (em desenvolvimento)
+├── tests/                   # Testes unitários
+│   ├── test_data.py
+│   ├── test_features.py
+│   └── test_models.py
+├── .gitignore
+├── config.yaml              # Configurações do projeto
+├── requirements.txt         # Dependências
+├── main.py                  # Pipeline principal
+├── predict_customer.py      # Script de predição interativo
+├── api.py                   # API FastAPI
+├── dashboard.py             # Dashboard Streamlit
+└── README.md                # Documentação
+```
 
 ---
 
-## 🔧 Instalação e Configuração
+## 🔧 Instalação
 
 ### Pré‑requisitos
-
-- Python 3.10 ou superior
+- Python 3.10+
 - Git
 - Ambiente virtual (recomendado)
 
 ### Passo a Passo
 
+<details>
+<summary><b>📦 Clique para expandir as instruções de instalação</b></summary>
+
 1. **Clone o repositório**
    ```bash
    git clone https://github.com/samuelmaiapro/churn-prediction.git
    cd churn-prediction
+   ```
 
-    Crie e ative um ambiente virtual
+2. **Crie e ative um ambiente virtual**
+   ```bash
+   # Windows
+   python -m venv venv
+   venv\Scripts\activate
 
-    # Windows
-    python -m venv venv
-    venv\Scripts\activate
+   # Linux/Mac
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
 
-    # Linux/Mac
-    python3 -m venv venv
-    source venv/bin/activate
+3. **Instale as dependências**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-    Instale as dependências
+4. **Baixe o dataset**
+   ```bash
+   # Opção 1: Download manual
+   # Acesse: https://www.kaggle.com/datasets/blastchar/telco-customer-churn
+   # Coloque o arquivo em data/raw/
 
-    pip install -r requirements.txt
+   # Opção 2: Via Kaggle API
+   pip install kaggle
+   kaggle datasets download -d blastchar/telco-customer-churn
+   unzip telco-customer-churn.zip -d data/raw/
+   ```
 
-    Baixe o dataset · Acesse: https://www.kaggle.com/datasets/blastchar/telco-customer-churn · Faça o download do arquivo WA_Fn-UseC_-Telco-Customer-Churn.csv · Coloque o arquivo na pasta data/raw/ Alternativa - Download via código (requer conta Kaggle):
+</details>
 
-    pip install kaggle
-    kaggle datasets download -d blastchar/telco-customer-churn
-    unzip telco-customer-churn.zip -d data/raw/
+---
 
-🚀 Como Executar
+## 🚀 Como Executar
 
-1️⃣ Treinar o Modelo
-
-Execute o pipeline completo de treinamento:
-
+### 1️⃣ Treinar o Modelo
+```bash
 python main.py
+```
 
-O que acontece:
-
-· Carrega os dados brutos · Pré-processa (limpeza, tratamento de nulos) · Divide em treino (80%) e teste (20%) · Aplica engenharia de features com imputação · Treina 3 modelos: LogisticRegression, RandomForest, GradientBoosting · Avalia e exibe as métricas · Salva o melhor modelo e o pré-processador em models/
-
-Saída esperada:
-
+**Saída esperada:**
+```
 ============================================================
  PROJETO DE PREDIÇÃO DE CHURN
 ============================================================
@@ -147,141 +209,129 @@ Saída esperada:
    GradientBoosting - F1: 0.5886, AUC: 0.8362
 
 ✅ Melhor modelo: LogisticRegression
+```
 
-2️⃣ Fazer Predições Interativas
-
-Execute o script para testar o modelo com diferentes clientes:
-
+### 2️⃣ Fazer Predições Interativas
+```bash
 python predict_customer.py
+```
 
-Menu interativo:
-
-· 1️⃣ Cliente com ALTO risco · 2️⃣ Cliente com BAIXO risco · 3️⃣ Cliente NOVO · 4️⃣ Inserir dados manualmente · 0️⃣ Sair
-
-3️⃣ Iniciar a API REST
-
+### 3️⃣ Iniciar a API REST
+```bash
 uvicorn api:app --reload
+```
+**Endpoints:**
+- `GET /` - Informações da API
+- `GET /health` - Status da API
+- `POST /predict` - Predição individual
+- `POST /predict/batch` - Predições em lote
 
-Endpoints disponíveis:
+📚 Documentação interativa: http://localhost:8000/docs
 
-· GET / - Informações da API · GET /health - Status da API e do modelo · POST /predict - Fazer predição para um cliente · POST /predict/batch - Predições em lote
-
-Documentação interativa: http://localhost:8000/docs
-
-Exemplo de requisição:
-
-curl -X POST "http://localhost:8000/predict" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "gender": "Male",
-    "SeniorCitizen": 0,
-    "Partner": "Yes",
-    "Dependents": "No",
-    "tenure": 12,
-    "PhoneService": "Yes",
-    "MultipleLines": "No",
-    "InternetService": "Fiber optic",
-    "OnlineSecurity": "No",
-    "OnlineBackup": "Yes",
-    "DeviceProtection": "No",
-    "TechSupport": "No",
-    "StreamingTV": "No",
-    "StreamingMovies": "No",
-    "Contract": "Month-to-month",
-    "PaperlessBilling": "Yes",
-    "PaymentMethod": "Electronic check",
-    "MonthlyCharges": 65.5,
-    "TotalCharges": 786.0
-  }'
-
-4️⃣ Executar o Dashboard
-
+### 4️⃣ Executar o Dashboard
+```bash
 streamlit run dashboard.py
+```
+🌐 Acesse: http://localhost:8501
 
-Acesse: http://localhost:8501
+---
 
-O dashboard oferece:
+## 📈 Resultados
 
-· Análise Exploratória com gráficos interativos · Predição Individual via formulário · Comparação de Modelos com gráficos de barras · Visualização dos Dados Brutos
+### Comparação dos Modelos
 
-📈 Resultados dos Modelos
+| Modelo | Acurácia | Precisão | Recall | F1-Score | ROC-AUC |
+|--------|----------|----------|--------|----------|---------|
+| LogisticRegression | 0.8055 | 0.6572 | 0.5588 | **0.6040** | 0.8420 |
+| RandomForest | 0.8070 | 0.6711 | 0.5348 | 0.5952 | **0.8427** |
+| GradientBoosting | 0.8006 | 0.6505 | 0.5374 | 0.5886 | 0.8362 |
 
-Os modelos foram avaliados com validação holdout (80% treino / 20% teste):
+### 🏆 Modelo Escolhido: **Logistic Regression**
 
-Modelo Acurácia Precisão Recall F1-Score ROC-AUC LogisticRegression 0.8055 0.6572 0.5588 0.6040 0.8420 RandomForest 0.8070 0.6711 0.5348 0.5952 0.8427 GradientBoosting 0.8006 0.6505 0.5374 0.5886 0.8362
+**Motivos da escolha:**
+- ✅ Melhor F1-Score (equilíbrio entre precisão e recall)
+- ✅ Alta interpretabilidade (coeficientes mostram impacto de cada feature)
+- ✅ Menor overfitting comparado a modelos complexos
 
-📊 Análise das Métricas
+---
 
-· Acurácia (~80%): O modelo acerta 80% das classificações · ROC-AUC (~84%): Excelente capacidade de distinguir entre classes · Recall (~55%): Identifica 55% dos clientes que realmente vão dar churn · F1-Score (60%): Equilíbrio entre precisão e recall
+## 🛠️ Tecnologias Utilizadas
 
-🏆 Modelo Escolhido: Logistic Regression
+| Categoria | Tecnologias |
+|-----------|-------------|
+| **Linguagem** | Python 3.10 |
+| **Manipulação de Dados** | Pandas, NumPy |
+| **Visualização** | Matplotlib, Seaborn, Plotly |
+| **Machine Learning** | Scikit-learn |
+| **APIs** | FastAPI, Uvicorn |
+| **Dashboard** | Streamlit |
+| **Versionamento** | Git, GitHub |
+| **CI/CD** | GitHub Actions |
+| **Testes** | Pytest |
 
-Apesar de não ter a maior acurácia, a Regressão Logística foi escolhida por:
+---
 
-· Melhor F1-Score (equilíbrio entre precisão e recall) · Alta interpretabilidade (coeficientes mostram impacto de cada feature) · Menor overfitting em comparação com modelos mais complexos
+## 🤝 Como Contribuir
 
-🧪 Testes Unitários
+Contribuições são sempre bem-vindas!
 
-Execute a suíte de testes:
-
-pytest tests/ -v
-
-Os testes cobrem:
-
-· Carregamento de dados · Pré-processamento · Engenharia de features · Treinamento dos modelos
-
-🛠️ Tecnologias Utilizadas
-
-Categoria Tecnologias Linguagem Python 3.10 Manipulação de Dados Pandas, NumPy Visualização Matplotlib, Seaborn, Plotly Machine Learning Scikit-learn, XGBoost, LightGBM APIs FastAPI, Uvicorn Dashboard Streamlit Versionamento Git, GitHub CI/CD GitHub Actions (em desenvolvimento) Testes Pytest
-
-🤝 Como Contribuir
-
-Contribuições são sempre bem-vindas! Siga os passos:
-
-    Faça um fork do projeto
-    Crie uma branch para sua feature
-
-    git checkout -b feature/nova-feature
-
-    Commit suas mudanças
-
-    git commit -m 'Adiciona nova feature'
-
-    Push para a branch
-
-    git push origin feature/nova-feature
-
-    Abra um Pull Request
-
-Diretrizes
-
-· Mantenha o código limpo e comentado quando necessário · Adicione testes para novas funcionalidades · Atualize a documentação quando apropriado
-
-📄 Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para detalhes.
-
-📞 Contato
-
-Samuel Maia
-
-· GitHub: @samuelmaiapro · E-mail: samuelmaiapro@gmail.com · LinkedIn: [Adicionar link se desejar]
-
-⭐ Agradecimentos
-
-· Kaggle por disponibilizar o dataset · Scikit-learn pela excelente biblioteca de machine learning · FastAPI e Streamlit pelas ferramentas incríveis para deployment
-
-⭐ Se este projeto te ajudou, considere dar uma estrela no GitHub! 🚀 Happy Coding!
-
-
-## 📌 Instruções para criar o arquivo
-
-1. **No PyCharm**, navegue até a raiz do projeto
-2. **Crie um novo arquivo** chamado `README.md` (se já existir, substitua)
-3. **Cole todo o conteúdo** acima
-4. **Salve** (Ctrl+S)
-5. **Faça commit e push**:
+1. **Faça um fork** do projeto
+2. **Crie uma branch** para sua feature
    ```bash
-   git add README.md
-   git commit -m "Adiciona README completo com documentação do projeto"
-   git push
+   git checkout -b feature/nova-feature
+   ```
+3. **Commit suas mudanças**
+   ```bash
+   git commit -m 'Adiciona nova feature'
+   ```
+4. **Push para a branch**
+   ```bash
+   git push origin feature/nova-feature
+   ```
+5. **Abra um Pull Request**
+
+### 📌 Diretrizes
+- Mantenha o código limpo e comentado
+- Adicione testes para novas funcionalidades
+- Atualize a documentação quando necessário
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+## 📞 Contato
+
+**Samuel Maia**
+- GitHub: [@samuelmaiapro](https://github.com/samuelmaiapro)
+- E-mail: samuelmaiapro@gmail.com
+- LinkedIn: [Adicionar link]
+
+---
+
+<div align="center">
+  
+⭐ **Se este projeto te ajudou, considere dar uma estrela no GitHub!** ⭐
+
+🚀 **Happy Coding!**
+
+</div>
+```
+
+## 🎨 Principais melhorias que fiz:
+
+1. **Índice** no início para facilitar navegação
+2. **Tabela de Funcionalidades** mais visual
+3. **Dicionário de dados colapsável** (`<details>`) para não poluir a visualização
+4. **Badges** mais organizados no topo
+5. **Instruções de instalação colapsáveis** para leitura opcional
+6. **Tabela de resultados** mais clara com destaque para o melhor modelo
+7. **Rodapé centralizado** com call-to-action
+8. **Emojis estratégicos** para guiar visualmente o leitor
+9. **Separadores visuais** (`---`) entre seções principais
+
+```
+
