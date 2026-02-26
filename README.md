@@ -16,10 +16,10 @@
   </p>
   
   <p>
-    <img src="https://img.shields.io/github/license/samuelmaiapro/churn-prediction?style=for-the-badge&color=blue" alt="License">
-    <img src="https://img.shields.io/github/stars/samuelmaiapro/churn-prediction?style=for-the-badge&color=yellow" alt="Stars">
-    <img src="https://img.shields.io/github/forks/samuelmaiapro/churn-prediction?style=for-the-badge&color=orange" alt="Forks">
-    <img src="https://img.shields.io/github/issues/samuelmaiapro/churn-prediction?style=for-the-badge&color=red" alt="Issues">
+    <img src="https://img.shields.io/github/license/samuelmaia-data-analyst/churn-prediction?style=for-the-badge&color=blue" alt="License">
+    <img src="https://img.shields.io/github/stars/samuelmaia-data-analyst/churn-prediction?style=for-the-badge&color=yellow" alt="Stars">
+    <img src="https://img.shields.io/github/forks/samuelmaia-data-analyst/churn-prediction?style=for-the-badge&color=orange" alt="Forks">
+    <img src="https://img.shields.io/github/issues/samuelmaia-data-analyst/churn-prediction?style=for-the-badge&color=red" alt="Issues">
   </p>
 
   <!-- Menu de Navegação -->
@@ -176,7 +176,7 @@ Passo a Passo
 bash
 
 # 1. Clone o repositório
-git clone https://github.com/samuelmaiapro/churn-prediction.git
+git clone https://github.com/samuelmaia-data-analyst/churn-prediction.git
 cd churn-prediction
 
 # 2. Crie e ative o ambiente virtual
@@ -384,7 +384,7 @@ Passo	Ação	Comando
 
 Este projeto está licenciado sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
 👨‍💻 Autor
-<div align="center"> <table> <tr> <td align="center"> <img src="https://github.com/samuelmaiapro.png" width="200" height="200" style="border-radius: 50%; border: 4px solid #667EEA;" alt="Samuel de Andrade Maia"/> <br> <h2>Samuel de Andrade Maia</h2> <h3>🚀 Desenvolvedor & Cientista de Dados</h3> <p> <a href="https://github.com/samuelmaiapro"> <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"> </a> <a href="https://linkedin.com/in/samuelmaiapro"> <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> <a href="mailto:samuelmaiapro@gmail.com"> <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> </p> <p> <strong>📍 São Paulo, Brasil</strong> </p> </td> </tr> </table> </div><div align="center"> <h2>⭐ Se este projeto te ajudou, considere dar uma estrela! ⭐</h2> <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fsamuelmaiapro%2Fchurn-prediction&countColor=%23263759" alt="Visitantes"> <br> <br> <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6&height=150&section=footer" width="100%" alt="footer"/> <br>
+<div align="center"> <table> <tr> <td align="center"> <img src="https://github.com/samuelmaia-data-analyst.png" width="200" height="200" style="border-radius: 50%; border: 4px solid #667EEA;" alt="Samuel de Andrade Maia"/> <br> <h2>Samuel de Andrade Maia</h2> <h3>🚀 Desenvolvedor & Cientista de Dados</h3> <p> <a href="https://github.com/samuelmaia-data-analyst"> <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"> </a> <a href="https://linkedin.com/in/samuelmaia-data-analyst"> <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"> </a> <a href="mailto:samuelmaia-data-analyst@gmail.com"> <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"> </a> </p> <p> <strong>📍 São Paulo, Brasil</strong> </p> </td> </tr> </table> </div><div align="center"> <h2>⭐ Se este projeto te ajudou, considere dar uma estrela! ⭐</h2> <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fsamuelmaia-data-analyst%2Fchurn-prediction&countColor=%23263759" alt="Visitantes"> <br> <br> <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6&height=150&section=footer" width="100%" alt="footer"/> <br>
 
 <sub>Desenvolvido com ❤️ por <strong>Samuel de Andrade Maia</strong> | © 2024</sub>
 </div> ```

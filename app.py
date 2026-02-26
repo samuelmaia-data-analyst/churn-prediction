@@ -68,9 +68,9 @@ with st.sidebar:
     ### 👨‍💻 Autor
     **Samuel de Andrade Maia**
 
-    [![GitHub](https://img.shields.io/badge/GitHub-@samuelmaiapro-181717?style=flat&logo=github)](https://github.com/samuelmaiapro)
+    [![GitHub](https://img.shields.io/badge/GitHub-@samuelmaia-data-analyst-181717?style=flat&logo=github)](https://github.com/samuelmaia-data-analyst)
 
-    [![LinkedIn](https://img.shields.io/badge/LinkedIn-@samuelmaiapro-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/samuelmaiapro)
+    [![LinkedIn](https://img.shields.io/badge/LinkedIn-@samuelmaia-data-analyst-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/samuelmaia-data-analyst)
     """)
 
 # ============================================================================

@@ -10,3 +10,6 @@ maxUploadSize = 10
 enableCORS = true
 enableXsrfProtection = true
 headless = true
+
+[browser]
+gatherUsageStats = false
