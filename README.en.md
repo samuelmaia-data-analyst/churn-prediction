@@ -5,16 +5,18 @@
 [![Streamlit](https://img.shields.io/badge/interface-streamlit-red)](#running-the-dashboard)
 [![FastAPI](https://img.shields.io/badge/api-fastapi-009688)](#running-the-api)
 
-Language: [Português](README.md) | **English**
+Language: [Portugues](README.md) | **English**
 
-Customer churn prediction system with an end-to-end ML pipeline in Python, a Streamlit dashboard, and a FastAPI inference API.
+Customer churn prediction system with an end-to-end ML pipeline, Streamlit dashboard, and FastAPI inference API.
 
 ## Table of Contents
 
 - [Executive Overview](#executive-overview)
+- [Business Impact](#business-impact)
 - [Status](#status)
 - [Functional Scope](#functional-scope)
 - [Solution Architecture](#solution-architecture)
+- [Demo](#demo)
 - [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
 - [Requirements](#requirements)
@@ -33,12 +35,28 @@ Customer churn prediction system with an end-to-end ML pipeline in Python, a Str
 
 ## Executive Overview
 
-This project addresses a recurring-revenue challenge: identifying customers with high churn risk to prioritize retention actions. The solution includes:
+This project addresses a recurring-revenue challenge: identify high-risk customers and prioritize retention actions. The solution provides:
 
-- supervised ML training pipeline;
+- supervised training and evaluation pipeline;
 - automatic best-model selection based on `F1`;
 - interactive churn analytics dashboard;
 - REST API for online single-customer inference.
+
+## Business Impact
+
+KPIs supported by this solution:
+
+- churn reduction in high-risk cohorts;
+- higher retention campaign effectiveness;
+- operational prioritization by churn probability;
+- better recurring revenue predictability.
+
+Recommended executive tracking:
+
+- Monthly Churn Rate (%);
+- Post-action Retention (%);
+- Retention Lift (treatment vs control);
+- Revenue preserved per campaign.
 
 ## Status
 
@@ -48,7 +66,7 @@ In development.
 
 - Binary churn classification (`Yes`/`No`).
 - Model training and comparison (`LogisticRegression`, `RandomForest`, `GradientBoosting`).
-- Model artifact persistence in `models/`.
+- Artifact persistence in `models/`.
 - Inference through CLI script, dashboard, and HTTP endpoint.
 
 ## Solution Architecture
@@ -66,6 +84,13 @@ CSV Dataset -> Data + Feature Pipeline -> Model Training -> Artifacts
 ```
 
 Best-model selection rule in code: highest `F1` score on test set.
+
+## Demo
+
+| API Demo | Dashboard Demo |
+|---|---|
+| ![API REST Demo](assets/api-demo.gif) | ![Dashboard Demo](assets/dashboard-demo.gif) |
+| FastAPI REST API - interactive automatic docs | Interactive dashboard - metrics and prediction visualization |
 
 ## Tech Stack
 
@@ -195,19 +220,19 @@ Available endpoints:
 }
 ```
 
-Example response:
+Expected response (current API behavior):
 
 ```json
 {
-  "churn": "Yes",
+  "churn": "Sim",
   "probability": 0.73,
-  "risk_level": "High"
+  "risk_level": "Alto"
 }
 ```
 
 ## Current Model Metrics
 
-Reported metrics for the currently saved model (`models/LogisticRegression.joblib`) with `test_size=0.2` and `random_state=42`:
+Reported metrics for the current saved model (`models/LogisticRegression.joblib`) with `test_size=0.2` and `random_state=42`:
 
 - Accuracy: `0.8055`
 - Precision: `0.6572`
@@ -215,11 +240,11 @@ Reported metrics for the currently saved model (`models/LogisticRegression.jobli
 - F1-score: `0.6040`
 - ROC-AUC: `0.8420`
 
-Metrics may vary after retraining.
+Metrics can vary after retraining.
 
 ## Tests
 
-A test structure exists in `tests/`, but current files are empty.
+A test structure exists in `tests/`, but current test files are empty.
 
 Default command:
 
@@ -229,10 +254,10 @@ pytest -q
 
 ## Current Limitations
 
-- No implemented automated tests yet.
-- No formal experiment/metric versioning yet.
-- Project license not defined yet.
-- Some project files still have inconsistent text encoding.
+- Automated tests are not implemented yet.
+- Formal experiment/metric versioning is not implemented yet.
+- Project license is not defined yet.
+- Some project files still have text encoding issues.
 
 ## Roadmap
 

@@ -5,40 +5,58 @@
 [![Streamlit](https://img.shields.io/badge/interface-streamlit-red)](#executando-o-dashboard)
 [![FastAPI](https://img.shields.io/badge/api-fastapi-009688)](#executando-a-api)
 
-Idioma: **Português** | [English](README.en.md)
+Idioma: **Portugues** | [English](README.en.md)
 
-Sistema de predição de churn de clientes com pipeline de ML em Python, dashboard em Streamlit e API de inferência com FastAPI.
+Sistema de predicao de churn com pipeline de ML, dashboard em Streamlit e API de inferencia em FastAPI.
 
-## Sumário
+## Sumario
 
-- [Visão Executiva](#visão-executiva)
+- [Visao Executiva](#visao-executiva)
+- [Impacto de Negocio](#impacto-de-negocio)
 - [Status](#status)
 - [Escopo Funcional](#escopo-funcional)
-- [Arquitetura da Solução](#arquitetura-da-solução)
-- [Stack Técnica](#stack-técnica)
-- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Arquitetura da Solucao](#arquitetura-da-solucao)
+- [Demonstracao](#demonstracao)
+- [Stack Tecnica](#stack-tecnica)
+- [Estrutura do Repositorio](#estrutura-do-repositorio)
 - [Requisitos](#requisitos)
 - [Setup Local](#setup-local)
-- [Fluxo de Execução](#fluxo-de-execução)
+- [Fluxo de Execucao](#fluxo-de-execucao)
 - [Executando o Dashboard](#executando-o-dashboard)
 - [Executando a API](#executando-a-api)
 - [Exemplo de Uso da API](#exemplo-de-uso-da-api)
-- [Métricas do Modelo Atual](#métricas-do-modelo-atual)
+- [Metricas do Modelo Atual](#metricas-do-modelo-atual)
 - [Testes](#testes)
-- [Limitações Atuais](#limitações-atuais)
+- [Limitacoes Atuais](#limitacoes-atuais)
 - [Roadmap](#roadmap)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+- [Contribuicao](#contribuicao)
+- [Licenca](#licenca)
 - [Contato](#contato)
 
-## Visão Executiva
+## Visao Executiva
 
-Este projeto resolve um problema clássico de receita recorrente: identificar clientes com maior risco de cancelamento para priorizar ações de retenção. A solução inclui:
+Este projeto resolve um problema de receita recorrente: identificar clientes com maior risco de cancelamento para priorizar acoes de retencao. A solucao entrega:
 
-- pipeline de dados e treino de modelos supervisionados;
-- seleção automática do melhor modelo por `F1`;
-- dashboard interativo para análise de churn;
-- API REST para inferência online por cliente.
+- pipeline supervisionado de treino e avaliacao;
+- selecao automatica do melhor modelo por `F1`;
+- dashboard analitico para exploracao de churn;
+- API REST para inferencia por cliente.
+
+## Impacto de Negocio
+
+KPIs que a solucao suporta:
+
+- reducao de churn em cohorts de maior risco;
+- aumento de efetividade de campanhas de retencao;
+- priorizacao operacional por probabilidade de churn;
+- melhor previsibilidade de receita recorrente.
+
+Sugestao de acompanhamento executivo:
+
+- Churn Rate mensal (%);
+- Retencao apos acao (%);
+- Lift de retencao (grupo tratado vs controle);
+- Receita preservada por campanha.
 
 ## Status
 
@@ -46,37 +64,44 @@ Em desenvolvimento.
 
 ## Escopo Funcional
 
-- Classificação binária de churn (`Yes`/`No`).
-- Treino e comparação de modelos (`LogisticRegression`, `RandomForest`, `GradientBoosting`).
-- Persistência de artefatos em `models/`.
-- Inferência por script local, dashboard e endpoint HTTP.
+- Classificacao binaria de churn (`Yes`/`No`).
+- Treino e comparacao de modelos (`LogisticRegression`, `RandomForest`, `GradientBoosting`).
+- Persistencia de artefatos em `models/`.
+- Inferencia por script local, dashboard e endpoint HTTP.
 
-## Arquitetura da Solução
+## Arquitetura da Solucao
 
 ![Arquitetura do Projeto](assets/architecture.png)
 
 Fluxo principal:
 
 ```text
-Dataset CSV -> Data + Feature Pipeline -> Model Training -> Artifacts
-                                                    |
-                                                    +-> Streamlit Dashboard
-                                                    +-> FastAPI Endpoint
-                                                    +-> CLI Prediction
+CSV Dataset -> Data + Feature Pipeline -> Model Training -> Artifacts
+                                                   |
+                                                   +-> Streamlit Dashboard
+                                                   +-> FastAPI Endpoint
+                                                   +-> CLI Prediction
 ```
 
-Regra de seleção do melhor modelo no código: maior `F1` no conjunto de teste.
+Regra de selecao do melhor modelo no codigo: maior `F1` no conjunto de teste.
 
-## Stack Técnica
+## Demonstracao
+
+| API Demo | Dashboard Demo |
+|---|---|
+| ![API REST Demo](assets/api-demo.gif) | ![Dashboard Demo](assets/dashboard-demo.gif) |
+| API REST com FastAPI - documentacao interativa automatica | Dashboard interativo - visualizacao de metricas e predicoes |
+
+## Stack Tecnica
 
 - Linguagem: `Python`
 - Dados: `pandas`, `numpy`
 - ML: `scikit-learn`
-- Persistência: `joblib`
+- Persistencia: `joblib`
 - Dashboard: `Streamlit`, `Plotly`
 - API: `FastAPI`, `Pydantic`, `Uvicorn`
 
-## Estrutura do Repositório
+## Estrutura do Repositorio
 
 ```text
 churn-prediction/
@@ -107,7 +132,7 @@ churn-prediction/
 - Python 3.12+
 - `pip`
 
-Observação: o arquivo `requirements.txt` menciona compatibilidade com Python 3.13.
+Observacao: `requirements.txt` menciona compatibilidade com Python 3.13.
 
 ## Setup Local
 
@@ -117,7 +142,7 @@ cd churn-prediction
 python -m venv .venv
 ```
 
-Ativação do ambiente virtual:
+Ativar ambiente virtual:
 
 ```bash
 # Windows
@@ -127,13 +152,13 @@ Ativação do ambiente virtual:
 source .venv/bin/activate
 ```
 
-Instalação de dependências:
+Instalar dependencias:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Fluxo de Execução
+## Fluxo de Execucao
 
 1. Treinar modelos e salvar artefatos:
 
@@ -141,7 +166,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-2. Opcional: gerar base processada para consumo analítico:
+2. Opcional: gerar base processada para consumo analitico:
 
 ```bash
 python save_processed_data.py
@@ -161,11 +186,11 @@ streamlit run app.py
 uvicorn api:app --reload
 ```
 
-Endpoints disponíveis:
+Endpoints disponiveis:
 
-- `GET /` retorna status básico da API.
-- `GET /health` valida carga de modelo e pré-processador.
-- `POST /predict` retorna predição, probabilidade e nível de risco.
+- `GET /` retorna status basico da API.
+- `GET /health` valida carga de modelo e pre-processador.
+- `POST /predict` retorna predicao, probabilidade e nivel de risco.
 
 ## Exemplo de Uso da API
 
@@ -195,7 +220,7 @@ Payload para `POST /predict`:
 }
 ```
 
-Exemplo de resposta:
+Resposta esperada (API atual):
 
 ```json
 {
@@ -205,9 +230,9 @@ Exemplo de resposta:
 }
 ```
 
-## Métricas do Modelo Atual
+## Metricas do Modelo Atual
 
-Métricas reportadas para o modelo salvo atual (`models/LogisticRegression.joblib`), com `test_size=0.2` e `random_state=42`:
+Metricas reportadas para o modelo salvo atual (`models/LogisticRegression.joblib`), com `test_size=0.2` e `random_state=42`:
 
 - Accuracy: `0.8055`
 - Precision: `0.6572`
@@ -215,42 +240,42 @@ Métricas reportadas para o modelo salvo atual (`models/LogisticRegression.jobli
 - F1-score: `0.6040`
 - ROC-AUC: `0.8420`
 
-As métricas podem variar conforme novos treinos e dados.
+As metricas podem variar apos retreino.
 
 ## Testes
 
-Existe estrutura de testes em `tests/`, mas os arquivos atuais estão vazios.
+A estrutura de testes existe em `tests/`, mas os arquivos atuais estao vazios.
 
-Comando padrão:
+Comando padrao:
 
 ```bash
 pytest -q
 ```
 
-## Limitações Atuais
+## Limitacoes Atuais
 
-- Ausência de testes automatizados implementados.
-- Ausência de versionamento formal de experimentos e métricas.
-- Licença do projeto ainda não definida.
-- Alguns arquivos do projeto apresentam textos com encoding inconsistente.
+- Testes automatizados ainda nao implementados.
+- Versionamento formal de experimentos/metricas ainda nao implementado.
+- Licenca do projeto ainda nao definida.
+- Alguns arquivos do projeto ainda possuem problemas de encoding.
 
 ## Roadmap
 
-- Implementar testes unitários e de integração.
-- Versionar métricas e artefatos por experimento.
+- Implementar testes unitarios e de integracao.
+- Versionar metricas e artefatos por experimento.
 - Adicionar monitoramento de drift de dados/modelo.
 - Evoluir API para batch scoring.
 - Integrar pipeline com CI/CD.
 - Avaliar modelos adicionais (ex.: XGBoost, LightGBM).
 
-## Contribuição
+## Contribuicao
 
-1. Faça um fork do projeto.
+1. Faca um fork do projeto.
 2. Crie uma branch de feature: `git checkout -b feature/minha-feature`.
-3. Commit suas mudanças: `git commit -m "feat: minha feature"`.
+3. Commit suas mudancas: `git commit -m "feat: minha feature"`.
 4. Abra um Pull Request.
 
-## Licença
+## Licenca
 
 Pendente. Recomenda-se adicionar `LICENSE` (ex.: MIT).
 
