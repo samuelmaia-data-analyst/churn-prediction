@@ -1,36 +1,36 @@
-# Plataforma de Predicao de Churn
+# Plataforma de Predição de Churn
 
 [![Status](https://img.shields.io/badge/status-em_desenvolvimento-yellow)](#roadmap)
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#stack-tecnologica)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#stack-tecnológica)
 [![Machine Learning](https://img.shields.io/badge/machine_learning-scikit--learn-orange)](#performance-do-modelo)
 [![API](https://img.shields.io/badge/api-fastapi-009688)](#contrato-da-api)
-[![Dashboard](https://img.shields.io/badge/dashboard-streamlit-red)](#demonstracao)
+[![Dashboard](https://img.shields.io/badge/dashboard-streamlit-red)](#demonstração)
 
 Idioma: **PT-BR** | [English](README.en.md)
 
-Projeto de previsao de churn com pipeline de Machine Learning, API FastAPI e dashboard Streamlit para apoiar decisoes de retencao de clientes.
+Projeto de previsão de churn com pipeline de Machine Learning, API FastAPI e dashboard Streamlit para apoiar decisões de retenção de clientes.
 
 ## Resumo Executivo
 
-- Solucao end-to-end de **Customer Churn Prediction** com Python e scikit-learn.
-- Camada de inferencia deployavel com **FastAPI** e analise visual com **Streamlit + Plotly**.
-- Pipeline de preprocessamento persistido para inferencia consistente entre treino e producao.
+- Solução end-to-end de **Customer Churn Prediction** com Python e scikit-learn.
+- Camada de inferência deployável com **FastAPI** e análise visual com **Streamlit + Plotly**.
+- Pipeline de pré-processamento persistido para inferência consistente entre treino e produção.
 - Modelo salvo atual com alta capacidade de ranking (**ROC-AUC 0.8420**).
 
-## Contexto de Negocio
+## Contexto de Negócio
 
 ### Problema
-Empresas com receita recorrente perdem margem quando o churn e identificado tardiamente.
+Empresas com receita recorrente perdem margem quando o churn é identificado tardiamente.
 
-### Solucao
-Pipeline supervisionado de classificacao binaria para estimar probabilidade de churn por cliente, com exposicao via API e dashboard.
+### Solução
+Pipeline supervisionado de classificação binária para estimar probabilidade de churn por cliente, com exposição via API e dashboard.
 
 ### Resultado Esperado
-Permite priorizar clientes de alto risco, otimizar budget de retencao e proteger receita.
+Permite priorizar clientes de alto risco, otimizar budget de retenção e proteger receita.
 
 ## Resultados-Chave
 
-| Metrica | Valor |
+| Métrica | Valor |
 |---|---:|
 | Accuracy | 0.8055 |
 | Precision | 0.6572 |
@@ -40,35 +40,35 @@ Permite priorizar clientes de alto risco, otimizar budget de retencao e proteger
 
 Artefato principal: `models/LogisticRegression.joblib`
 
-## Arquitetura da Solucao
+## Arquitetura da Solução
 
 ![Arquitetura do Projeto](assets/architecture.png)
 
 ```text
 Dados CSV
   -> Limpeza e split
-  -> Engenharia de features + preprocessamento
-  -> Treino e selecao do modelo
-  -> Persistencia de artefatos (modelo + preprocessor)
+  -> Engenharia de features + pré-processamento
+  -> Treino e seleção do modelo
+  -> Persistência de artefatos (modelo + preprocessor)
   -> Consumo via API / Dashboard / CLI
 ```
 
-## Stack Tecnologica
+## Stack Tecnológica
 
 - **Linguagem:** Python
 - **Dados e ML:** pandas, numpy, scikit-learn
-- **Persistencia:** joblib
+- **Persistência:** joblib
 - **API:** FastAPI, Pydantic, Uvicorn
 - **Dashboard:** Streamlit, Plotly
 
 ## Funcionalidades
 
 - Pipeline completo de modelagem de churn.
-- Dashboard interativo com filtros e predicao individual.
+- Dashboard interativo com filtros e predição individual.
 - Endpoint REST para scoring em tempo real.
 - Reuso do mesmo preprocessor no app e na API (evita train-serving skew).
 
-## Demonstracao
+## Demonstração
 
 | API Demo | Dashboard Demo |
 |---|---|
@@ -79,7 +79,7 @@ Dados CSV
 ### Health
 - `GET /health`
 
-### Predicao
+### Predição
 - `POST /predict`
 
 Exemplo de request:
@@ -108,7 +108,7 @@ Exemplo de request:
 }
 ```
 
-Exemplo de response (implementacao atual):
+Exemplo de response (implementação atual):
 
 ```json
 {
@@ -118,7 +118,7 @@ Exemplo de response (implementacao atual):
 }
 ```
 
-## Setup Rapido
+## Setup Rápido
 
 ```bash
 git clone <url-do-repositorio>
@@ -132,7 +132,7 @@ uvicorn api:app --reload
 # em outro terminal: streamlit run app.py
 ```
 
-## Estrutura do Repositorio
+## Estrutura do Repositório
 
 ```text
 churn-prediction/
@@ -152,29 +152,29 @@ churn-prediction/
 `-- assets/
 ```
 
-## Decisoes de Engenharia
+## Decisões de Engenharia
 
-- Selecao de modelo por **F1-score** para balancear precision e recall.
-- Persistencia de `preprocessor.joblib` para consistencia de features.
+- Seleção de modelo por **F1-score** para balancear precision e recall.
+- Persistência de `preprocessor.joblib` para consistência de features.
 - API e dashboard desacoplados, consumindo os mesmos artefatos.
 
 ## Qualidade e Testes
 
 Estado atual:
-- estrutura de testes existe em `tests/`, mas suites ainda nao implementadas.
+- estrutura de testes existe em `tests/`, mas suites ainda não implementadas.
 
-Proximos passos:
-- testes unitarios de preprocessamento;
+Próximos passos:
+- testes unitários de pré-processamento;
 - testes de contrato da API;
-- validacao de schema de entrada do modelo.
+- validação de schema de entrada do modelo.
 
 ## Roadmap
 
 - Cobertura automatizada de testes (unit + integration).
-- Rastreabilidade de experimentos e metricas.
+- Rastreabilidade de experimentos e métricas.
 - Monitoramento de drift de dados/modelo.
 - Batch scoring na API.
-- CI/CD para validacao e release.
+- CI/CD para validação e release.
 
 ## Palavras-chave ATS
 
@@ -186,6 +186,6 @@ Proximos passos:
 - GitHub: https://github.com/samuelmaia-data-analyst
 - LinkedIn: https://linkedin.com/in/samuelmaia-data-analyst
 
-## Licenca
+## Licença
 
-Licenca ainda nao definida. Recomendado: MIT.
+Licença ainda não definida. Recomendado: MIT.
