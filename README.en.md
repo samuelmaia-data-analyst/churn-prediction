@@ -1,200 +1,88 @@
-# Churn Prediction
+# Churn Prediction Platform
 
-[![Status](https://img.shields.io/badge/status-in_development-yellow)](#status)
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#requirements)
-[![Streamlit](https://img.shields.io/badge/interface-streamlit-red)](#running-the-dashboard)
-[![FastAPI](https://img.shields.io/badge/api-fastapi-009688)](#running-the-api)
+[![Status](https://img.shields.io/badge/status-in_development-yellow)](#roadmap)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#technology-stack)
+[![Machine Learning](https://img.shields.io/badge/machine_learning-scikit--learn-orange)](#model-performance)
+[![API](https://img.shields.io/badge/api-fastapi-009688)](#api-contract)
+[![Dashboard](https://img.shields.io/badge/dashboard-streamlit-red)](#demo)
 
-Language: [Portugues](README.md) | **English**
+Language: **English** | [Portuguese (PT-BR)](README.md)
 
-Customer churn prediction system with an end-to-end ML pipeline, Streamlit dashboard, and FastAPI inference API.
+Production-oriented churn prediction project with a Machine Learning pipeline, FastAPI inference API, and Streamlit dashboard for retention decision support.
 
-## Table of Contents
+## Executive Summary
 
-- [Executive Overview](#executive-overview)
-- [Business Impact](#business-impact)
-- [Status](#status)
-- [Functional Scope](#functional-scope)
-- [Solution Architecture](#solution-architecture)
-- [Demo](#demo)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
-- [Requirements](#requirements)
-- [Local Setup](#local-setup)
-- [Execution Flow](#execution-flow)
-- [Running the Dashboard](#running-the-dashboard)
-- [Running the API](#running-the-api)
-- [API Usage Example](#api-usage-example)
-- [Current Model Metrics](#current-model-metrics)
-- [Tests](#tests)
-- [Current Limitations](#current-limitations)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+- End-to-end **Customer Churn Prediction** solution built with Python and scikit-learn.
+- Deployable inference layer using **FastAPI** and interactive analytics using **Streamlit + Plotly**.
+- Persistent preprocessing pipeline for consistent training-serving behavior.
+- Current best saved model shows strong ranking quality (**ROC-AUC 0.8420**).
 
-## Executive Overview
+## Business Context
 
-This project addresses a recurring-revenue challenge: identify high-risk customers and prioritize retention actions. The solution provides:
+### Problem
+Recurring-revenue companies lose margin when churn risk is detected too late.
 
-- supervised training and evaluation pipeline;
-- automatic best-model selection based on `F1`;
-- interactive churn analytics dashboard;
-- REST API for online single-customer inference.
+### Solution
+A supervised binary classification pipeline predicts customer-level churn probability and exposes scores through API and dashboard.
 
-## Business Impact
+### Expected Outcome
+Enables teams to prioritize high-risk customers, optimize retention budget, and protect revenue.
 
-KPIs supported by this solution:
+## Key Results
 
-- churn reduction in high-risk cohorts;
-- higher retention campaign effectiveness;
-- operational prioritization by churn probability;
-- better recurring revenue predictability.
+| Metric | Value |
+|---|---:|
+| Accuracy | 0.8055 |
+| Precision | 0.6572 |
+| Recall | 0.5588 |
+| F1-score | 0.6040 |
+| ROC-AUC | 0.8420 |
 
-Recommended executive tracking:
-
-- Monthly Churn Rate (%);
-- Post-action Retention (%);
-- Retention Lift (treatment vs control);
-- Revenue preserved per campaign.
-
-## Status
-
-In development.
-
-## Functional Scope
-
-- Binary churn classification (`Yes`/`No`).
-- Model training and comparison (`LogisticRegression`, `RandomForest`, `GradientBoosting`).
-- Artifact persistence in `models/`.
-- Inference through CLI script, dashboard, and HTTP endpoint.
+Primary model artifact: `models/LogisticRegression.joblib`
 
 ## Solution Architecture
 
 ![Project Architecture](assets/architecture.png)
 
-Main flow:
-
 ```text
-CSV Dataset -> Data + Feature Pipeline -> Model Training -> Artifacts
-                                                   |
-                                                   +-> Streamlit Dashboard
-                                                   +-> FastAPI Endpoint
-                                                   +-> CLI Prediction
+Raw CSV Data
+  -> Cleaning and split
+  -> Feature engineering + preprocessing
+  -> Training and model selection
+  -> Persisted artifacts (model + preprocessor)
+  -> Consumption via API / Dashboard / CLI
 ```
 
-Best-model selection rule in code: highest `F1` score on test set.
+## Technology Stack
+
+- **Language:** Python
+- **Data & ML:** pandas, numpy, scikit-learn
+- **Persistence:** joblib
+- **API:** FastAPI, Pydantic, Uvicorn
+- **Dashboard:** Streamlit, Plotly
+
+## Features
+
+- End-to-end churn modeling pipeline.
+- Interactive dashboard with filters and individual prediction.
+- REST endpoint for real-time scoring.
+- Shared preprocessor in app and API to prevent train-serving skew.
 
 ## Demo
 
 | API Demo | Dashboard Demo |
 |---|---|
 | ![API REST Demo](assets/api-demo.gif) | ![Dashboard Demo](assets/dashboard-demo.gif) |
-| FastAPI REST API - interactive automatic docs | Interactive dashboard - metrics and prediction visualization |
 
-## Tech Stack
+## API Contract
 
-- Language: `Python`
-- Data: `pandas`, `numpy`
-- ML: `scikit-learn`
-- Persistence: `joblib`
-- Dashboard: `Streamlit`, `Plotly`
-- API: `FastAPI`, `Pydantic`, `Uvicorn`
+### Health
+- `GET /health`
 
-## Repository Structure
+### Prediction
+- `POST /predict`
 
-```text
-churn-prediction/
-|-- api.py
-|-- app.py
-|-- main.py
-|-- predict_customer.py
-|-- save_processed_data.py
-|-- config.yaml
-|-- requirements.txt
-|-- data/
-|   |-- raw/
-|   `-- processed/
-|-- models/
-|-- notebooks/
-|-- reports/
-|-- src/
-|   |-- data/
-|   |-- features/
-|   |-- models/
-|   `-- visualization/
-|-- tests/
-`-- assets/
-```
-
-## Requirements
-
-- Python 3.12+
-- `pip`
-
-Note: `requirements.txt` references compatibility with Python 3.13.
-
-## Local Setup
-
-```bash
-git clone <repository-url>
-cd churn-prediction
-python -m venv .venv
-```
-
-Activate virtual environment:
-
-```bash
-# Windows
-.venv\Scripts\activate
-
-# Linux/macOS
-source .venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Execution Flow
-
-1. Train models and persist artifacts:
-
-```bash
-python main.py
-```
-
-2. Optional: generate processed dataset for analytics:
-
-```bash
-python save_processed_data.py
-```
-
-3. Start consumption interfaces (dashboard/API).
-
-## Running the Dashboard
-
-```bash
-streamlit run app.py
-```
-
-## Running the API
-
-```bash
-uvicorn api:app --reload
-```
-
-Available endpoints:
-
-- `GET /` returns API base status.
-- `GET /health` validates model and preprocessor loading.
-- `POST /predict` returns churn prediction, probability, and risk level.
-
-## API Usage Example
-
-`POST /predict` payload:
+Sample request:
 
 ```json
 {
@@ -220,7 +108,7 @@ Available endpoints:
 }
 ```
 
-Expected response (current API behavior):
+Sample response (current implementation):
 
 ```json
 {
@@ -230,57 +118,74 @@ Expected response (current API behavior):
 }
 ```
 
-## Current Model Metrics
-
-Reported metrics for the current saved model (`models/LogisticRegression.joblib`) with `test_size=0.2` and `random_state=42`:
-
-- Accuracy: `0.8055`
-- Precision: `0.6572`
-- Recall: `0.5588`
-- F1-score: `0.6040`
-- ROC-AUC: `0.8420`
-
-Metrics can vary after retraining.
-
-## Tests
-
-A test structure exists in `tests/`, but current test files are empty.
-
-Default command:
+## Quick Start
 
 ```bash
-pytest -q
+git clone <repository-url>
+cd churn-prediction
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
+uvicorn api:app --reload
+# in another terminal: streamlit run app.py
 ```
 
-## Current Limitations
+## Repository Structure
 
-- Automated tests are not implemented yet.
-- Formal experiment/metric versioning is not implemented yet.
-- Project license is not defined yet.
-- Some project files still have text encoding issues.
+```text
+churn-prediction/
+|-- app.py
+|-- api.py
+|-- main.py
+|-- predict_customer.py
+|-- config.yaml
+|-- requirements.txt
+|-- data/
+|-- models/
+|-- src/
+|   |-- data/
+|   |-- features/
+|   `-- models/
+|-- tests/
+`-- assets/
+```
+
+## Engineering Decisions
+
+- Model selection by **F1-score** to balance precision and recall.
+- Persistent `preprocessor.joblib` for feature consistency.
+- API and dashboard decoupled, consuming shared artifacts.
+
+## Testing and Quality
+
+Current state:
+- test scaffolding exists in `tests/`, but test suites are not implemented yet.
+
+Next steps:
+- unit tests for preprocessing;
+- API contract tests;
+- model input schema validation.
 
 ## Roadmap
 
-- Add unit and integration tests.
-- Version metrics and artifacts per experiment.
-- Add data/model drift monitoring.
-- Evolve API to batch scoring.
-- Integrate pipeline with CI/CD.
-- Evaluate additional models (e.g., XGBoost, LightGBM).
+- Automated test coverage (unit + integration).
+- Experiment and metric traceability.
+- Data/model drift monitoring.
+- API batch scoring.
+- CI/CD validation and release flow.
 
-## Contributing
+## ATS Keywords
 
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/my-feature`.
-3. Commit your changes: `git commit -m "feat: my feature"`.
-4. Open a Pull Request.
-
-## License
-
-Pending. Recommended to add a `LICENSE` file (e.g., MIT).
+`Python` `Machine Learning` `Churn Prediction` `scikit-learn` `FastAPI` `Streamlit` `Model Deployment` `REST API` `Data Science` `MLOps` `Feature Engineering` `Binary Classification` `Model Evaluation` `ROC-AUC`
 
 ## Contact
 
-- Samuel de Andrade Maia
+**Samuel de Andrade Maia**
 - GitHub: https://github.com/samuelmaia-data-analyst
 - LinkedIn: https://linkedin.com/in/samuelmaia-data-analyst
+
+## License
+
+License is not defined yet. Recommended: MIT.

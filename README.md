@@ -1,200 +1,88 @@
-# Churn Prediction
+# Plataforma de Predicao de Churn
 
-[![Status](https://img.shields.io/badge/status-em_desenvolvimento-yellow)](#status)
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#requisitos)
-[![Streamlit](https://img.shields.io/badge/interface-streamlit-red)](#executando-o-dashboard)
-[![FastAPI](https://img.shields.io/badge/api-fastapi-009688)](#executando-a-api)
+[![Status](https://img.shields.io/badge/status-em_desenvolvimento-yellow)](#roadmap)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#stack-tecnologica)
+[![Machine Learning](https://img.shields.io/badge/machine_learning-scikit--learn-orange)](#performance-do-modelo)
+[![API](https://img.shields.io/badge/api-fastapi-009688)](#contrato-da-api)
+[![Dashboard](https://img.shields.io/badge/dashboard-streamlit-red)](#demonstracao)
 
-Idioma: **Portugues** | [English](README.en.md)
+Idioma: **PT-BR** | [English](README.en.md)
 
-Sistema de predicao de churn com pipeline de ML, dashboard em Streamlit e API de inferencia em FastAPI.
+Projeto de previsao de churn com pipeline de Machine Learning, API FastAPI e dashboard Streamlit para apoiar decisoes de retencao de clientes.
 
-## Sumario
+## Resumo Executivo
 
-- [Visao Executiva](#visao-executiva)
-- [Impacto de Negocio](#impacto-de-negocio)
-- [Status](#status)
-- [Escopo Funcional](#escopo-funcional)
-- [Arquitetura da Solucao](#arquitetura-da-solucao)
-- [Demonstracao](#demonstracao)
-- [Stack Tecnica](#stack-tecnica)
-- [Estrutura do Repositorio](#estrutura-do-repositorio)
-- [Requisitos](#requisitos)
-- [Setup Local](#setup-local)
-- [Fluxo de Execucao](#fluxo-de-execucao)
-- [Executando o Dashboard](#executando-o-dashboard)
-- [Executando a API](#executando-a-api)
-- [Exemplo de Uso da API](#exemplo-de-uso-da-api)
-- [Metricas do Modelo Atual](#metricas-do-modelo-atual)
-- [Testes](#testes)
-- [Limitacoes Atuais](#limitacoes-atuais)
-- [Roadmap](#roadmap)
-- [Contribuicao](#contribuicao)
-- [Licenca](#licenca)
-- [Contato](#contato)
+- Solucao end-to-end de **Customer Churn Prediction** com Python e scikit-learn.
+- Camada de inferencia deployavel com **FastAPI** e analise visual com **Streamlit + Plotly**.
+- Pipeline de preprocessamento persistido para inferencia consistente entre treino e producao.
+- Modelo salvo atual com alta capacidade de ranking (**ROC-AUC 0.8420**).
 
-## Visao Executiva
+## Contexto de Negocio
 
-Este projeto resolve um problema de receita recorrente: identificar clientes com maior risco de cancelamento para priorizar acoes de retencao. A solucao entrega:
+### Problema
+Empresas com receita recorrente perdem margem quando o churn e identificado tardiamente.
 
-- pipeline supervisionado de treino e avaliacao;
-- selecao automatica do melhor modelo por `F1`;
-- dashboard analitico para exploracao de churn;
-- API REST para inferencia por cliente.
+### Solucao
+Pipeline supervisionado de classificacao binaria para estimar probabilidade de churn por cliente, com exposicao via API e dashboard.
 
-## Impacto de Negocio
+### Resultado Esperado
+Permite priorizar clientes de alto risco, otimizar budget de retencao e proteger receita.
 
-KPIs que a solucao suporta:
+## Resultados-Chave
 
-- reducao de churn em cohorts de maior risco;
-- aumento de efetividade de campanhas de retencao;
-- priorizacao operacional por probabilidade de churn;
-- melhor previsibilidade de receita recorrente.
+| Metrica | Valor |
+|---|---:|
+| Accuracy | 0.8055 |
+| Precision | 0.6572 |
+| Recall | 0.5588 |
+| F1-score | 0.6040 |
+| ROC-AUC | 0.8420 |
 
-Sugestao de acompanhamento executivo:
-
-- Churn Rate mensal (%);
-- Retencao apos acao (%);
-- Lift de retencao (grupo tratado vs controle);
-- Receita preservada por campanha.
-
-## Status
-
-Em desenvolvimento.
-
-## Escopo Funcional
-
-- Classificacao binaria de churn (`Yes`/`No`).
-- Treino e comparacao de modelos (`LogisticRegression`, `RandomForest`, `GradientBoosting`).
-- Persistencia de artefatos em `models/`.
-- Inferencia por script local, dashboard e endpoint HTTP.
+Artefato principal: `models/LogisticRegression.joblib`
 
 ## Arquitetura da Solucao
 
 ![Arquitetura do Projeto](assets/architecture.png)
 
-Fluxo principal:
-
 ```text
-CSV Dataset -> Data + Feature Pipeline -> Model Training -> Artifacts
-                                                   |
-                                                   +-> Streamlit Dashboard
-                                                   +-> FastAPI Endpoint
-                                                   +-> CLI Prediction
+Dados CSV
+  -> Limpeza e split
+  -> Engenharia de features + preprocessamento
+  -> Treino e selecao do modelo
+  -> Persistencia de artefatos (modelo + preprocessor)
+  -> Consumo via API / Dashboard / CLI
 ```
 
-Regra de selecao do melhor modelo no codigo: maior `F1` no conjunto de teste.
+## Stack Tecnologica
+
+- **Linguagem:** Python
+- **Dados e ML:** pandas, numpy, scikit-learn
+- **Persistencia:** joblib
+- **API:** FastAPI, Pydantic, Uvicorn
+- **Dashboard:** Streamlit, Plotly
+
+## Funcionalidades
+
+- Pipeline completo de modelagem de churn.
+- Dashboard interativo com filtros e predicao individual.
+- Endpoint REST para scoring em tempo real.
+- Reuso do mesmo preprocessor no app e na API (evita train-serving skew).
 
 ## Demonstracao
 
 | API Demo | Dashboard Demo |
 |---|---|
 | ![API REST Demo](assets/api-demo.gif) | ![Dashboard Demo](assets/dashboard-demo.gif) |
-| API REST com FastAPI - documentacao interativa automatica | Dashboard interativo - visualizacao de metricas e predicoes |
 
-## Stack Tecnica
+## Contrato da API
 
-- Linguagem: `Python`
-- Dados: `pandas`, `numpy`
-- ML: `scikit-learn`
-- Persistencia: `joblib`
-- Dashboard: `Streamlit`, `Plotly`
-- API: `FastAPI`, `Pydantic`, `Uvicorn`
+### Health
+- `GET /health`
 
-## Estrutura do Repositorio
+### Predicao
+- `POST /predict`
 
-```text
-churn-prediction/
-|-- api.py
-|-- app.py
-|-- main.py
-|-- predict_customer.py
-|-- save_processed_data.py
-|-- config.yaml
-|-- requirements.txt
-|-- data/
-|   |-- raw/
-|   `-- processed/
-|-- models/
-|-- notebooks/
-|-- reports/
-|-- src/
-|   |-- data/
-|   |-- features/
-|   |-- models/
-|   `-- visualization/
-|-- tests/
-`-- assets/
-```
-
-## Requisitos
-
-- Python 3.12+
-- `pip`
-
-Observacao: `requirements.txt` menciona compatibilidade com Python 3.13.
-
-## Setup Local
-
-```bash
-git clone <url-do-repositorio>
-cd churn-prediction
-python -m venv .venv
-```
-
-Ativar ambiente virtual:
-
-```bash
-# Windows
-.venv\Scripts\activate
-
-# Linux/macOS
-source .venv/bin/activate
-```
-
-Instalar dependencias:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Fluxo de Execucao
-
-1. Treinar modelos e salvar artefatos:
-
-```bash
-python main.py
-```
-
-2. Opcional: gerar base processada para consumo analitico:
-
-```bash
-python save_processed_data.py
-```
-
-3. Subir interfaces de consumo (dashboard/API).
-
-## Executando o Dashboard
-
-```bash
-streamlit run app.py
-```
-
-## Executando a API
-
-```bash
-uvicorn api:app --reload
-```
-
-Endpoints disponiveis:
-
-- `GET /` retorna status basico da API.
-- `GET /health` valida carga de modelo e pre-processador.
-- `POST /predict` retorna predicao, probabilidade e nivel de risco.
-
-## Exemplo de Uso da API
-
-Payload para `POST /predict`:
+Exemplo de request:
 
 ```json
 {
@@ -220,7 +108,7 @@ Payload para `POST /predict`:
 }
 ```
 
-Resposta esperada (API atual):
+Exemplo de response (implementacao atual):
 
 ```json
 {
@@ -230,57 +118,74 @@ Resposta esperada (API atual):
 }
 ```
 
-## Metricas do Modelo Atual
-
-Metricas reportadas para o modelo salvo atual (`models/LogisticRegression.joblib`), com `test_size=0.2` e `random_state=42`:
-
-- Accuracy: `0.8055`
-- Precision: `0.6572`
-- Recall: `0.5588`
-- F1-score: `0.6040`
-- ROC-AUC: `0.8420`
-
-As metricas podem variar apos retreino.
-
-## Testes
-
-A estrutura de testes existe em `tests/`, mas os arquivos atuais estao vazios.
-
-Comando padrao:
+## Setup Rapido
 
 ```bash
-pytest -q
+git clone <url-do-repositorio>
+cd churn-prediction
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
+uvicorn api:app --reload
+# em outro terminal: streamlit run app.py
 ```
 
-## Limitacoes Atuais
+## Estrutura do Repositorio
 
-- Testes automatizados ainda nao implementados.
-- Versionamento formal de experimentos/metricas ainda nao implementado.
-- Licenca do projeto ainda nao definida.
-- Alguns arquivos do projeto ainda possuem problemas de encoding.
+```text
+churn-prediction/
+|-- app.py
+|-- api.py
+|-- main.py
+|-- predict_customer.py
+|-- config.yaml
+|-- requirements.txt
+|-- data/
+|-- models/
+|-- src/
+|   |-- data/
+|   |-- features/
+|   `-- models/
+|-- tests/
+`-- assets/
+```
+
+## Decisoes de Engenharia
+
+- Selecao de modelo por **F1-score** para balancear precision e recall.
+- Persistencia de `preprocessor.joblib` para consistencia de features.
+- API e dashboard desacoplados, consumindo os mesmos artefatos.
+
+## Qualidade e Testes
+
+Estado atual:
+- estrutura de testes existe em `tests/`, mas suites ainda nao implementadas.
+
+Proximos passos:
+- testes unitarios de preprocessamento;
+- testes de contrato da API;
+- validacao de schema de entrada do modelo.
 
 ## Roadmap
 
-- Implementar testes unitarios e de integracao.
-- Versionar metricas e artefatos por experimento.
-- Adicionar monitoramento de drift de dados/modelo.
-- Evoluir API para batch scoring.
-- Integrar pipeline com CI/CD.
-- Avaliar modelos adicionais (ex.: XGBoost, LightGBM).
+- Cobertura automatizada de testes (unit + integration).
+- Rastreabilidade de experimentos e metricas.
+- Monitoramento de drift de dados/modelo.
+- Batch scoring na API.
+- CI/CD para validacao e release.
 
-## Contribuicao
+## Palavras-chave ATS
 
-1. Faca um fork do projeto.
-2. Crie uma branch de feature: `git checkout -b feature/minha-feature`.
-3. Commit suas mudancas: `git commit -m "feat: minha feature"`.
-4. Abra um Pull Request.
-
-## Licenca
-
-Pendente. Recomenda-se adicionar `LICENSE` (ex.: MIT).
+`Python` `Machine Learning` `Churn Prediction` `scikit-learn` `FastAPI` `Streamlit` `Model Deployment` `REST API` `Data Science` `MLOps` `Feature Engineering` `Binary Classification` `Model Evaluation` `ROC-AUC`
 
 ## Contato
 
-- Samuel de Andrade Maia
+**Samuel de Andrade Maia**
 - GitHub: https://github.com/samuelmaia-data-analyst
 - LinkedIn: https://linkedin.com/in/samuelmaia-data-analyst
+
+## Licenca
+
+Licenca ainda nao definida. Recomendado: MIT.
