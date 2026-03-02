@@ -429,7 +429,7 @@ def render_footer() -> None:
         """
         <div style='text-align: center; color: #355070; padding: 0.35rem 0 0.8rem 0;'>
             <p>Desenvolvido por <strong>Samuel de Andrade Maia</strong></p>
-            <p>2024 - Churn Prediction System</p>
+            <p>2026 - Churn Prediction System</p>
         </div>
         """,
         unsafe_allow_html=True,
