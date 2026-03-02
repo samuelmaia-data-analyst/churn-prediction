@@ -10,6 +10,25 @@ Language: **English** | [Portuguese (PT-BR)](README.md)
 
 Production-oriented churn prediction project with a Machine Learning pipeline, FastAPI inference API, and Streamlit dashboard for retention decision support.
 
+## Table of Contents
+
+- [Executive Summary](#executive-summary)
+- [Business Context](#business-context)
+- [Key Results](#key-results)
+- [Solution Architecture](#solution-architecture)
+- [Technology Stack](#technology-stack)
+- [Features](#features)
+- [Demo](#demo)
+- [API Contract](#api-contract)
+- [Quick Start](#quick-start)
+- [Repository Structure](#repository-structure)
+- [Engineering Decisions](#engineering-decisions)
+- [Testing and Quality](#testing-and-quality)
+- [Roadmap](#roadmap)
+- [ATS Keywords](#ats-keywords)
+- [Contact](#contact)
+- [License](#license)
+
 ## Executive Summary
 
 - End-to-end **Customer Churn Prediction** solution built with Python and scikit-learn.

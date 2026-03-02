@@ -10,6 +10,25 @@ Idioma: **PT-BR** | [English](README.en.md)
 
 Projeto de previsão de churn com pipeline de Machine Learning, API FastAPI e dashboard Streamlit para apoiar decisões de retenção de clientes.
 
+## Sumário
+
+- [Resumo Executivo](#resumo-executivo)
+- [Contexto de Negócio](#contexto-de-negócio)
+- [Resultados-Chave](#resultados-chave)
+- [Arquitetura da Solução](#arquitetura-da-solução)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Funcionalidades](#funcionalidades)
+- [Demonstração](#demonstração)
+- [Contrato da API](#contrato-da-api)
+- [Setup Rápido](#setup-rápido)
+- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Decisões de Engenharia](#decisões-de-engenharia)
+- [Qualidade e Testes](#qualidade-e-testes)
+- [Roadmap](#roadmap)
+- [Palavras-chave ATS](#palavras-chave-ats)
+- [Contato](#contato)
+- [Licença](#licença)
+
 ## Resumo Executivo
 
 - Solução end-to-end de **Customer Churn Prediction** com Python e scikit-learn.
