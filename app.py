@@ -14,6 +14,7 @@ import streamlit as st
 
 DATA_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 MODEL_PATH = Path("models/LogisticRegression.joblib")
+PREPROCESSOR_PATH = Path("models/preprocessor.joblib")
 COLOR_BG_START = "#f7f9fc"
 COLOR_BG_END = "#eef3f9"
 COLOR_PRIMARY = "#164e63"
@@ -38,6 +39,12 @@ def load_data(path: Path) -> pd.DataFrame:
 @st.cache_resource(show_spinner=False)
 def load_model(path: Path):
     """Carrega o modelo treinado de churn."""
+    return joblib.load(path)
+
+
+@st.cache_resource(show_spinner=False)
+def load_preprocessor(path: Path):
+    """Carrega o pre-processador treinado de churn."""
     return joblib.load(path)
 
 
@@ -170,9 +177,10 @@ def render_header() -> None:
     )
 
 
-def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
+def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None, bool]:
     df: pd.DataFrame | None = None
     model = None
+    preprocessor = None
     model_loaded = False
 
     with st.sidebar:
@@ -194,6 +202,12 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
         else:
             st.error("Modelo nao encontrado")
 
+        if PREPROCESSOR_PATH.exists():
+            preprocessor = load_preprocessor(PREPROCESSOR_PATH)
+            st.success("Pre-processador carregado")
+        else:
+            st.warning("Pre-processador nao encontrado (inferencia pode falhar)")
+
         st.markdown("---")
         st.markdown(
             """
@@ -206,7 +220,7 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
             """
         )
 
-    return df, model, model_loaded
+    return df, model, preprocessor, model_loaded
 
 
 def apply_filters(df: pd.DataFrame) -> pd.DataFrame:
@@ -320,7 +334,7 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
         st.dataframe(filtered_df[valid_cols].head(20), use_container_width=True)
 
 
-def render_prediction(model) -> None:
+def render_prediction(model, preprocessor) -> None:
     st.markdown("---")
     st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
 
@@ -381,7 +395,8 @@ def render_prediction(model) -> None:
                     ]
                 )
 
-                proba = model.predict_proba(input_data)[0][1]
+                model_input = preprocessor.transform(input_data) if preprocessor is not None else input_data
+                proba = model.predict_proba(model_input)[0][1]
 
                 result_col1, result_col2 = st.columns(2)
 
@@ -446,7 +461,7 @@ def main() -> None:
     pio.templates.default = "plotly_white"
     inject_styles()
     render_header()
-    df, model, model_loaded = render_sidebar()
+    df, model, preprocessor, model_loaded = render_sidebar()
 
     if df is None:
         st.error(f"Dataset nao encontrado em: {DATA_PATH}")
@@ -463,7 +478,7 @@ def main() -> None:
     render_data_preview(filtered_df)
 
     if model_loaded and model is not None:
-        render_prediction(model)
+        render_prediction(model, preprocessor)
 
     render_footer()
 
