@@ -1,8 +1,10 @@
-# Churn Prediction Pipeline (Senior)
+# Churn Prediction Pipeline (Enterprise)
 
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](./.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
 [![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
+
+Idioma: **Português (PT-BR)** | [English](README.en.md)
 
 Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturado em camadas:
 
@@ -15,34 +17,38 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - rastreabilidade de modelos com `MLflow`
 
 ## Sumario
+- [Destaques](#destaques)
 - [Streamlit (publico)](#streamlit-publico)
-- [Arquitetura](#arquitetura)
+- [Saidas de dados](#saidas-de-dados)
 - [Setup](#setup)
 - [Execucao do pipeline](#execucao-do-pipeline)
 - [Orquestracao com Prefect](#orquestracao-com-prefect)
 - [Qualidade](#qualidade)
+- [Versionamento de artefatos](#versionamento-de-artefatos)
 - [Dashboard Executivo Multipagina](#dashboard-executivo-multipagina)
 - [Dados](#dados)
+
+## Destaques
+- Arquitetura em camadas: `raw -> bronze -> silver -> gold`
+- Star schema no gold (`fato + dimensoes`)
+- Predicao de churn + predicao de proxima compra
+- Saidas executivas: `executive_report.json`, KPI CSV e priorizacao CSV
+- Orquestracao com `Prefect`
+- Contratos de qualidade de dados com `Pandera`
+- Rastreabilidade de modelos com `MLflow`
+- Dashboard executivo multipagina em Streamlit
 
 ## Streamlit (publico)
 
 https://data-senior-analytics.streamlit.app/
 
-## Arquitetura
-
-### Camadas de dados
-- `raw`: fonte original do Kaggle
-- `bronze`: copia com metadados de ingestao
-- `silver`: dados limpos, tipados e validados
-- `gold`: star schema + KPIs + priorizacao de clientes
-
-### Star schema (gold)
-- `dim_customer.csv`
-- `dim_contract.csv`
-- `dim_service.csv`
-- `fact_customer_churn.csv`
-
-### Outputs de negocio
+## Saidas de dados
+- `data/bronze/customer_churn_bronze.csv`
+- `data/silver/customer_churn_silver.csv`
+- `data/gold/dim_customer.csv`
+- `data/gold/dim_contract.csv`
+- `data/gold/dim_service.csv`
+- `data/gold/fact_customer_churn.csv`
 - `reports/executive_report.json`
 - `data/gold/kpi_summary.csv`
 - `data/gold/customer_prioritization.csv`
@@ -97,6 +103,10 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
   - `ruff check main.py src tests pages`
   - `black --check main.py src tests pages`
   - `pytest -q`
+
+## Versionamento de artefatos
+- `logs/` e `mlruns/` nao devem ser enviados para o Git.
+- versione apenas codigo, configuracoes e documentacao.
 
 ## Dashboard Executivo Multipagina
 - `Executive Overview`
