@@ -1,0 +1,27 @@
+name: churn-prediction-enterprise
+prefect-version: 3
+
+build: []
+push: []
+pull: []
+
+deployments:
+  - name: daily-enterprise-run
+    version: "1.0.0"
+    description: "Execucao diaria do pipeline enterprise de churn."
+    tags:
+      - enterprise
+      - daily
+    entrypoint: main.py:run_pipeline
+    parameters:
+      seed: 42
+      data_dir: data
+      log_level: INFO
+      mlflow_tracking_uri: file:./mlruns
+    schedules:
+      - cron: "0 7 * * *"
+        timezone: UTC
+        active: true
+    work_pool:
+      name: default-agent-pool
+      work_queue_name: default

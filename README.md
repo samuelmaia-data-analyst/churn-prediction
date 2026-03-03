@@ -1,210 +1,104 @@
-# Plataforma de Predição de Churn
+# Churn Prediction Pipeline (Senior)
 
-[![Status](https://img.shields.io/badge/status-em_desenvolvimento-yellow)](#roadmap)
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](#stack-tecnológica)
-[![Machine Learning](https://img.shields.io/badge/machine_learning-scikit--learn-orange)](#performance-do-modelo)
-[![API](https://img.shields.io/badge/api-fastapi-009688)](#contrato-da-api)
-[![Dashboard](https://img.shields.io/badge/dashboard-streamlit-red)](#demonstração)
+[![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](./.github/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
+[![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
 
-Idioma: **PT-BR** | [English](README.en.md)
+Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturado em camadas:
 
-Projeto de previsão de churn com pipeline de Machine Learning, API FastAPI e dashboard Streamlit para apoiar decisões de retenção de clientes.
+- `raw -> bronze -> silver -> gold`
+- modelo de `churn prediction`
+- modelo de `next purchase prediction`
+- reporting executivo para consumo de negocio
+- orquestracao com `Prefect`
+- data quality checks com `Pandera`
+- rastreabilidade de modelos com `MLflow`
 
-## Sumário
+## Streamlit (publico)
 
-- [Resumo Executivo](#resumo-executivo)
-- [Contexto de Negócio](#contexto-de-negócio)
-- [Resultados-Chave](#resultados-chave)
-- [Arquitetura da Solução](#arquitetura-da-solução)
-- [Stack Tecnológica](#stack-tecnológica)
-- [Funcionalidades](#funcionalidades)
-- [Demonstração](#demonstração)
-- [Contrato da API](#contrato-da-api)
-- [Setup Rápido](#setup-rápido)
-- [Estrutura do Repositório](#estrutura-do-repositório)
-- [Decisões de Engenharia](#decisões-de-engenharia)
-- [Qualidade e Testes](#qualidade-e-testes)
-- [Roadmap](#roadmap)
-- [Palavras-chave ATS](#palavras-chave-ats)
-- [Contato](#contato)
-- [Licença](#licença)
+https://data-senior-analytics.streamlit.app/
 
-## Resumo Executivo
+## Arquitetura
 
-- Solução end-to-end de **Customer Churn Prediction** com Python e scikit-learn.
-- Camada de inferência deployável com **FastAPI** e análise visual com **Streamlit + Plotly**.
-- Pipeline de pré-processamento persistido para inferência consistente entre treino e produção.
-- Modelo salvo atual com alta capacidade de ranking (**ROC-AUC 0.8420**).
+### Camadas de dados
+- `raw`: fonte original do Kaggle
+- `bronze`: copia com metadados de ingestao
+- `silver`: dados limpos, tipados e validados
+- `gold`: star schema + KPIs + priorizacao de clientes
 
-## Contexto de Negócio
+### Star schema (gold)
+- `dim_customer.csv`
+- `dim_contract.csv`
+- `dim_service.csv`
+- `fact_customer_churn.csv`
 
-### Problema
-Empresas com receita recorrente perdem margem quando o churn é identificado tardiamente.
+### Outputs de negocio
+- `reports/executive_report.json`
+- `data/gold/kpi_summary.csv`
+- `data/gold/customer_prioritization.csv`
 
-### Solução
-Pipeline supervisionado de classificação binária para estimar probabilidade de churn por cliente, com exposição via API e dashboard.
-
-### Resultado Esperado
-Permite priorizar clientes de alto risco, otimizar budget de retenção e proteger receita.
-
-## Resultados-Chave
-
-| Métrica | Valor |
-|---|---:|
-| Accuracy | 0.8055 |
-| Precision | 0.6572 |
-| Recall | 0.5588 |
-| F1-score | 0.6040 |
-| ROC-AUC | 0.8420 |
-
-Artefato principal: `models/LogisticRegression.joblib`
-
-## Arquitetura da Solução
-
-![Arquitetura do Projeto](assets/architecture.png)
-
-```text
-Dados CSV
-  -> Limpeza e split
-  -> Engenharia de features + pré-processamento
-  -> Treino e seleção do modelo
-  -> Persistência de artefatos (modelo + preprocessor)
-  -> Consumo via API / Dashboard / CLI
-```
-
-## Stack Tecnológica
-
-- **Linguagem:** Python
-- **Dados e ML:** pandas, numpy, scikit-learn
-- **Persistência:** joblib
-- **API:** FastAPI, Pydantic, Uvicorn
-- **Dashboard:** Streamlit, Plotly
-
-## Funcionalidades
-
-- Pipeline completo de modelagem de churn.
-- Dashboard interativo com filtros e predição individual.
-- Endpoint REST para scoring em tempo real.
-- Reuso do mesmo preprocessor no app e na API (evita train-serving skew).
-
-## Demonstração
-
-| API Demo | Dashboard Demo |
-|---|---|
-| ![API REST Demo](assets/api-demo.gif) | ![Dashboard Demo](assets/dashboard-demo.gif) |
-
-## Contrato da API
-
-### Health
-- `GET /health`
-
-### Predição
-- `POST /predict`
-
-Exemplo de request:
-
-```json
-{
-  "gender": "Male",
-  "SeniorCitizen": 0,
-  "Partner": "Yes",
-  "Dependents": "No",
-  "tenure": 12,
-  "PhoneService": "Yes",
-  "MultipleLines": "No",
-  "InternetService": "Fiber optic",
-  "OnlineSecurity": "No",
-  "OnlineBackup": "Yes",
-  "DeviceProtection": "No",
-  "TechSupport": "No",
-  "StreamingTV": "No",
-  "StreamingMovies": "No",
-  "Contract": "Month-to-month",
-  "PaperlessBilling": "Yes",
-  "PaymentMethod": "Electronic check",
-  "MonthlyCharges": 65.5,
-  "TotalCharges": 786.0
-}
-```
-
-Exemplo de response (implementação atual):
-
-```json
-{
-  "churn": "Sim",
-  "probability": 0.73,
-  "risk_level": "Alto"
-}
-```
-
-## Setup Rápido
+## Setup
 
 ```bash
-git clone <url-do-repositorio>
-cd churn-prediction
 python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
+# Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
-python main.py
-uvicorn api:app --reload
-# em outro terminal: streamlit run app.py
 ```
 
-## Estrutura do Repositório
+## Execucao do pipeline
 
-```text
-churn-prediction/
-|-- app.py
-|-- api.py
-|-- main.py
-|-- predict_customer.py
-|-- config.yaml
-|-- requirements.txt
-|-- data/
-|-- models/
-|-- src/
-|   |-- data/
-|   |-- features/
-|   `-- models/
-|-- tests/
-`-- assets/
+```bash
+python main.py --seed 42 --data-dir data --log-level INFO
 ```
 
-## Decisões de Engenharia
+## Orquestracao com Prefect
 
-- Seleção de modelo por **F1-score** para balancear precision e recall.
-- Persistência de `preprocessor.joblib` para consistência de features.
-- API e dashboard desacoplados, consumindo os mesmos artefatos.
+Deploy configurado em [prefect.yaml](prefect.yaml) com agenda diaria (`07:00 UTC`).
 
-## Qualidade e Testes
+```bash
+# 1) iniciar API local do Prefect (opcional, para UI local)
+prefect server start
 
-Estado atual:
-- estrutura de testes existe em `tests/`, mas suites ainda não implementadas.
+# 2) criar pool e iniciar worker
+prefect work-pool create --type process default-agent-pool
+prefect worker start --pool default-agent-pool
 
-Próximos passos:
-- testes unitários de pré-processamento;
-- testes de contrato da API;
-- validação de schema de entrada do modelo.
+# 3) registrar deployment
+prefect deploy --all
 
-## Roadmap
+# 4) disparar execucao manual
+prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
+```
 
-- Cobertura automatizada de testes (unit + integration).
-- Rastreabilidade de experimentos e métricas.
-- Monitoramento de drift de dados/modelo.
-- Batch scoring na API.
-- CI/CD para validação e release.
+### Tracking de ML
+- MLflow local em `./mlruns`
+- modelos versionados por execucao no run do pipeline
 
-## Palavras-chave ATS
+### Logging estruturado
+- logs JSON em `logs/pipeline.log`
+- cada execucao tem `run_id`
 
-`Python` `Machine Learning` `Churn Prediction` `scikit-learn` `FastAPI` `Streamlit` `Model Deployment` `REST API` `Data Science` `MLOps` `Feature Engineering` `Binary Classification` `Model Evaluation` `ROC-AUC`
+## Qualidade
 
-## Contato
+- `pre-commit` com `black`, `ruff`, `isort`
+- `pytest` para contratos do pipeline e outputs
+- CI executando:
+  - `ruff check main.py src tests pages`
+  - `black --check main.py src tests pages`
+  - `pytest -q`
 
-**Samuel de Andrade Maia**
-- GitHub: https://github.com/samuelmaia-data-analyst
-- LinkedIn: https://linkedin.com/in/samuelmaia-data-analyst
+## Dashboard Executivo Multipagina
+- `Executive Overview`
+- `Risk and Growth`
+- `Prioritization`
+- `Simulation`
 
-## Licença
+Com download direto de:
+- `executive_report.json`
+- `customer_prioritization.csv`
 
-Licença ainda não definida. Recomendado: MIT.
+## Dados
+
+Dataset utilizado: Kaggle - Telco Customer Churn  
+Arquivo esperado em: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`

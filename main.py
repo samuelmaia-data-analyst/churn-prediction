@@ -1,77 +1,140 @@
-import logging
-import sys
-from pathlib import Path
+from __future__ import annotations
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+import argparse
+import logging
+import time
+from pathlib import Path
+from uuid import uuid4
+
+import pandas as pd
+
+try:
+    from prefect import flow, task
+except ImportError:  # pragma: no cover
+
+    def task(*_args, **_kwargs):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    def flow(*_args, **_kwargs):
+        def decorator(func):
+            return func
+
+        return decorator
+
+
+from src.config import PipelineConfig
+from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
+from src.logging_utils import configure_logging
+from src.ml import ModelOutputs, train_models_and_score
+from src.reporting import ReportOutputs, build_business_outputs, persist_business_outputs
+from src.transformation import build_silver_layer, persist_silver
+from src.warehouse import StarSchema, build_star_schema, persist_star_schema
+
 logger = logging.getLogger(__name__)
 
-# Importar módulos
-from src.data.make_dataset import DataLoader
-from src.data.preprocess import DataPreprocessor
-from src.features.build_features import FeatureEngineer
-from src.models.train_model import ModelTrainer
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Pipeline enterprise em camadas (raw -> bronze -> silver -> gold)"
+    )
+    parser.add_argument("--seed", type=int, default=42, help="Seed para reproducibilidade")
+    parser.add_argument(
+        "--data-dir", type=Path, default=Path("data"), help="Diretorio base de dados"
+    )
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Nivel de log",
+    )
+    return parser.parse_args()
 
 
-def main():
-    """Função principal do projeto"""
+@task(retries=2, retry_delay_seconds=3)
+def bronze_task(config: PipelineConfig) -> pd.DataFrame:
+    raw_df = load_raw_dataset(config)
+    bronze_df = build_bronze_layer(raw_df)
+    persist_bronze(config, bronze_df)
+    return bronze_df
 
-    print("\n" + "=" * 60)
-    print(" PROJETO DE PREDIÇÃO DE CHURN")
-    print("=" * 60 + "\n")
 
-    try:
-        # 1. Carregar dados
-        print("1. Carregando dados...")
-        loader = DataLoader()
-        df = loader.load_data()
-        print(f"   ✓ Dados carregados: {df.shape}")
+@task(retries=2, retry_delay_seconds=3)
+def silver_task(config: PipelineConfig, bronze_df: pd.DataFrame) -> pd.DataFrame:
+    silver_df = build_silver_layer(bronze_df)
+    persist_silver(config, silver_df)
+    return silver_df
 
-        # 2. Pré-processar
-        print("\n2. Pré-processando dados...")
-        preprocessor = DataPreprocessor()
-        df_clean = preprocessor.clean_data(df)
-        X_train, X_test, y_train, y_test = preprocessor.split_data(df_clean)
-        print(f"   ✓ Treino: {X_train.shape}, Teste: {X_test.shape}")
 
-        # 3. Engenharia de features com imputação
-        print("\n3. Engenharia de features...")
-        feature_eng = FeatureEngineer()
-        X_train_proc, X_test_proc = feature_eng.fit_transform(X_train, X_test)
-        feature_eng.save_preprocessor()
-        print(f"   ✓ Features processadas: {X_train_proc.shape[1]}")
+@task(retries=1, retry_delay_seconds=2)
+def warehouse_task(config: PipelineConfig, silver_df: pd.DataFrame) -> StarSchema:
+    schema = build_star_schema(silver_df)
+    persist_star_schema(config, schema)
+    return schema
 
-        # 4. Treinar modelos
-        print("\n4. Treinando modelos...")
-        trainer = ModelTrainer()
-        results = trainer.train_all(X_train_proc, y_train, X_test_proc, y_test)
 
-        # 5. Resultados
-        print("\n" + "=" * 60)
-        print(" RESULTADOS")
-        print("=" * 60)
+@task(retries=1, retry_delay_seconds=2)
+def ml_task(config: PipelineConfig, silver_df: pd.DataFrame) -> ModelOutputs:
+    return train_models_and_score(config, silver_df)
 
-        for model_name, metrics in results.items():
-            print(f"\n{model_name}:")
-            print(f"  - Acurácia: {metrics['accuracy']:.4f}")
-            print(f"  - Precisão: {metrics['precision']:.4f}")
-            print(f"  - Recall: {metrics['recall']:.4f}")
-            print(f"  - F1-Score: {metrics['f1']:.4f}")
-            print(f"  - ROC-AUC: {metrics['roc_auc']:.4f}")
 
-        print(f"\n✅ Melhor modelo: {trainer.best_model}")
-        trainer.save_model()
+@task(retries=1, retry_delay_seconds=2)
+def reporting_task(config: PipelineConfig, model_outputs: ModelOutputs) -> ReportOutputs:
+    outputs = build_business_outputs(model_outputs.scored_df, model_outputs.metrics)
+    persist_business_outputs(config, outputs)
+    return outputs
 
-        print("\n" + "=" * 60)
-        print(" PROJETO CONCLUÍDO COM SUCESSO!")
-        print("=" * 60 + "\n")
 
-    except Exception as e:
-        logger.error(f"Erro durante a execução: {e}")
-        raise
+@flow(name="enterprise-churn-pipeline")
+def run_pipeline(
+    seed: int = 42,
+    data_dir: str = "data",
+    log_level: str = "INFO",
+    mlflow_tracking_uri: str = "file:./mlruns",
+) -> None:
+    run_id = str(uuid4())
+    config = PipelineConfig(
+        data_dir=Path(data_dir),
+        seed=seed,
+        log_level=log_level,
+        mlflow_tracking_uri=mlflow_tracking_uri,
+    )
+    configure_logging(level=config.log_level, log_dir=config.logs_dir, run_id=run_id)
+
+    started_at = time.perf_counter()
+    logger.info(
+        "pipeline_start run_id=%s seed=%s data_dir=%s",
+        run_id,
+        config.seed,
+        config.data_dir,
+    )
+
+    bronze_df = bronze_task(config)
+    silver_df = silver_task(config, bronze_df)
+    warehouse_task(config, silver_df)
+    model_outputs = ml_task(config, silver_df)
+    reporting_task(config, model_outputs)
+
+    elapsed_seconds = time.perf_counter() - started_at
+    logger.info(
+        "pipeline_done run_id=%s duration_seconds=%.2f churn_f1=%.4f churn_auc=%.4f",
+        run_id,
+        elapsed_seconds,
+        model_outputs.metrics["churn_f1"],
+        model_outputs.metrics["churn_roc_auc"],
+    )
+
+
+def main() -> None:
+    args = parse_args()
+    run_pipeline(
+        seed=args.seed,
+        data_dir=str(args.data_dir),
+        log_level=args.log_level,
+    )
 
 
 if __name__ == "__main__":

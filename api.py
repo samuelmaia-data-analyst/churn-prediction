@@ -1,33 +1,21 @@
+﻿from __future__ import annotations
+
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import joblib
-import pandas as pd
-import numpy as np
-from pathlib import Path
+from pydantic import BaseModel, Field
 
-app = FastAPI(title="Churn Prediction API", description="API para predição de churn")
+from src.models.predict_model import ChurnPredictor, PredictionResult
 
-# Carregar modelo e pré-processador na inicialização
-model_path = Path("models/LogisticRegression.joblib")
-preprocessor_path = Path("models/preprocessor.joblib")
-
-if model_path.exists() and preprocessor_path.exists():
-    model = joblib.load(model_path)
-    preprocessor = joblib.load(preprocessor_path)
-    print("✅ Modelo e pré-processador carregados!")
-else:
-    print("❌ Modelo ou pré-processador não encontrado. Execute main.py primeiro.")
-    model = None
-    preprocessor = None
+predictor = ChurnPredictor()
 
 
-# Definir modelo de dados
 class CustomerData(BaseModel):
     gender: str
-    SeniorCitizen: int
+    SeniorCitizen: int = Field(ge=0, le=1)
     Partner: str
     Dependents: str
-    tenure: int
+    tenure: int = Field(ge=0)
     PhoneService: str
     MultipleLines: str
     InternetService: str
@@ -40,8 +28,8 @@ class CustomerData(BaseModel):
     Contract: str
     PaperlessBilling: str
     PaymentMethod: str
-    MonthlyCharges: float
-    TotalCharges: float
+    MonthlyCharges: float = Field(ge=0)
+    TotalCharges: float = Field(ge=0)
 
 
 class PredictionResponse(BaseModel):
@@ -50,49 +38,45 @@ class PredictionResponse(BaseModel):
     risk_level: str
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:
+        predictor.load_artifacts()
+    except FileNotFoundError:
+        # API segue no ar para facilitar health-check mesmo sem artefatos.
+        pass
+    yield
+
+
+app = FastAPI(
+    title="Churn Prediction API",
+    description="API para predicao de churn",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+
 @app.get("/")
-def read_root():
+def read_root() -> dict[str, str]:
     return {"message": "Churn Prediction API", "status": "running"}
 
 
 @app.get("/health")
-def health_check():
-    if model and preprocessor:
-        return {"status": "healthy", "model": "loaded"}
-    return {"status": "unhealthy", "model": "not loaded"}
+def health_check() -> dict[str, str]:
+    return {"status": "healthy" if predictor.is_ready else "unhealthy"}
 
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict(customer: CustomerData):
-    if model is None or preprocessor is None:
-        raise HTTPException(status_code=500, detail="Modelo não carregado")
-
+def predict(customer: CustomerData) -> PredictionResponse:
     try:
-        # Converter para DataFrame
-        df = pd.DataFrame([customer.dict()])
+        result: PredictionResult = predictor.predict_from_dict(customer.model_dump())
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Erro ao prever churn: {exc}") from exc
 
-        # Pré-processar
-        X_processed = preprocessor.transform(df)
-
-        # Predizer
-        prediction = model.predict(X_processed)[0]
-        probability = model.predict_proba(X_processed)[0][1]
-
-        # Determinar nível de risco
-        if probability > 0.6:
-            risk = "Alto"
-        elif probability > 0.3:
-            risk = "Médio"
-        else:
-            risk = "Baixo"
-
-        return PredictionResponse(
-            churn="Sim" if prediction == 1 else "Não",
-            probability=round(float(probability), 4),
-            risk_level=risk
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-# Para executar: uvicorn api:app --reload
+    return PredictionResponse(
+        churn=result.churn,
+        probability=result.probability,
+        risk_level=result.risk_level,
+    )

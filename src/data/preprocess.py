@@ -1,58 +1,46 @@
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
+﻿from __future__ import annotations
+
 import logging
+
+import pandas as pd
 import yaml
+from sklearn.model_selection import train_test_split
 
 logger = logging.getLogger(__name__)
 
 
 class DataPreprocessor:
-    def __init__(self, config_path="config.yaml"):
-        with open(config_path, 'r') as file:
+    def __init__(self, config_path: str = "config.yaml") -> None:
+        with open(config_path, "r", encoding="utf-8") as file:
             self.config = yaml.safe_load(file)
 
-    def clean_data(self, df):
-        """Limpeza básica dos dados"""
-        logger.info("Iniciando limpeza dos dados...")
+    def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        cleaned = df.copy()
 
-        # Remover customerID (não é uma feature)
-        if 'customerID' in df.columns:
-            df = df.drop('customerID', axis=1)
+        if "customerID" in cleaned.columns:
+            cleaned = cleaned.drop(columns=["customerID"])
 
-        # Converter TotalCharges para numérico, forçando erros a se tornarem NaN
-        df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+        cleaned["TotalCharges"] = pd.to_numeric(cleaned["TotalCharges"], errors="coerce")
+        median_total_charges = cleaned["TotalCharges"].median()
+        cleaned["TotalCharges"] = cleaned["TotalCharges"].fillna(median_total_charges)
 
-        # Preencher valores nulos em TotalCharges com a mediana (de forma segura)
-        median_total_charges = df['TotalCharges'].median()
-        df['TotalCharges'] = df['TotalCharges'].fillna(median_total_charges)
-        logger.info(f"Valores nulos em TotalCharges preenchidos com a mediana: {median_total_charges}")
+        cleaned["Churn"] = cleaned["Churn"].map({"Yes": 1, "No": 0})
+        if cleaned["Churn"].isna().any():
+            raise ValueError("Coluna Churn contem valores inesperados. Esperado: Yes/No")
 
-        # Converter Churn para binário
-        df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
+        return cleaned
 
-        # Verificar se ainda existem NaNs em outras colunas
-        cols_com_nan = df.columns[df.isna().any()].tolist()
-        if cols_com_nan:
-            logger.warning(
-                f"Atenção: As seguintes colunas ainda contêm NaN após limpeza inicial: {cols_com_nan}. Eles serão tratados na imputação.")
-        else:
-            logger.info("Nenhum valor NaN encontrado após limpeza inicial.")
-
-        logger.info(f"Limpeza concluída. Shape: {df.shape}")
-        return df
-
-    def split_data(self, df):
-        """Divide dados em treino e teste"""
-        X = df.drop('Churn', axis=1)
-        y = df['Churn']
+    def split_data(self, df: pd.DataFrame):
+        X = df.drop(columns=["Churn"])
+        y = df["Churn"]
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y,
-            test_size=self.config['data']['test_size'],
-            random_state=self.config['data']['random_state'],
-            stratify=y
+            X,
+            y,
+            test_size=self.config["data"]["test_size"],
+            random_state=self.config["data"]["random_state"],
+            stratify=y,
         )
 
-        logger.info(f"Treino: {X_train.shape}, Teste: {X_test.shape}")
+        logger.info("Treino: %s | Teste: %s", X_train.shape, X_test.shape)
         return X_train, X_test, y_train, y_test

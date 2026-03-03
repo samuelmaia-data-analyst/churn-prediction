@@ -1,84 +1,66 @@
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-import logging
-import yaml
-import joblib
+﻿from __future__ import annotations
+
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+import joblib
+import yaml
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
 
 class ModelTrainer:
-    def __init__(self, config_path="config.yaml"):
-        with open(config_path, 'r') as file:
+    def __init__(self, config_path: str = "config.yaml") -> None:
+        with open(config_path, "r", encoding="utf-8") as file:
             self.config = yaml.safe_load(file)
-        self.models = {}
-        self.results = {}
-        self.best_model = None
+        self.models: dict = {}
+        self.results: dict = {}
+        self.best_model: str | None = None
 
-    def get_models(self):
-        """Retorna dicionário com modelos"""
+    def get_models(self) -> dict:
+        seed = self.config["data"]["random_state"]
         return {
-            'LogisticRegression': LogisticRegression(
-                max_iter=1000,
-                random_state=self.config['data']['random_state']
+            "LogisticRegression": LogisticRegression(max_iter=1000, random_state=seed),
+            "RandomForest": RandomForestClassifier(
+                n_estimators=100, max_depth=10, random_state=seed
             ),
-            'RandomForest': RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
-                random_state=self.config['data']['random_state']
+            "GradientBoosting": GradientBoostingClassifier(
+                n_estimators=100, max_depth=5, random_state=seed
             ),
-            'GradientBoosting': GradientBoostingClassifier(
-                n_estimators=100,
-                max_depth=5,
-                random_state=self.config['data']['random_state']
-            )
         }
 
-    def evaluate(self, model, X_test, y_test):
-        """Avalia o modelo"""
+    def evaluate(self, model, X_test, y_test) -> dict[str, float]:
         y_pred = model.predict(X_test)
         y_proba = model.predict_proba(X_test)[:, 1]
 
         return {
-            'accuracy': accuracy_score(y_test, y_pred),
-            'precision': precision_score(y_test, y_pred),
-            'recall': recall_score(y_test, y_pred),
-            'f1': f1_score(y_test, y_pred),
-            'roc_auc': roc_auc_score(y_test, y_proba)
+            "accuracy": accuracy_score(y_test, y_pred),
+            "precision": precision_score(y_test, y_pred, zero_division=0),
+            "recall": recall_score(y_test, y_pred, zero_division=0),
+            "f1": f1_score(y_test, y_pred, zero_division=0),
+            "roc_auc": roc_auc_score(y_test, y_proba),
         }
 
-    def train_all(self, X_train, y_train, X_test, y_test):
-        """Treina todos os modelos"""
-
+    def train_all(self, X_train, y_train, X_test, y_test) -> dict:
         for name, model in self.get_models().items():
-            logger.info(f"Treinando {name}...")
-
-            # Treinar
             model.fit(X_train, y_train)
             self.models[name] = model
+            self.results[name] = self.evaluate(model, X_test, y_test)
 
-            # Avaliar
-            metrics = self.evaluate(model, X_test, y_test)
-            self.results[name] = metrics
-
-            logger.info(f"{name} - F1: {metrics['f1']:.4f}, AUC: {metrics['roc_auc']:.4f}")
-
-        # Melhor modelo (baseado em F1)
-        self.best_model = max(self.results, key=lambda x: self.results[x]['f1'])
-        logger.info(f"Melhor modelo: {self.best_model}")
-
+        self.best_model = max(
+            self.results,
+            key=lambda name: (self.results[name]["f1"], self.results[name]["roc_auc"]),
+        )
         return self.results
 
-    def save_model(self, model_name=None):
-        """Salva o modelo"""
-        if model_name is None:
-            model_name = self.best_model
+    def save_model(self, model_name: str | None = None) -> Path:
+        target_name = model_name or self.best_model
+        if not target_name:
+            raise RuntimeError("Nenhum modelo treinado para salvar")
+        if target_name not in self.models:
+            raise ValueError(f"Modelo nao encontrado: {target_name}")
 
-        path = Path(self.config['models']['save_path']) / f"{model_name}.joblib"
+        path = Path(self.config["models"]["save_path"]) / f"{target_name}.joblib"
         path.parent.mkdir(parents=True, exist_ok=True)
-        joblib.dump(self.models[model_name], path)
-        logger.info(f"Modelo salvo em: {path}")
+        joblib.dump(self.models[target_name], path)
+        return path

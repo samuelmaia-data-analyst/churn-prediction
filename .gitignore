@@ -1,4 +1,4 @@
-# Ambientes virtuais
+﻿# Ambientes virtuais
 venv/
 .venv/
 env/
@@ -14,6 +14,9 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # IDEs
 .vscode/
@@ -27,6 +30,16 @@ Thumbs.db
 # Streamlit
 .streamlit/secrets.toml
 
-# Modelos (opcional - se quiser incluir, remova do gitignore)
-*.joblib
-!models/*.joblib
+# Pipeline outputs gerados
+data/bronze/
+data/silver/
+data/gold/
+reports/executive_report.json
+
+# Modelos enterprise gerados em runtime
+models/enterprise_churn_model.joblib
+models/enterprise_next_purchase_model.joblib
+
+# Observabilidade e tracking
+logs/
+mlruns/
