@@ -108,6 +108,10 @@ Com download direto de:
 - `executive_report.json`
 - `customer_prioritization.csv`
 
+Comportamento de bootstrap do dashboard:
+- se `reports/` e `data/gold/` nao existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
+- se o pipeline falhar ou nao houver `data/raw`, o app gera fallback sintetico para nao ficar vazio.
+
 ## Dados
 
 Dataset utilizado: Kaggle - Telco Customer Churn  

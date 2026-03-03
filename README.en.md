@@ -84,6 +84,10 @@ Includes direct download of:
 - `executive_report.json`
 - `customer_prioritization.csv`
 
+Dashboard bootstrap behavior:
+- if `reports/` and `data/gold/` are missing and `data/raw` exists, the app generates artifacts through the real pipeline;
+- if pipeline execution fails or `data/raw` is unavailable, the app uses a synthetic fallback to avoid empty pages.
+
 ## Dataset
 Source: Kaggle - Telco Customer Churn  
 Official source: https://www.kaggle.com/datasets/blastchar/telco-customer-churn  
