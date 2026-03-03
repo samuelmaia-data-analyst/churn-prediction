@@ -6,6 +6,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.config import PipelineConfig
+from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
+from src.ml import train_models_and_score
+from src.reporting import build_business_outputs, persist_business_outputs
+from src.transformation import build_silver_layer, persist_silver
+from src.warehouse import build_star_schema, persist_star_schema
+
 REPORT_PATH = Path("reports/executive_report.json")
 PRIORITIZATION_PATH = Path("data/gold/customer_prioritization.csv")
 KPI_PATH = Path("data/gold/kpi_summary.csv")
@@ -60,14 +67,29 @@ def _build_synthetic_raw(rows: int = 800) -> pd.DataFrame:
     return df
 
 
-def ensure_dashboard_outputs() -> None:
-    if REPORT_PATH.exists() and PRIORITIZATION_PATH.exists() and KPI_PATH.exists():
-        return
-    if RAW_PATH.exists():
-        df = pd.read_csv(RAW_PATH)
-    else:
-        df = _build_synthetic_raw(rows=800)
+def _generate_outputs_from_pipeline() -> bool:
+    config = PipelineConfig(data_dir=Path("data"), seed=42, log_level="INFO")
+    try:
+        raw_df = load_raw_dataset(config)
+        bronze_df = build_bronze_layer(raw_df)
+        persist_bronze(config, bronze_df)
 
+        silver_df = build_silver_layer(bronze_df)
+        persist_silver(config, silver_df)
+
+        schema = build_star_schema(silver_df)
+        persist_star_schema(config, schema)
+
+        model_outputs = train_models_and_score(config, silver_df)
+        report_outputs = build_business_outputs(model_outputs.scored_df, model_outputs.metrics)
+        persist_business_outputs(config, report_outputs)
+    except Exception:
+        return False
+    return True
+
+
+def _generate_outputs_from_raw_or_synthetic(raw_df: pd.DataFrame) -> None:
+    df = raw_df.copy()
     df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
     df["TotalCharges"] = df["TotalCharges"].fillna(df["TotalCharges"].median())
     df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0}).fillna(0).astype(int)
@@ -134,6 +156,19 @@ def ensure_dashboard_outputs() -> None:
             ensure_ascii=False,
             indent=2,
         )
+
+
+def ensure_dashboard_outputs() -> None:
+    if REPORT_PATH.exists() and PRIORITIZATION_PATH.exists() and KPI_PATH.exists():
+        return
+    if RAW_PATH.exists() and _generate_outputs_from_pipeline():
+        return
+
+    if RAW_PATH.exists():
+        raw_df = pd.read_csv(RAW_PATH)
+    else:
+        raw_df = _build_synthetic_raw(rows=800)
+    _generate_outputs_from_raw_or_synthetic(raw_df)
 
 
 def load_executive_report() -> dict:
