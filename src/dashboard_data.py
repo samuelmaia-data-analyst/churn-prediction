@@ -12,13 +12,62 @@ KPI_PATH = Path("data/gold/kpi_summary.csv")
 RAW_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 
 
+def _build_synthetic_raw(rows: int = 800) -> pd.DataFrame:
+    rng = np.random.default_rng(42)
+    contracts = np.array(["Month-to-month", "One year", "Two year"])
+    internet = np.array(["Fiber optic", "DSL", "No"])
+    payment = np.array(
+        [
+            "Electronic check",
+            "Mailed check",
+            "Bank transfer (automatic)",
+            "Credit card (automatic)",
+        ]
+    )
+
+    df = pd.DataFrame(
+        {
+            "customerID": [f"SYN-{i:05d}" for i in range(rows)],
+            "gender": rng.choice(["Male", "Female"], size=rows),
+            "SeniorCitizen": rng.integers(0, 2, size=rows),
+            "Partner": rng.choice(["Yes", "No"], size=rows),
+            "Dependents": rng.choice(["Yes", "No"], size=rows),
+            "tenure": rng.integers(1, 73, size=rows),
+            "PhoneService": rng.choice(["Yes", "No"], size=rows, p=[0.9, 0.1]),
+            "MultipleLines": rng.choice(["Yes", "No"], size=rows),
+            "InternetService": rng.choice(internet, size=rows, p=[0.45, 0.4, 0.15]),
+            "OnlineSecurity": rng.choice(["Yes", "No"], size=rows),
+            "OnlineBackup": rng.choice(["Yes", "No"], size=rows),
+            "DeviceProtection": rng.choice(["Yes", "No"], size=rows),
+            "TechSupport": rng.choice(["Yes", "No"], size=rows),
+            "StreamingTV": rng.choice(["Yes", "No"], size=rows),
+            "StreamingMovies": rng.choice(["Yes", "No"], size=rows),
+            "Contract": rng.choice(contracts, size=rows, p=[0.55, 0.25, 0.2]),
+            "PaperlessBilling": rng.choice(["Yes", "No"], size=rows, p=[0.75, 0.25]),
+            "PaymentMethod": rng.choice(payment, size=rows),
+        }
+    )
+    df["MonthlyCharges"] = np.round(rng.uniform(20, 120, size=rows), 2)
+    df["TotalCharges"] = np.round(df["MonthlyCharges"] * df["tenure"], 2)
+    churn_score = (
+        0.15
+        + np.where(df["Contract"].eq("Month-to-month"), 0.3, 0.03)
+        + np.where(df["InternetService"].eq("Fiber optic"), 0.15, 0.05)
+        + np.where(df["tenure"] < 12, 0.18, 0.0)
+    )
+    churn_score = np.clip(churn_score, 0.01, 0.95)
+    df["Churn"] = np.where(rng.random(rows) < churn_score, "Yes", "No")
+    return df
+
+
 def ensure_dashboard_outputs() -> None:
     if REPORT_PATH.exists() and PRIORITIZATION_PATH.exists() and KPI_PATH.exists():
         return
-    if not RAW_PATH.exists():
-        return
+    if RAW_PATH.exists():
+        df = pd.read_csv(RAW_PATH)
+    else:
+        df = _build_synthetic_raw(rows=800)
 
-    df = pd.read_csv(RAW_PATH)
     df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
     df["TotalCharges"] = df["TotalCharges"].fillna(df["TotalCharges"].median())
     df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0}).fillna(0).astype(int)
