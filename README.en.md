@@ -8,6 +8,14 @@ Language: **English** | [Portuguese (PT-BR)](README.md)
 
 Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 
+- `raw -> bronze -> silver -> gold`
+- `churn prediction` model
+- `next purchase prediction` model
+- executive reporting for business consumption
+- orchestration with `Prefect`
+- data quality checks with `Pandera`
+- model traceability with `MLflow`
+
 ## Table of Contents
 - [Highlights](#highlights)
 - [Public Streamlit App](#public-streamlit-app)
@@ -73,6 +81,10 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
   - `ruff check main.py src tests pages`
   - `black --check main.py src tests pages`
   - `pytest -q`
+
+## Artifact versioning
+- `logs/` and `mlruns/` should not be pushed to Git.
+- version only code, configuration, and documentation.
 
 ## Executive Dashboard Pages
 - Executive Overview
