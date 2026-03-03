@@ -8,6 +8,17 @@ Language: **English** | [Portuguese (PT-BR)](README.md)
 
 Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 
+## Table of Contents
+- [Highlights](#highlights)
+- [Public Streamlit App](#public-streamlit-app)
+- [Data Outputs](#data-outputs)
+- [Setup](#setup)
+- [Run Pipeline](#run-pipeline)
+- [Prefect Orchestration](#prefect-orchestration)
+- [Quality](#quality)
+- [Executive Dashboard Pages](#executive-dashboard-pages)
+- [Dataset](#dataset)
+
 ## Highlights
 - Layered data architecture: `raw -> bronze -> silver -> gold`
 - Star schema in gold (`fact + dimensions`)
@@ -75,5 +86,5 @@ Includes direct download of:
 
 ## Dataset
 Source: Kaggle - Telco Customer Churn  
+Official source: https://www.kaggle.com/datasets/blastchar/telco-customer-churn  
 Expected file path: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
-

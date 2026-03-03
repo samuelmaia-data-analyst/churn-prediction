@@ -14,6 +14,16 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - data quality checks com `Pandera`
 - rastreabilidade de modelos com `MLflow`
 
+## Sumario
+- [Streamlit (publico)](#streamlit-publico)
+- [Arquitetura](#arquitetura)
+- [Setup](#setup)
+- [Execucao do pipeline](#execucao-do-pipeline)
+- [Orquestracao com Prefect](#orquestracao-com-prefect)
+- [Qualidade](#qualidade)
+- [Dashboard Executivo Multipagina](#dashboard-executivo-multipagina)
+- [Dados](#dados)
+
 ## Streamlit (publico)
 
 https://data-senior-analytics.streamlit.app/
@@ -101,4 +111,5 @@ Com download direto de:
 ## Dados
 
 Dataset utilizado: Kaggle - Telco Customer Churn  
+Fonte oficial: https://www.kaggle.com/datasets/blastchar/telco-customer-churn  
 Arquivo esperado em: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
