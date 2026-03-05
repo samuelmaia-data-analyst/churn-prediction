@@ -216,14 +216,16 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
             st.warning("Modelo enterprise nao encontrado. Rode o pipeline para habilitar predicao.")
 
         st.markdown("---")
-        st.markdown("""
+        st.markdown(
+            """
             ### Autor
             **Samuel de Andrade Maia**
 
             [GitHub](https://github.com/samuelmaia-data-analyst)
 
             [LinkedIn](https://linkedin.com/in/samuelmaia-data-analyst)
-            """)
+            """
+        )
 
     return df, model, model_loaded
 

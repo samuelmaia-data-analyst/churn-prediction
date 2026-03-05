@@ -54,7 +54,8 @@ for insight in metrics.get("key_insights", []):
 
 st.markdown("### Executive Operating Model")
 st.caption("Board-grade view: strategy, allocation, execution, and value realization")
-st.markdown("""
+st.markdown(
+    """
 ```mermaid
 flowchart LR
     A[Strategic Targets\nRevenue Retention Margin]
@@ -67,7 +68,8 @@ flowchart LR
     G -. Rebalance budget and capacity .-> C
     G -. Model and policy feedback .-> B
 ```
-""")
+"""
+)
 
 gov_col1, gov_col2, gov_col3 = st.columns(3)
 gov_col1.metric("Decision Cadence", "Weekly")
@@ -76,7 +78,8 @@ gov_col3.metric("Primary Owners", "CCO / CFO / RevOps")
 
 with st.expander("Operator View (Owners + SLAs + Controls)"):
     st.caption("Execution detail for operating teams")
-    st.markdown("""
+    st.markdown(
+        """
 ```mermaid
 flowchart LR
     subgraph O1[Data and ML Factory]
@@ -102,7 +105,8 @@ flowchart LR
     D3 -. Controlled retrain and recalibration .-> A3
     D2 -. Reallocate budget and capacity .-> B2
 ```
-""")
+"""
+    )
 
 st.markdown("### Top 10 Prioridades")
 top10_df = pd.DataFrame(report.get("top_10_priorities", []))
