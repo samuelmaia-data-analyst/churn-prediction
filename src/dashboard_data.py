@@ -13,7 +13,7 @@ from src.reporting import build_business_outputs, persist_business_outputs
 from src.transformation import build_silver_layer, persist_silver
 from src.warehouse import build_star_schema, persist_star_schema
 
-REPORT_PATH = Path("reports/executive_report.json")
+REPORT_PATH = Path("artifacts/reports/executive_report.json")
 PRIORITIZATION_PATH = Path("data/gold/customer_prioritization.csv")
 KPI_PATH = Path("data/gold/kpi_summary.csv")
 RAW_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")

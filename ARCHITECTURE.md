@@ -21,8 +21,16 @@ src/
   modeling/
     churn.py                # features, pré-processamento e modelos de churn
     pipeline.py             # orquestra treino e score de modelos
+    predictor.py            # inferência online/offline
+    trainer.py              # treino comparativo de modelos
+  cli/
+    pipeline.py             # entrypoint CLI do pipeline
+    predict_customer.py     # entrypoint CLI para predição individual
+apps/
+  streamlit_app.py          # app Streamlit principal
+  api.py                    # app FastAPI principal
   ml.py                     # façade pública para compatibilidade
-main.py                     # flow principal (Prefect)
+main.py                     # wrapper retrocompatível para CLI/Prefect
 pages/                      # Streamlit multipágina
 tests/                      # contratos e regressão
 ```
@@ -44,7 +52,7 @@ Se `xgboost` não estiver disponível, usar fallback explícito com nota em `mod
 Métricas principais continuam registradas em MLflow e `executive_report.json`.
 
 ## Contratos Críticos
-- `reports/executive_report.json`
+- `artifacts/reports/executive_report.json`
   - `kpis`
   - `model_metrics`
   - `top_10_priorities`

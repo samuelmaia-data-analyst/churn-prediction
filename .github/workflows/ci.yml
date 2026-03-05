@@ -24,10 +24,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Ruff
-        run: ruff check main.py src tests pages
+        run: ruff check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
 
       - name: Black check
-        run: black --check main.py src tests pages
+        run: black --check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
 
       - name: Run tests
         run: pytest -q

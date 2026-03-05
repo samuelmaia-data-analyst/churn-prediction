@@ -1,3 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "churn-prediction-enterprise"
+version = "0.1.0"
+description = "Enterprise churn analytics and prediction pipeline"
+requires-python = ">=3.12"
+
+[project.scripts]
+churn-pipeline = "src.cli.pipeline:main"
+churn-predict = "src.cli.predict_customer:main"
+churn-process-data = "src.cli.save_processed_data:main"
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

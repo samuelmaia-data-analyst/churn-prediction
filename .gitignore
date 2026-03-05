@@ -37,6 +37,7 @@ data/silver/
 data/gold/
 reports/
 reports/executive_report.json
+artifacts/
 
 # Modelos enterprise gerados em runtime
 models/enterprise_churn_model.joblib

@@ -52,7 +52,7 @@ ROC-AUC: 0.842
 ```
 
 ### 2) Model comparison
-Last run (`2026-03-05`) in `reports/executive_report.json -> model_metrics.model_comparison`:
+Last run (`2026-03-05`) in `artifacts/reports/executive_report.json -> model_metrics.model_comparison`:
 
 | Model | ROC-AUC |
 |---|---:|
@@ -104,9 +104,9 @@ https://data-senior-analytics.streamlit.app/
 - `data/gold/fact_customer_churn.csv`
 - `data/gold/kpi_summary.csv`
 - `data/gold/customer_prioritization.csv`
-- `reports/executive_report.json`
-- `reports/model_card.md`
-- `reports/executive_brief.md`
+- `artifacts/reports/executive_report.json`
+- `artifacts/reports/model_card.md`
+- `artifacts/reports/executive_brief.md`
 
 ## Setup
 ```bash
@@ -118,7 +118,7 @@ pip install -r requirements.txt
 
 ## Run Pipeline
 ```bash
-python main.py --seed 42 --data-dir data --log-level INFO
+python -m src.cli.pipeline --seed 42 --data-dir data --log-level INFO
 ```
 
 ## Prefect Orchestration
@@ -135,12 +135,12 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
 ## Quality
 - `pre-commit` with `black`, `ruff`, `isort`
 - CI checks:
-  - `ruff check main.py src tests pages`
-  - `black --check main.py src tests pages`
+  - `ruff check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages`
+  - `black --check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages`
   - `pytest -q`
 
 ## Artifact versioning
-- `logs/` and `mlruns/` should not be pushed to Git.
+- `artifacts/` and `mlruns/` should not be pushed to Git.
 - version only code, configuration, and documentation.
 
 ## Executive Dashboard Pages
@@ -154,7 +154,7 @@ Includes direct download of:
 - `customer_prioritization.csv`
 
 Dashboard bootstrap behavior:
-- if `reports/` and `data/gold/` are missing and `data/raw` exists, the app generates artifacts through the real pipeline;
+- if `artifacts/reports/` and `data/gold/` are missing and `data/raw` exists, the app generates artifacts through the real pipeline;
 - if pipeline execution fails or `data/raw` is unavailable, the app uses a synthetic fallback to avoid empty pages.
 
 ## Dataset

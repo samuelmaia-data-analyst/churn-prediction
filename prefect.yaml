@@ -12,7 +12,7 @@ deployments:
     tags:
       - enterprise
       - daily
-    entrypoint: main.py:run_pipeline
+    entrypoint: src/cli/pipeline.py:run_pipeline
     parameters:
       seed: 42
       data_dir: data

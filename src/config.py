@@ -32,15 +32,15 @@ class PipelineConfig:
 
     @property
     def reports_dir(self) -> Path:
-        return Path("reports")
+        return Path("artifacts/reports")
 
     @property
     def models_dir(self) -> Path:
-        return Path("models")
+        return Path("artifacts/models")
 
     @property
     def logs_dir(self) -> Path:
-        return Path("logs")
+        return Path("artifacts/logs")
 
     @property
     def raw_input_path(self) -> Path:

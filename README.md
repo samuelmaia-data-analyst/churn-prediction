@@ -53,7 +53,7 @@ ROC-AUC: 0.842
 ```
 
 ### 2) Comparação de modelos
-Último run (`2026-03-05`) em `reports/executive_report.json -> model_metrics.model_comparison`:
+Último run (`2026-03-05`) em `artifacts/reports/executive_report.json -> model_metrics.model_comparison`:
 
 | Model | ROC-AUC |
 |---|---:|
@@ -138,9 +138,9 @@ https://data-senior-analytics.streamlit.app/
 - `data/gold/dim_contract.csv`
 - `data/gold/dim_service.csv`
 - `data/gold/fact_customer_churn.csv`
-- `reports/executive_report.json`
-- `reports/model_card.md`
-- `reports/executive_brief.md`
+- `artifacts/reports/executive_report.json`
+- `artifacts/reports/model_card.md`
+- `artifacts/reports/executive_brief.md`
 - `data/gold/kpi_summary.csv`
 - `data/gold/customer_prioritization.csv`
 
@@ -156,7 +156,7 @@ pip install -r requirements.txt
 ## Execução do pipeline
 
 ```bash
-python main.py --seed 42 --data-dir data --log-level INFO
+python -m src.cli.pipeline --seed 42 --data-dir data --log-level INFO
 ```
 
 ## Orquestração com Prefect
@@ -183,7 +183,7 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
 - modelos versionados por execução no run do pipeline
 
 ### Logging estruturado
-- logs JSON em `logs/pipeline.log`
+- logs JSON em `artifacts/logs/pipeline.log`
 - cada execução tem `run_id`
 
 ## Qualidade
@@ -191,12 +191,12 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
 - `pre-commit` com `black`, `ruff`, `isort`
 - `pytest` para contratos do pipeline e outputs
 - CI executando:
-  - `ruff check main.py src tests pages`
-  - `black --check main.py src tests pages`
+  - `ruff check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages`
+  - `black --check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages`
   - `pytest -q`
 
 ## Versionamento de artefatos
-- `logs/` e `mlruns/` não devem ser enviados para o Git.
+- `artifacts/` e `mlruns/` não devem ser enviados para o Git.
 - versione apenas código, configurações e documentação.
 
 ## Dashboard Executivo Multipágina
@@ -210,7 +210,7 @@ Com download direto de:
 - `customer_prioritization.csv`
 
 Comportamento de bootstrap do dashboard:
-- se `reports/` e `data/gold/` não existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
+- se `artifacts/reports/` e `data/gold/` não existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
 - se o pipeline falhar ou não houver `data/raw`, o app gera fallback sintético para não ficar vazio.
 
 ## Dados
