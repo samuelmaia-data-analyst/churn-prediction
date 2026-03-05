@@ -11,9 +11,11 @@ from src.contracts import ExecutiveReport
 from src.decisioning import (
     action_for_segment,
     build_action_playbook,
+    customer_value_segment,
     decision_threshold,
     get_policy,
     risk_segment,
+    threshold_for_value_segment,
 )
 
 
@@ -27,7 +29,7 @@ class ReportOutputs:
 
 def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
     policy = get_policy("balanceada")
-    threshold = decision_threshold(policy)
+    base_threshold = decision_threshold(policy)
 
     recommendations = scored_df[
         [
@@ -39,15 +41,22 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
         ]
     ].copy()
 
-    recommendations["risk_segment"] = recommendations["churn_probability"].apply(
-        lambda p: risk_segment(float(p), threshold)
+    recommendations["value_segment"] = recommendations["next_purchase_prediction"].apply(
+        lambda p: customer_value_segment(float(p))
     )
-    recommendations["action_recommendation"] = recommendations.apply(
-        lambda row: action_for_segment(row["risk_segment"], float(row["next_purchase_prediction"])),
+    recommendations["decision_threshold"] = recommendations["value_segment"].apply(
+        threshold_for_value_segment
+    )
+    recommendations["risk_segment"] = recommendations.apply(
+        lambda row: risk_segment(float(row["churn_probability"]), float(row["decision_threshold"])),
         axis=1,
     )
-    recommendations["decision_threshold"] = threshold
+    recommendations["action_recommendation"] = recommendations.apply(
+        lambda row: action_for_segment(row["risk_segment"], row["value_segment"]),
+        axis=1,
+    )
     recommendations["decision_policy"] = policy.name
+    recommendations["base_decision_threshold"] = base_threshold
     recommendations = recommendations.sort_values("churn_probability", ascending=False).reset_index(
         drop=True
     )
@@ -67,7 +76,7 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
         model_metrics=dict(metrics),
         top_10_priorities=recommendations.head(10).to_dict(orient="records"),
     )
-    action_playbook = build_action_playbook(recommendations, policy)
+    action_playbook = build_action_playbook(recommendations)
 
     return ReportOutputs(
         executive_report=executive_report,
@@ -135,12 +144,9 @@ def _render_executive_brief(
     kpis = report.get("kpis", {})
     model_metrics = report.get("model_metrics", {})
 
-    high_risk = recommendations[recommendations["churn_probability"] >= 0.7]
-    medium_risk = recommendations[
-        (recommendations["churn_probability"] >= 0.45)
-        & (recommendations["churn_probability"] < 0.7)
-    ]
-    low_risk = recommendations[recommendations["churn_probability"] < 0.45]
+    high_risk = recommendations[recommendations["risk_segment"] == "high"]
+    medium_risk = recommendations[recommendations["risk_segment"] == "medium"]
+    low_risk = recommendations[recommendations["risk_segment"] == "low"]
 
     month_to_month = recommendations[recommendations["Contract"].eq("Month-to-month")]
     month_to_month_risk = (
@@ -152,16 +158,16 @@ def _render_executive_brief(
     segmentation_rows = "\n".join(
         [
             (
-                f"| High | churn_probability >= 0.70 | {len(high_risk)} | "
-                "Immediate retention contact + premium offer |"
+                f"| High | Threshold by LTV (0.65 or 0.80) | {len(high_risk)} | "
+                "Call retention / retention offer by email |"
             ),
             (
-                f"| Medium | 0.45 <= churn_probability < 0.70 | {len(medium_risk)} | "
-                "Proactive engagement campaign |"
+                f"| Medium | Threshold minus 0.20 band | {len(medium_risk)} | "
+                "Proactive loyalty outreach / automated nurture journey |"
             ),
             (
-                f"| Low | churn_probability < 0.45 | {len(low_risk)} | "
-                "Relationship nurture and monitoring |"
+                f"| Low | Below medium-risk band | {len(low_risk)} | "
+                "Monitor and upsell trigger |"
             ),
         ]
     )
@@ -201,28 +207,25 @@ flowchart LR
 
 def _render_action_playbook(playbook: pd.DataFrame) -> str:
     header = (
-        "| Rank | Customer | Action | Unit Cost (USD) | Expected Impact (USD) | "
-        "Expected ROI | Policy |\n"
-        "|---:|---|---|---:|---:|---:|---|"
+        "| Segment | Risk | Action | Expected ROI | Customers | Total Expected ROI (USD) |\n"
+        "|---|---|---|---|---:|---:|"
     )
     rows = []
     for _, row in playbook.iterrows():
         template = (
-            "| {rank} | {customer} | {action} | {cost:.2f} | "
-            "{impact:.2f} | {roi:.2f} | {policy} |"
+            "| {segment} | {risk} | {action} | {expected_roi} | {customers} | {total_roi:.2f} |"
         )
         rows.append(
             template.format(
-                rank=int(row["rank"]),
-                customer=row["customerID"],
-                action=row["action_recommendation"],
-                cost=float(row["unit_cost_usd"]),
-                impact=float(row["expected_impact_usd"]),
-                roi=float(row["expected_roi"]),
-                policy=row["decision_policy"],
+                segment=row["Segment"],
+                risk=row["Risk"],
+                action=row["Action"],
+                expected_roi=row["Expected ROI"],
+                customers=int(row["Customers"]),
+                total_roi=float(row["total_expected_roi_usd"]),
             )
         )
-    return "# Action Playbook (Top 10)\n\n" + header + "\n" + "\n".join(rows) + "\n"
+    return "# Action Playbook\n\n" + header + "\n" + "\n".join(rows) + "\n"
 
 
 def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> None:

@@ -1,0 +1,11 @@
+﻿{
+  "model_version": "v1.0.0",
+  "model_file": "models/model_v1.pkl",
+  "algorithm": "Logistic Regression",
+  "created_at_utc": "2026-03-05T00:00:00Z",
+  "threshold_strategy": {
+    "high_ltv": 0.65,
+    "low_ltv": 0.8
+  },
+  "notes": "Initial production release artifact. Runtime training rewrites this metadata with fresh metrics."
+}

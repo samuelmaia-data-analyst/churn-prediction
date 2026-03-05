@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "churn-prediction-enterprise"
-version = "0.1.0"
+version = "1.0.0"
 description = "Enterprise churn analytics and prediction pipeline"
 requires-python = ">=3.12"
 

@@ -7,6 +7,12 @@ import numpy as np
 import pandas as pd
 
 from src.config import PipelineConfig
+from src.decisioning import (
+    action_for_segment,
+    customer_value_segment,
+    risk_segment,
+    threshold_for_value_segment,
+)
 from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
 from src.ml import train_models_and_score
 from src.reporting import build_business_outputs, persist_business_outputs
@@ -109,16 +115,19 @@ def _generate_outputs_from_raw_or_synthetic(raw_df: pd.DataFrame) -> None:
     recommendations = df[["customerID", "MonthlyCharges", "Contract", "Churn"]].copy()
     recommendations["churn_probability"] = churn_probability
     recommendations["next_purchase_prediction"] = next_purchase_prediction
-    recommendations["action_recommendation"] = recommendations["churn_probability"].apply(
-        lambda p: (
-            "Contato imediato + oferta premium de retencao"
-            if p >= 0.7
-            else (
-                "Campanha de engajamento proativa"
-                if p >= 0.45
-                else "Monitoramento e nutricao de relacionamento"
-            )
-        )
+    recommendations["value_segment"] = recommendations["next_purchase_prediction"].apply(
+        lambda p: customer_value_segment(float(p))
+    )
+    recommendations["decision_threshold"] = recommendations["value_segment"].apply(
+        threshold_for_value_segment
+    )
+    recommendations["risk_segment"] = recommendations.apply(
+        lambda row: risk_segment(float(row["churn_probability"]), float(row["decision_threshold"])),
+        axis=1,
+    )
+    recommendations["action_recommendation"] = recommendations.apply(
+        lambda row: action_for_segment(row["risk_segment"], row["value_segment"]),
+        axis=1,
     )
     recommendations = recommendations.sort_values("churn_probability", ascending=False).reset_index(
         drop=True

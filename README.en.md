@@ -157,6 +157,38 @@ Dashboard bootstrap behavior:
 - if `artifacts/reports/` and `data/gold/` are missing and `data/raw` exists, the app generates artifacts through the real pipeline;
 - if pipeline execution fails or `data/raw` is unavailable, the app uses a synthetic fallback to avoid empty pages.
 
+## Cost-sensitive Threshold Strategy
+- global baseline (`balanced`): `0.50`
+- value-sensitive thresholds:
+  - `High LTV`: `0.65`
+  - `Low LTV`: `0.80`
+
+## Actionable Playbook
+| Segment | Risk | Action | Expected ROI |
+|---|---|---|---|
+| High LTV | High | Call retention | +$200/customer |
+| Low LTV | High | Retention offer by email | +$90/customer |
+| High LTV | Medium | Proactive loyalty outreach | +$80/customer |
+| Low LTV | Medium | Automated nurture journey | +$35/customer |
+
+Outputs:
+- `data/gold/action_playbook.csv`
+- `artifacts/reports/action_playbook.md`
+
+## Drift Monitoring
+- runtime drift checks: `PSI` and `KS`
+- standalone script: `monitoring/drift_detection.py`
+
+```bash
+python monitoring/drift_detection.py --baseline reports/drift_reference.csv --current data/gold/customer_prioritization.csv --output reports/drift_alert.json
+```
+
+## Release
+- Version: `v1.0.0`
+- Model versioning artifacts:
+  - `models/model_v1.pkl`
+  - `models/model_metadata.json`
+
 ## Dataset
 Source: Kaggle - Telco Customer Churn  
 Official source: https://www.kaggle.com/datasets/blastchar/telco-customer-churn  

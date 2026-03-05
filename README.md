@@ -30,6 +30,7 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - [Politica de Decisao por Custo](#politica-de-decisao-por-custo)
 - [Action Playbook](#action-playbook)
 - [Monitoramento de Drift](#monitoramento-de-drift)
+- [Release](#release)
 - [Dados](#dados)
 
 ## Destaques
@@ -225,30 +226,29 @@ Regra de threshold orientada por custo de erro:
 
 `threshold = Custo_FP / (Custo_FP + Custo_FN)`
 
-- `campanha_cara` (`FP=12`, `FN=3`): `threshold = 0.80`
-- `balanceada` (`FP=5`, `FN=5`): `threshold = 0.50`
-- `campanha_barata` (`FP=2`, `FN=8`): `threshold = 0.20`
+- baseline global (`balanceada`): `threshold = 0.50`
+- estrategia sensivel a valor (aplicada em producao):
+  - `High LTV`: `threshold = 0.65`
+  - `Low LTV`: `threshold = 0.80`
 
 Leitura executiva:
-- campanha cara: aciona menos clientes, com maior precisão;
-- campanha barata: aciona mais clientes, com maior cobertura (recall).
+- clientes `High LTV` entram em acao mais cedo para maximizar retencao de valor;
+- clientes `Low LTV` usam corte mais conservador para controlar custo de campanha.
 
 ## Action Playbook
 
-Top 10 ações operacionais com custo, impacto esperado e ROI.
+Tabela acionavel por segmento de valor e risco:
 
-Saídas:
+| Segment | Risk | Action | Expected ROI |
+|---|---|---|---|
+| High LTV | High | Call retention | +$200/customer |
+| Low LTV | High | Retention offer by email | +$90/customer |
+| High LTV | Medium | Proactive loyalty outreach | +$80/customer |
+| Low LTV | Medium | Automated nurture journey | +$35/customer |
+
+Saidas:
 - `data/gold/action_playbook.csv`
 - `artifacts/reports/action_playbook.md`
-
-Colunas chave:
-- `rank`
-- `customerID`
-- `action_recommendation`
-- `unit_cost_usd`
-- `expected_impact_usd`
-- `expected_roi`
-- `decision_policy`
 
 ## Monitoramento de Drift
 
@@ -265,6 +265,22 @@ Arquivo de alerta gerado a cada execução:
 
 Baseline de referência:
 - `reports/drift_reference.csv` (criado automaticamente no primeiro run)
+
+Script standalone:
+- `monitoring/drift_detection.py`
+
+Execucao:
+
+```bash
+python monitoring/drift_detection.py --baseline reports/drift_reference.csv --current data/gold/customer_prioritization.csv --output reports/drift_alert.json
+```
+
+## Release
+
+- Versao: `v1.0.0`
+- Versionamento de modelo:
+  - `models/model_v1.pkl`
+  - `models/model_metadata.json`
 
 ## Dados
 

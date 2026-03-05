@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 
 import joblib
 import numpy as np
@@ -154,6 +157,27 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
     config.models_dir.mkdir(parents=True, exist_ok=True)
     joblib.dump(champion_model, config.churn_model_path)
     joblib.dump(next_purchase_model, config.next_purchase_model_path)
+    versioned_model_path = Path("models/model_v1.pkl")
+    versioned_model_path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(champion_model, versioned_model_path)
+
+    metadata = {
+        "model_version": "v1.0.0",
+        "model_file": str(versioned_model_path.as_posix()),
+        "algorithm": model_aliases[best_key],
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "seed": config.seed,
+        "features": FEATURES,
+        "threshold_strategy": {"high_ltv": 0.65, "low_ltv": 0.80},
+        "metrics": {
+            "churn_f1": metrics["churn_f1"],
+            "churn_roc_auc": metrics["churn_roc_auc"],
+            "next_purchase_mae": metrics["next_purchase_mae"],
+        },
+    }
+    metadata_path = Path("models/model_metadata.json")
+    with open(metadata_path, "w", encoding="utf-8") as fp:
+        json.dump(metadata, fp, ensure_ascii=False, indent=2)
 
     if mlflow is not None:
         mlflow.set_tracking_uri(config.mlflow_tracking_uri)

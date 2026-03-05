@@ -34,6 +34,19 @@ POLICIES: dict[str, DecisionPolicy] = {
     ),
 }
 
+THRESHOLD_BY_VALUE_SEGMENT: dict[str, float] = {
+    "high_ltv": 0.65,
+    "low_ltv": 0.80,
+}
+
+
+def customer_value_segment(next_purchase: float) -> str:
+    return "high_ltv" if next_purchase >= 80.0 else "low_ltv"
+
+
+def threshold_for_value_segment(value_segment: str) -> float:
+    return THRESHOLD_BY_VALUE_SEGMENT.get(value_segment, THRESHOLD_BY_VALUE_SEGMENT["low_ltv"])
+
 
 def get_policy(policy_name: str = "balanceada") -> DecisionPolicy:
     return POLICIES.get(policy_name, POLICIES["balanceada"])
@@ -53,52 +66,59 @@ def risk_segment(probability: float, threshold: float) -> str:
     return "low"
 
 
-def action_for_segment(segment: str, next_purchase: float) -> str:
-    if segment == "high" and next_purchase >= 80:
-        return "Contato imediato + oferta premium de retencao"
+def action_for_segment(segment: str, value_segment: str) -> str:
+    if segment == "high" and value_segment == "high_ltv":
+        return "Call retention"
     if segment == "high":
-        return "Contato imediato + desconto de retencao"
+        return "Retention offer by email"
+    if segment == "medium" and value_segment == "high_ltv":
+        return "Proactive loyalty outreach"
     if segment == "medium":
-        return "Campanha de engajamento proativa"
-    return "Monitoramento e nutricao de relacionamento"
+        return "Automated nurture journey"
+    return "Monitor and upsell trigger"
 
 
-def build_action_playbook(
-    recommendations: pd.DataFrame,
-    policy: DecisionPolicy,
-) -> pd.DataFrame:
-    assumptions = {
-        "Contato imediato + oferta premium de retencao": {"cost": 120.0, "lift": 0.35},
-        "Contato imediato + desconto de retencao": {"cost": 70.0, "lift": 0.25},
-        "Campanha de engajamento proativa": {"cost": 18.0, "lift": 0.12},
-        "Monitoramento e nutricao de relacionamento": {"cost": 4.0, "lift": 0.04},
+def build_action_playbook(recommendations: pd.DataFrame) -> pd.DataFrame:
+    assumptions: dict[tuple[str, str], dict[str, float | str]] = {
+        ("high_ltv", "high"): {"action": "Call retention", "expected_roi_usd": 200.0},
+        ("low_ltv", "high"): {"action": "Retention offer by email", "expected_roi_usd": 90.0},
+        ("high_ltv", "medium"): {"action": "Proactive loyalty outreach", "expected_roi_usd": 80.0},
+        ("low_ltv", "medium"): {"action": "Automated nurture journey", "expected_roi_usd": 35.0},
+        ("high_ltv", "low"): {"action": "Monitor and upsell trigger", "expected_roi_usd": 20.0},
+        ("low_ltv", "low"): {"action": "Monitor and upsell trigger", "expected_roi_usd": 8.0},
     }
-
-    top_10 = recommendations.head(10).copy().reset_index(drop=True)
-    top_10["rank"] = top_10.index + 1
-    top_10["unit_cost_usd"] = top_10["action_recommendation"].map(
-        lambda action: assumptions[action]["cost"]
+    playbook = (
+        recommendations[["value_segment", "risk_segment"]]
+        .value_counts()
+        .reset_index(name="Customers")
+        .rename(columns={"value_segment": "Segment", "risk_segment": "Risk"})
     )
-    top_10["expected_impact_usd"] = top_10.apply(
-        lambda row: row["churn_probability"]
-        * float(row["MonthlyCharges"])
-        * 12.0
-        * assumptions[row["action_recommendation"]]["lift"],
+    playbook["Action"] = playbook.apply(
+        lambda row: str(assumptions[(row["Segment"], row["Risk"])]["action"]),
         axis=1,
     )
-    top_10["expected_roi"] = (top_10["expected_impact_usd"] - top_10["unit_cost_usd"]) / top_10[
-        "unit_cost_usd"
-    ]
-    top_10["decision_policy"] = policy.name
+    playbook["Expected ROI"] = playbook.apply(
+        lambda row: (
+            f"+${assumptions[(row['Segment'], row['Risk'])]['expected_roi_usd']:.0f}/customer"
+        ),
+        axis=1,
+    )
+    playbook["expected_roi_usd_per_customer"] = playbook.apply(
+        lambda row: float(assumptions[(row["Segment"], row["Risk"])]["expected_roi_usd"]),
+        axis=1,
+    )
+    playbook["total_expected_roi_usd"] = (
+        playbook["expected_roi_usd_per_customer"] * playbook["Customers"]
+    )
 
-    return top_10[
-        [
-            "rank",
-            "customerID",
-            "action_recommendation",
-            "unit_cost_usd",
-            "expected_impact_usd",
-            "expected_roi",
-            "decision_policy",
-        ]
+    playbook["Segment"] = playbook["Segment"].map(
+        {"high_ltv": "High LTV", "low_ltv": "Low LTV"}
+    )
+    playbook["Risk"] = playbook["Risk"].str.capitalize()
+    playbook["risk_order"] = playbook["Risk"].map({"High": 0, "Medium": 1, "Low": 2}).fillna(99)
+    playbook = playbook.sort_values(["risk_order", "Segment"]).reset_index(drop=True)
+    playbook = playbook.drop(columns=["risk_order"])
+
+    return playbook[
+        ["Segment", "Risk", "Action", "Expected ROI", "Customers", "total_expected_roi_usd"]
     ]

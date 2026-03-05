@@ -80,7 +80,7 @@ class PipelineConfig:
 
     @property
     def monitoring_dir(self) -> Path:
-        return Path("reports")
+        return self.data_dir.parent / "reports"
 
     @property
     def drift_reference_path(self) -> Path:
