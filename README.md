@@ -84,14 +84,47 @@ show 3x+ higher churn risk.
 ```
 No último run, o valor observado foi `6.3x`.
 
-### 5) Pipeline visual
-Pipeline de dados e consumo de modelos:
+### 5) Executive flowcharts (Mermaid)
+Duas visoes complementares: `Board View` (sintese de decisao) e `Operator View` (execucao com owners e SLAs).
+
+Board View:
 
 ```mermaid
 flowchart LR
-    A[Raw] --> B[Bronze]
-    B --> C[Silver]
-    C --> D[Gold]
+    A[Strategic Targets\nRevenue Retention Margin] --> B[Decision Intelligence\nRisk Value Prioritization]
+    B --> C[Capital Allocation\nApprove Hold Reject]
+    C --> D[Commercial Execution\nRetention Upsell Cross-sell]
+    D --> E[Value Realization\nROI Payback SLA]
+    E --> F[Operating Review\nWeekly Governance]
+    F -. Rebalance budget and capacity .-> C
+    F -. Model feedback loop .-> B
+```
+
+Operator View:
+
+```mermaid
+flowchart LR
+    subgraph O1[Data and ML Factory]
+        A1[Ingestion and Standardization\nOwner Data Engineering\nSLA Daily 07:00 UTC] --> A2[Quality and Contract Gates\nOwner Data Governance\nSLA <2 percent failed checks]
+        A2 --> A3[Scoring and Value at Risk\nOwner Data Science\nSLA AUC >= 0.82]
+    end
+
+    subgraph O2[Portfolio Governance]
+        A3 --> B1[Prioritization Engine\nOwner RevOps\nSLA Top 10 published by 09:00]
+        B1 --> B2{Investment Committee Gate\nOwner CCO CFO}
+    end
+
+    subgraph O3[Field Execution]
+        B2 --> C1[Playbook Activation\nOwner Sales and CS\nSLA First touch <24h]
+        C1 --> C2[Customer Outcomes\nSave Upsell Cross-sell]
+        C2 --> C3[Outcome Ledger\nOwner Finance\nSLA Weekly close]
+    end
+
+    C3 --> D1[Executive Cockpit\nOwner Strategy Office]
+    D1 --> D2[Weekly Operating Review]
+    D2 -. Drift incidents and policy breaches .-> D3[Model Risk Monitoring\nOwner MRM]
+    D3 -. Controlled retrain and recalibration .-> A3
+    D2 -. Reallocate budget and capacity .-> B2
 ```
 
 ## Streamlit (público)

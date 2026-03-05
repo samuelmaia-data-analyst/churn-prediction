@@ -52,13 +52,53 @@ st.markdown("### Key Insights")
 for insight in metrics.get("key_insights", []):
     st.markdown(f"- {insight}")
 
-st.markdown("### Pipeline Visual")
+st.markdown("### Executive Operating Model")
+st.caption("Board-grade view: strategy, allocation, execution, and value realization")
 st.markdown("""
 ```mermaid
 flowchart LR
-    A[Raw] --> B[Bronze]
-    B --> C[Silver]
-    C --> D[Gold]
+    A[Strategic Targets\nRevenue Retention Margin] --> B[Decision Intelligence\nChurn Risk Value at Risk]
+    B --> C{Capital Allocation Gate\nApprove Hold Reject}
+    C --> D[Commercial Execution\nSales CS Marketing Programs]
+    D --> E[Value Realization\nRetention Revenue Margin]
+    E --> F[Executive Cockpit\nKPI ROI SLA]
+    F --> G[Weekly Operating Review]
+    G -. Rebalance budget and capacity .-> C
+    G -. Model and policy feedback .-> B
+```
+""")
+
+gov_col1, gov_col2, gov_col3 = st.columns(3)
+gov_col1.metric("Decision Cadence", "Weekly")
+gov_col2.metric("Allocation Gate", "Approve / Hold / Reject")
+gov_col3.metric("Primary Owners", "CCO / CFO / RevOps")
+
+with st.expander("Operator View (Owners + SLAs + Controls)"):
+    st.caption("Execution detail for operating teams")
+    st.markdown("""
+```mermaid
+flowchart LR
+    subgraph O1[Data and ML Factory]
+        A1[Ingestion and Standardization\nOwner Data Engineering\nSLA Daily 07:00 UTC] --> A2[Quality and Contract Gates\nOwner Data Governance\nSLA <2 percent failed checks]
+        A2 --> A3[Scoring and Value at Risk\nOwner Data Science\nSLA AUC >= 0.82]
+    end
+
+    subgraph O2[Portfolio Governance]
+        A3 --> B1[Prioritization Engine\nOwner RevOps\nSLA Top 10 published by 09:00]
+        B1 --> B2{Investment Committee Gate\nOwner CCO CFO}
+    end
+
+    subgraph O3[Field Execution]
+        B2 --> C1[Playbook Activation\nOwner Sales and CS\nSLA First touch <24h]
+        C1 --> C2[Customer Outcomes\nSave Upsell Cross-sell]
+        C2 --> C3[Outcome Ledger\nOwner Finance\nSLA Weekly close]
+    end
+
+    C3 --> D1[Executive Cockpit\nOwner Strategy Office]
+    D1 --> D2[Weekly Operating Review]
+    D2 -. Drift incidents and policy breaches .-> D3[Model Risk Monitoring\nOwner MRM]
+    D3 -. Controlled retrain and recalibration .-> A3
+    D2 -. Reallocate budget and capacity .-> B2
 ```
 """)
 
