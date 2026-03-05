@@ -57,7 +57,8 @@ st.caption("Board-grade view: strategy, allocation, execution, and value realiza
 st.markdown("""
 ```mermaid
 flowchart LR
-    A[Strategic Targets\nRevenue Retention Margin] --> B[Decision Intelligence\nChurn Risk Value at Risk]
+    A[Strategic Targets\nRevenue Retention Margin]
+    --> B[Decision Intelligence\nChurn Risk & Value at Risk]
     B --> C{Capital Allocation Gate\nApprove Hold Reject}
     C --> D[Commercial Execution\nSales CS Marketing Programs]
     D --> E[Value Realization\nRetention Revenue Margin]
@@ -79,7 +80,8 @@ with st.expander("Operator View (Owners + SLAs + Controls)"):
 ```mermaid
 flowchart LR
     subgraph O1[Data and ML Factory]
-        A1[Ingestion and Standardization\nOwner Data Engineering\nSLA Daily 07:00 UTC] --> A2[Quality and Contract Gates\nOwner Data Governance\nSLA <2 percent failed checks]
+        A1[Ingestion and Standardization\nOwner Data Engineering\nSLA Daily 07:00 UTC]
+        --> A2[Quality and Contract Gates\nOwner Data Governance\nSLA <2 percent failed checks]
         A2 --> A3[Scoring and Value at Risk\nOwner Data Science\nSLA AUC >= 0.82]
     end
 
