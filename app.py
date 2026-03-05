@@ -13,7 +13,7 @@ import plotly.io as pio
 import streamlit as st
 
 DATA_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
-MODEL_PATH = Path("models/LogisticRegression.joblib")
+PRIMARY_MODEL_PATH = Path("models/enterprise_churn_model.joblib")
 PREPROCESSOR_PATH = Path("models/preprocessor.joblib")
 COLOR_BG_START = "#f7f9fc"
 COLOR_BG_END = "#eef3f9"
@@ -31,7 +31,9 @@ def load_data(path: Path) -> pd.DataFrame:
 
     if "TotalCharges" in df_loaded.columns:
         df_loaded["TotalCharges"] = pd.to_numeric(df_loaded["TotalCharges"], errors="coerce")
-        df_loaded["TotalCharges"] = df_loaded["TotalCharges"].fillna(df_loaded["TotalCharges"].median())
+        df_loaded["TotalCharges"] = df_loaded["TotalCharges"].fillna(
+            df_loaded["TotalCharges"].median()
+        )
 
     return df_loaded
 
@@ -72,12 +74,21 @@ def inject_styles() -> None:
         html, body, [class*="css"]  {{
             font-family: "Space Grotesk", sans-serif;
         }}
-        h1, h2, h3, [data-testid="stMarkdownContainer"] h1, [data-testid="stMarkdownContainer"] h2 {{
+        h1, h2, h3,
+        [data-testid="stMarkdownContainer"] h1,
+        [data-testid="stMarkdownContainer"] h2 {{
             color: var(--text);
             letter-spacing: -0.02em;
         }}
+        [data-testid="stHeaderActionElements"] {{
+            display: none !important;
+        }}
         [data-testid="stSidebar"] {{
-            background: linear-gradient(200deg, rgba(22, 78, 99, 0.96) 0%, rgba(11, 31, 51, 0.97) 100%);
+            background: linear-gradient(
+                200deg,
+                rgba(22, 78, 99, 0.96) 0%,
+                rgba(11, 31, 51, 0.97) 100%
+            );
         }}
         [data-testid="stSidebar"] * {{
             color: #f8fafc;
@@ -170,7 +181,9 @@ def render_header() -> None:
         """
         <div class="hero">
             <h1 class="hero-title">Churn Prediction System</h1>
-            <p class="hero-subtitle">Monitoramento de cancelamento e predição individual de risco</p>
+            <p class="hero-subtitle">
+                Monitoramento de cancelamento e predicao individual de risco
+            </p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -190,66 +203,75 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
             df = load_data(DATA_PATH)
             st.success(f"Dados: {len(df):,} registros")
         else:
-            st.error("Dataset não encontrado")
+            st.error("Dataset nao encontrado")
 
-        if MODEL_PATH.exists():
-            model = load_model(MODEL_PATH)
+        if PRIMARY_MODEL_PATH.exists():
+            model = load_model(PRIMARY_MODEL_PATH)
             model_loaded = hasattr(model, "predict_proba")
             if model_loaded:
-                st.success("Modelo carregado")
+                st.success(f"Modelo carregado ({PRIMARY_MODEL_PATH.name})")
             else:
                 st.warning("Modelo encontrado, mas sem suporte a predict_proba")
         else:
-            st.error("Modelo não encontrado")
+            st.warning("Modelo enterprise nao encontrado. Rode o pipeline para habilitar predicao.")
 
         if PREPROCESSOR_PATH.exists():
             preprocessor = load_preprocessor(PREPROCESSOR_PATH)
             st.success("Pre-processador carregado")
         else:
-            st.warning("Pré-processador não encontrado (inferência pode falhar)")
+            st.info("Pre-processador opcional ausente (ok para modelo enterprise em pipeline).")
 
         st.markdown("---")
-        st.markdown(
-            """
+        st.markdown("""
             ### Autor
             **Samuel de Andrade Maia**
 
             [GitHub](https://github.com/samuelmaia-data-analyst)
 
             [LinkedIn](https://linkedin.com/in/samuelmaia-data-analyst)
-            """
-        )
+            """)
 
     return df, model, preprocessor, model_loaded
 
 
-def apply_filters(df: pd.DataFrame) -> pd.DataFrame:
+def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
     st.markdown("---")
-    st.markdown('<div class="section-title">Filtros de exploração</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Filtros de exploracao</div>', unsafe_allow_html=True)
 
     filter_col1, filter_col2 = st.columns(2)
 
     with filter_col1:
+        st.caption("Controla o grafico da esquerda")
         contract_options = ["Todos"]
         if "Contract" in df.columns:
             contract_options += sorted(df["Contract"].dropna().unique().tolist())
         selected_contract = st.selectbox("Contrato", contract_options)
 
     with filter_col2:
+        st.caption("Controla o grafico da direita")
         internet_options = ["Todos"]
         if "InternetService" in df.columns:
             internet_options += sorted(df["InternetService"].dropna().unique().tolist())
-        selected_internet = st.selectbox("Serviço de internet", internet_options)
+        selected_internet = st.selectbox("Servico de internet", internet_options)
 
-    filtered_df = df.copy()
+    # Left chart: filtered by Contract only.
+    left_chart_df = df.copy()
+    if selected_contract != "Todos" and "Contract" in left_chart_df.columns:
+        left_chart_df = left_chart_df[left_chart_df["Contract"] == selected_contract]
 
-    if selected_contract != "Todos" and "Contract" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["Contract"] == selected_contract]
+    # Right chart: filtered by InternetService only.
+    right_chart_df = df.copy()
+    if selected_internet != "Todos" and "InternetService" in right_chart_df.columns:
+        right_chart_df = right_chart_df[right_chart_df["InternetService"] == selected_internet]
 
-    if selected_internet != "Todos" and "InternetService" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["InternetService"] == selected_internet]
+    # Data preview: intersection of both filters to avoid ambiguity.
+    preview_df = df.copy()
+    if selected_contract != "Todos" and "Contract" in preview_df.columns:
+        preview_df = preview_df[preview_df["Contract"] == selected_contract]
+    if selected_internet != "Todos" and "InternetService" in preview_df.columns:
+        preview_df = preview_df[preview_df["InternetService"] == selected_internet]
 
-    return filtered_df
+    return left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet
 
 
 def render_metrics(df: pd.DataFrame) -> None:
@@ -274,18 +296,25 @@ def render_metrics(df: pd.DataFrame) -> None:
         st.metric("Media Tenure", f"{avg_tenure:.1f} meses")
 
 
-def render_charts(filtered_df: pd.DataFrame) -> None:
-    st.markdown('<div class="section-title">Análise visual</div>', unsafe_allow_html=True)
+def render_charts(
+    left_chart_df: pd.DataFrame,
+    right_chart_df: pd.DataFrame,
+    selected_contract: str,
+    selected_internet: str,
+) -> None:
+    st.markdown('<div class="section-title">Analise visual</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Distribuicao de Churn")
-        if "Churn" in filtered_df.columns:
-            churn_counts = filtered_df["Churn"].value_counts()
+        st.subheader(f"Distribuicao de Churn (Contrato: {selected_contract})")
+        if "Churn" in left_chart_df.columns:
+            churn_counts = (
+                left_chart_df["Churn"].value_counts().reindex(["No", "Yes"], fill_value=0)
+            )
             fig1 = px.pie(
                 values=churn_counts.values,
                 names=churn_counts.index,
-            title="Proporção de Cancelamentos",
+                title=f"Proporcao de Cancelamentos (No/Yes) - Contrato: {selected_contract}",
                 color=churn_counts.index,
                 color_discrete_map={"Yes": COLOR_ALERT, "No": COLOR_PRIMARY},
                 hole=0.48,
@@ -297,17 +326,23 @@ def render_charts(filtered_df: pd.DataFrame) -> None:
             )
             st.plotly_chart(fig1, use_container_width=True)
         else:
-            st.info("Coluna 'Churn' não encontrada para gerar o gráfico.")
+            st.info("Coluna 'Churn' nao encontrada para gerar o grafico.")
 
     with col2:
-        st.subheader("Churn por Contrato")
-        if {"Contract", "Churn"}.issubset(filtered_df.columns):
-            contract_churn = pd.crosstab(filtered_df["Contract"], filtered_df["Churn"], normalize="index") * 100
-            churn_yes = contract_churn.get("Yes", pd.Series(0, index=contract_churn.index))
+        st.subheader(f"Churn por Contrato (Servico: {selected_internet})")
+        if {"Contract", "Churn"}.issubset(right_chart_df.columns):
+            contract_order = ["Month-to-month", "One year", "Two year"]
+            contract_churn_rate = (
+                right_chart_df.assign(churn_yes=right_chart_df["Churn"].eq("Yes").astype(float))
+                .groupby("Contract", as_index=True)["churn_yes"]
+                .mean()
+                .mul(100)
+                .reindex(contract_order, fill_value=0.0)
+            )
             fig2 = px.bar(
-                x=contract_churn.index,
-                y=churn_yes,
-                title="Taxa de Churn por Tipo de Contrato",
+                x=contract_churn_rate.index,
+                y=contract_churn_rate.values,
+                title=f"Taxa de Churn (Yes) por Tipo de Contrato - Servico: {selected_internet}",
                 labels={"x": "Tipo de Contrato", "y": "Taxa (%)"},
                 color_discrete_sequence=[COLOR_SECONDARY],
             )
@@ -315,7 +350,7 @@ def render_charts(filtered_df: pd.DataFrame) -> None:
             fig2.update_layout(margin=dict(l=10, r=10, t=48, b=10), title_font=dict(size=18))
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("Colunas necessárias para gráfico de contrato não encontradas.")
+            st.info("Colunas necessarias para grafico de contrato nao encontradas.")
 
 
 def render_data_preview(filtered_df: pd.DataFrame) -> None:
@@ -336,13 +371,13 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
 
 def render_prediction(model, preprocessor) -> None:
     st.markdown("---")
-    st.markdown('<div class="section-title">Predição individual</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
 
     with st.expander("Preencher dados do cliente", expanded=False):
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            gender = st.selectbox("Gênero", ["Male", "Female"])
+            gender = st.selectbox("Genero", ["Male", "Female"])
             senior = st.selectbox("Senior Citizen", [0, 1])
             partner = st.selectbox("Partner", ["Yes", "No"])
             dependents = st.selectbox("Dependents", ["Yes", "No"])
@@ -395,7 +430,14 @@ def render_prediction(model, preprocessor) -> None:
                     ]
                 )
 
-                model_input = preprocessor.transform(input_data) if preprocessor is not None else input_data
+                if hasattr(model, "named_steps") and "prep" in model.named_steps:
+                    model_input = input_data
+                else:
+                    model_input = (
+                        preprocessor.transform(input_data)
+                        if preprocessor is not None
+                        else input_data
+                    )
                 proba = model.predict_proba(model_input)[0][1]
 
                 result_col1, result_col2 = st.columns(2)
@@ -428,14 +470,15 @@ def render_prediction(model, preprocessor) -> None:
                     st.markdown(
                         """
                         <div class="risk-box">
-                            Priorize clientes com risco alto para contato proativo, revisão de contrato e oferta de retenção.
+                            Priorize clientes com risco alto para contato proativo,
+                            revisao de contrato e oferta de retencao.
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
             except Exception as exc:
-                st.error(f"Erro ao gerar previsão: {exc}")
+                st.error(f"Erro ao gerar previsao: {exc}")
 
 
 def render_footer() -> None:
@@ -464,18 +507,20 @@ def main() -> None:
     df, model, preprocessor, model_loaded = render_sidebar()
 
     if df is None:
-        st.error(f"Dataset não encontrado em: {DATA_PATH}")
+        st.error(f"Dataset nao encontrado em: {DATA_PATH}")
         st.stop()
 
     render_metrics(df)
 
-    filtered_df = apply_filters(df)
-    if filtered_df.empty:
+    left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet = apply_filters(
+        df
+    )
+    if left_chart_df.empty and right_chart_df.empty:
         st.warning("Nenhum registro encontrado com os filtros selecionados.")
         st.stop()
 
-    render_charts(filtered_df)
-    render_data_preview(filtered_df)
+    render_charts(left_chart_df, right_chart_df, selected_contract, selected_internet)
+    render_data_preview(preview_df)
 
     if model_loaded and model is not None:
         render_prediction(model, preprocessor)

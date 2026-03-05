@@ -28,8 +28,10 @@ from src.modeling.churn import (
 try:
     import mlflow
     import mlflow.sklearn
+    from mlflow.models import infer_signature
 except ImportError:  # pragma: no cover
     mlflow = None
+    infer_signature = None
 
 
 @dataclass(frozen=True)
@@ -51,7 +53,11 @@ def _build_metrics_payload(
 ) -> dict[str, object]:
     sorted_comparison = sorted(comparison_rows, key=lambda row: float(row["roc_auc"]), reverse=True)
     baseline_auc = float(
-        next(row["roc_auc"] for row in sorted_comparison if row["model"] == MODEL_DISPLAY_NAMES["Logistic"])
+        next(
+            row["roc_auc"]
+            for row in sorted_comparison
+            if row["model"] == MODEL_DISPLAY_NAMES["Logistic"]
+        )
     )
     metrics = ExecutiveMetrics(
         churn_f1=float(f1_score(y_test, churn_pred)),
@@ -64,13 +70,20 @@ def _build_metrics_payload(
         ],
         selected_churn_model=selected_model_name,
         feature_importance=[
-            {"feature": feature, "importance": float(importance)} for feature, importance in top_drivers
+            {"feature": feature, "importance": float(importance)}
+            for feature, importance in top_drivers
         ],
-        top_drivers_of_churn=[BUSINESS_FEATURE_NAMES.get(feature, feature) for feature, _ in top_drivers],
-        key_insights=[f"Customers with month-to-month contracts show {risk_ratio:.1f}x higher churn risk."],
+        top_drivers_of_churn=[
+            BUSINESS_FEATURE_NAMES.get(feature, feature) for feature, _ in top_drivers
+        ],
+        key_insights=[
+            f"Customers with month-to-month contracts show {risk_ratio:.1f}x higher churn risk."
+        ],
         pipeline_visual=PIPELINE_VISUAL,
         model_comparison_note=(
-            "XGBoost unavailable; using GradientBoosting fallback." if XGBClassifier is None else None
+            "XGBoost unavailable; using GradientBoosting fallback."
+            if XGBClassifier is None
+            else None
         ),
     )
     return metrics.to_dict()
@@ -150,7 +163,32 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
             mlflow.log_metric("churn_f1", metrics["churn_f1"])
             mlflow.log_metric("churn_roc_auc", metrics["churn_roc_auc"])
             mlflow.log_metric("next_purchase_mae", metrics["next_purchase_mae"])
-            mlflow.sklearn.log_model(champion_model, artifact_path="churn_model")
-            mlflow.sklearn.log_model(next_purchase_model, artifact_path="next_purchase_model")
+            churn_input_example = X_train.head(5).copy()
+            next_purchase_input_example = X_np_train.head(5).copy()
+
+            if infer_signature is not None:
+                churn_signature = infer_signature(
+                    churn_input_example, champion_model.predict_proba(churn_input_example)
+                )
+                next_purchase_signature = infer_signature(
+                    next_purchase_input_example,
+                    next_purchase_model.predict(next_purchase_input_example),
+                )
+            else:  # pragma: no cover
+                churn_signature = None
+                next_purchase_signature = None
+
+            mlflow.sklearn.log_model(
+                champion_model,
+                artifact_path="churn_model",
+                input_example=churn_input_example,
+                signature=churn_signature,
+            )
+            mlflow.sklearn.log_model(
+                next_purchase_model,
+                artifact_path="next_purchase_model",
+                input_example=next_purchase_input_example,
+                signature=next_purchase_signature,
+            )
 
     return ModelOutputs(scored_df=scored, metrics=metrics)

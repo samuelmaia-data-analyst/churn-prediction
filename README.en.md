@@ -67,9 +67,9 @@ Top drivers for business communication:
 ```
 Top Drivers of Churn
 
-• Contract type
-• Tenure
-• Monthly charges
+- Contract type
+- Tenure
+- Monthly charges
 ```
 
 ### 4) Business insight
@@ -161,3 +161,4 @@ Dashboard bootstrap behavior:
 Source: Kaggle - Telco Customer Churn  
 Official source: https://www.kaggle.com/datasets/blastchar/telco-customer-churn  
 Expected file path: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
+

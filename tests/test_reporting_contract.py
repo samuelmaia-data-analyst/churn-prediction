@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from tests.test_enterprise_pipeline import build_dataset
-
 from src.config import PipelineConfig
 from src.ingestion import build_bronze_layer
 from src.ml import train_models_and_score
 from src.reporting import build_business_outputs
 from src.transformation import build_silver_layer
+from tests.test_enterprise_pipeline import build_dataset
 
 
 def test_executive_report_contract_is_stable(tmp_path) -> None:

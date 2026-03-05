@@ -31,7 +31,7 @@ metrics = report.get("model_metrics", {})
 
 baseline = metrics.get("baseline_model", {})
 st.markdown("### Baseline Model")
-st.markdown(f"- Logistic Regression")
+st.markdown("- Logistic Regression")
 st.markdown(f"- ROC-AUC: `{float(baseline.get('roc_auc', 0.0)):.2f}`")
 
 st.markdown("### Model Comparison")

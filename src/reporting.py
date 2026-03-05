@@ -19,12 +19,12 @@ class ReportOutputs:
 
 def _recommend_action(probability: float, next_purchase: float) -> str:
     if probability >= 0.7 and next_purchase >= 80:
-        return "Contato imediato + oferta premium de retenção"
+        return "Contato imediato + oferta premium de retencao"
     if probability >= 0.7:
-        return "Contato imediato + desconto de retenção"
+        return "Contato imediato + desconto de retencao"
     if probability >= 0.45:
         return "Campanha de engajamento proativa"
-    return "Monitoramento e nutrição de relacionamento"
+    return "Monitoramento e nutricao de relacionamento"
 
 
 def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
@@ -119,7 +119,9 @@ Referencia textual: `{pipeline_visual}`
 """
 
 
-def _render_executive_brief(executive_report: ExecutiveReport, recommendations: pd.DataFrame) -> str:
+def _render_executive_brief(
+    executive_report: ExecutiveReport, recommendations: pd.DataFrame
+) -> str:
     report = executive_report.to_dict()
     kpis = report.get("kpis", {})
     model_metrics = report.get("model_metrics", {})
@@ -138,6 +140,22 @@ def _render_executive_brief(executive_report: ExecutiveReport, recommendations: 
 
     top_drivers = model_metrics.get("top_drivers_of_churn", [])
     key_insights = model_metrics.get("key_insights", [])
+    segmentation_rows = "\n".join(
+        [
+            (
+                f"| High | churn_probability >= 0.70 | {len(high_risk)} | "
+                "Immediate retention contact + premium offer |"
+            ),
+            (
+                f"| Medium | 0.45 <= churn_probability < 0.70 | {len(medium_risk)} | "
+                "Proactive engagement campaign |"
+            ),
+            (
+                f"| Low | churn_probability < 0.45 | {len(low_risk)} | "
+                "Relationship nurture and monitoring |"
+            ),
+        ]
+    )
 
     return f"""# Executive Brief - Churn Strategy
 
@@ -150,9 +168,7 @@ def _render_executive_brief(executive_report: ExecutiveReport, recommendations: 
 ## Risk Segmentation Plan
 | Segment | Criteria | Customers | Recommended Action |
 |---|---|---:|---|
-| High | churn_probability >= 0.70 | {len(high_risk)} | Immediate retention contact + premium offer |
-| Medium | 0.45 <= churn_probability < 0.70 | {len(medium_risk)} | Proactive engagement campaign |
-| Low | churn_probability < 0.45 | {len(low_risk)} | Relationship nurture and monitoring |
+{segmentation_rows}
 
 ## Contract Insight
 - Month-to-month average churn probability: {month_to_month_risk:.2%}
