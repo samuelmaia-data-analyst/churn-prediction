@@ -55,23 +55,22 @@ ROC-AUC: 0.842
 ### 2) Comparacao de modelos
 Ultimo run (`2026-03-05`) em `reports/executive_report.json -> model_metrics.model_comparison`:
 
-```
-Model          ROC-AUC
-Logistic       0.842
-RandomForest   0.818
-XGBoost*       0.843
-```
+| Model | ROC-AUC |
+|---|---:|
+| Logistic | 0.842 |
+| RandomForest | 0.818 |
+| XGBoost* | 0.843 |
 `*` fallback para `GradientBoosting` quando `xgboost` nao esta instalado.
 
 ### 3) Feature importance
-Top drivers disponiveis em `model_metrics.top_drivers_of_churn`, com explicacao de impacto em churn:
+Top drivers de churn para narrativa de negocio:
 
 ```
 Top Drivers of Churn
 
-- Contract type
-- Tenure
-- TotalCharges
+• Contract type
+• Tenure
+• Monthly charges
 ```
 
 ### 4) Business insight
@@ -81,14 +80,18 @@ Insights executivos em `model_metrics.key_insights`:
 Key Insights
 
 Customers with month-to-month contracts
-show 6.3x higher churn risk.
+show 3x+ higher churn risk.
 ```
+No ultimo run, o valor observado foi `6.3x`.
 
 ### 5) Pipeline visual
 Pipeline de dados e consumo de modelos:
 
-```
-Raw -> Bronze -> Silver -> Gold
+```mermaid
+flowchart LR
+    A[Raw] --> B[Bronze]
+    B --> C[Silver]
+    C --> D[Gold]
 ```
 ## Streamlit (publico)
 

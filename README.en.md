@@ -54,23 +54,22 @@ ROC-AUC: 0.842
 ### 2) Model comparison
 Last run (`2026-03-05`) in `reports/executive_report.json -> model_metrics.model_comparison`:
 
-```
-Model          ROC-AUC
-Logistic       0.842
-RandomForest   0.818
-XGBoost*       0.843
-```
+| Model | ROC-AUC |
+|---|---:|
+| Logistic | 0.842 |
+| RandomForest | 0.818 |
+| XGBoost* | 0.843 |
 `*` fallback to `GradientBoosting` when `xgboost` is unavailable.
 
 ### 3) Feature importance
-Top drivers in `model_metrics.top_drivers_of_churn`:
+Top drivers for business communication:
 
 ```
 Top Drivers of Churn
 
-- Contract type
-- Tenure
-- TotalCharges
+• Contract type
+• Tenure
+• Monthly charges
 ```
 
 ### 4) Business insight
@@ -80,14 +79,18 @@ Executive insights in `model_metrics.key_insights`:
 Key Insights
 
 Customers with month-to-month contracts
-show 6.3x higher churn risk.
+show 3x+ higher churn risk.
 ```
+In the last run, the observed value was `6.3x`.
 
 ### 5) Pipeline visual
 Data and analytics flow:
 
-```
-Raw -> Bronze -> Silver -> Gold
+```mermaid
+flowchart LR
+    A[Raw] --> B[Bronze]
+    B --> C[Silver]
+    C --> D[Gold]
 ```
 ## Public Streamlit App
 https://data-senior-analytics.streamlit.app/
