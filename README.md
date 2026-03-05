@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
 [![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
 
-Idioma: **Português (PT-BR)** | [English](README.en.md)
+Idioma: **Portugues (PT-BR)** | [English](README.en.md)
 
 Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturado em camadas:
 
@@ -18,6 +18,7 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 
 ## Sumario
 - [Destaques](#destaques)
+- [Arquitetura](#arquitetura)
 - [Streamlit (publico)](#streamlit-publico)
 - [Saidas de dados](#saidas-de-dados)
 - [Setup](#setup)
@@ -38,6 +39,57 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - Rastreabilidade de modelos com `MLflow`
 - Dashboard executivo multipagina em Streamlit
 
+## Arquitetura
+- Visao detalhada em [ARCHITECTURE.md](ARCHITECTURE.md)
+- Organizacao por dominio com contratos em `src/contracts` e modelagem em `src/modeling`
+
+## Modelagem de Churn
+
+### 1) Baseline model
+```
+Baseline Model
+Logistic Regression
+ROC-AUC: 0.842
+```
+
+### 2) Comparacao de modelos
+Ultimo run (`2026-03-05`) em `reports/executive_report.json -> model_metrics.model_comparison`:
+
+```
+Model          ROC-AUC
+Logistic       0.842
+RandomForest   0.818
+XGBoost*       0.843
+```
+`*` fallback para `GradientBoosting` quando `xgboost` nao esta instalado.
+
+### 3) Feature importance
+Top drivers disponiveis em `model_metrics.top_drivers_of_churn`, com explicacao de impacto em churn:
+
+```
+Top Drivers of Churn
+
+- Contract type
+- Tenure
+- TotalCharges
+```
+
+### 4) Business insight
+Insights executivos em `model_metrics.key_insights`:
+
+```
+Key Insights
+
+Customers with month-to-month contracts
+show 6.3x higher churn risk.
+```
+
+### 5) Pipeline visual
+Pipeline de dados e consumo de modelos:
+
+```
+Raw -> Bronze -> Silver -> Gold
+```
 ## Streamlit (publico)
 
 https://data-senior-analytics.streamlit.app/

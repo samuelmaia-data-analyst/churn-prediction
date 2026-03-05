@@ -132,10 +132,30 @@ def _generate_outputs_from_raw_or_synthetic(raw_df: pd.DataFrame) -> None:
         "revenue_at_risk": float(high_risk["MonthlyCharges"].sum()),
         "avg_next_purchase_prediction": float(recommendations["next_purchase_prediction"].mean()),
     }
+    month_rate = float(df.loc[df["Contract"].eq("Month-to-month"), "Churn"].mean())
+    other_rate = float(df.loc[~df["Contract"].eq("Month-to-month"), "Churn"].mean())
+    risk_ratio = month_rate / other_rate if other_rate > 0 else 0.0
+
     model_metrics = {
         "churn_f1": 0.0,
         "churn_roc_auc": 0.0,
         "next_purchase_mae": 0.0,
+        "baseline_model": {"name": "Logistic Regression", "roc_auc": 0.0},
+        "model_comparison": [
+            {"model": "Logistic", "roc_auc": 0.0},
+            {"model": "RandomForest", "roc_auc": 0.0},
+            {"model": "XGBoost", "roc_auc": 0.0},
+        ],
+        "feature_importance": [
+            {"feature": "Contract", "importance": 0.0},
+            {"feature": "tenure", "importance": 0.0},
+            {"feature": "MonthlyCharges", "importance": 0.0},
+        ],
+        "top_drivers_of_churn": ["Contract type", "Tenure", "Monthly charges"],
+        "key_insights": [
+            f"Customers with month-to-month contracts show {risk_ratio:.1f}x higher churn risk."
+        ],
+        "pipeline_visual": "Raw -> Bronze -> Silver -> Gold",
         "note": "Fallback dashboard metrics (pipeline outputs unavailable).",
     }
 

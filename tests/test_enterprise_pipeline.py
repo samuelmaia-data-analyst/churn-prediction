@@ -75,6 +75,12 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     assert 0.0 <= model_outputs.metrics["churn_f1"] <= 1.0
     assert 0.0 <= model_outputs.metrics["churn_roc_auc"] <= 1.0
     assert model_outputs.metrics["next_purchase_mae"] >= 0.0
+    assert "baseline_model" in model_outputs.metrics
+    assert "model_comparison" in model_outputs.metrics
+    assert "top_drivers_of_churn" in model_outputs.metrics
+    assert "key_insights" in model_outputs.metrics
+    assert model_outputs.metrics["pipeline_visual"] == "Raw -> Bronze -> Silver -> Gold"
+    assert len(model_outputs.metrics["model_comparison"]) == 3
 
     assert config.executive_report_path.exists()
     with open(config.executive_report_path, "r", encoding="utf-8") as fp:

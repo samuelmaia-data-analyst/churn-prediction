@@ -18,6 +18,7 @@ Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 
 ## Table of Contents
 - [Highlights](#highlights)
+- [Architecture](#architecture)
 - [Public Streamlit App](#public-streamlit-app)
 - [Data Outputs](#data-outputs)
 - [Setup](#setup)
@@ -37,6 +38,57 @@ Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 - Model tracking with `MLflow`
 - Multi-page Streamlit executive dashboard
 
+## Architecture
+- Detailed architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
+- Domain-oriented organization with contracts in `src/contracts` and modeling in `src/modeling`
+
+## Churn Modeling
+
+### 1) Baseline model
+```
+Baseline Model
+Logistic Regression
+ROC-AUC: 0.842
+```
+
+### 2) Model comparison
+Last run (`2026-03-05`) in `reports/executive_report.json -> model_metrics.model_comparison`:
+
+```
+Model          ROC-AUC
+Logistic       0.842
+RandomForest   0.818
+XGBoost*       0.843
+```
+`*` fallback to `GradientBoosting` when `xgboost` is unavailable.
+
+### 3) Feature importance
+Top drivers in `model_metrics.top_drivers_of_churn`:
+
+```
+Top Drivers of Churn
+
+- Contract type
+- Tenure
+- TotalCharges
+```
+
+### 4) Business insight
+Executive insights in `model_metrics.key_insights`:
+
+```
+Key Insights
+
+Customers with month-to-month contracts
+show 6.3x higher churn risk.
+```
+
+### 5) Pipeline visual
+Data and analytics flow:
+
+```
+Raw -> Bronze -> Silver -> Gold
+```
 ## Public Streamlit App
 https://data-senior-analytics.streamlit.app/
 

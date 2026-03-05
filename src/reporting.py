@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from typing import Mapping
 
 import pandas as pd
 
@@ -25,7 +26,7 @@ def _recommend_action(probability: float, next_purchase: float) -> str:
     return "Monitoramento e nutricao de relacionamento"
 
 
-def build_business_outputs(scored_df: pd.DataFrame, metrics: dict[str, float]) -> ReportOutputs:
+def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
     recommendations = scored_df[
         [
             "customerID",
@@ -55,7 +56,7 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: dict[str, float]) -
     kpi_summary = pd.DataFrame([kpis])
     executive_report = {
         "kpis": kpis,
-        "model_metrics": metrics,
+        "model_metrics": dict(metrics),
         "top_10_priorities": recommendations.head(10).to_dict(orient="records"),
     }
 
