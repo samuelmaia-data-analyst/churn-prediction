@@ -40,16 +40,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Pipeline enterprise em camadas (raw -> bronze -> silver -> gold)"
     )
-    parser.add_argument("--seed", type=int, default=42, help="Seed para reproducibilidade")
+    parser.add_argument("--seed", type=int, default=42, help="Seed para reprodutibilidade")
     parser.add_argument(
-        "--data-dir", type=Path, default=Path("data"), help="Diretorio base de dados"
+        "--data-dir", type=Path, default=Path("data"), help="Diretório base de dados"
     )
     parser.add_argument(
         "--log-level",
         type=str,
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Nivel de log",
+        help="Nível de log",
     )
     return parser.parse_args()
 

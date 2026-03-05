@@ -6,7 +6,7 @@ from src.dashboard_data import PRIORITIZATION_PATH, load_prioritization
 
 st.set_page_config(page_title="Prioritization", page_icon="PR", layout="wide")
 st.title("Prioritization")
-st.caption("Clientes priorizados por risco de churn e recomendacao de acao")
+st.caption("Clientes priorizados por risco de churn e recomendação de ação")
 
 df = load_prioritization()
 if df.empty:

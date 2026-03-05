@@ -6,7 +6,7 @@ from src.dashboard_data import load_prioritization
 
 st.set_page_config(page_title="Simulation", page_icon="SM", layout="wide")
 st.title("Simulation")
-st.caption("Simulacao executiva de impacto de retencao")
+st.caption("Simulação executiva de impacto de retenção")
 
 df = load_prioritization()
 if df.empty:
@@ -16,11 +16,11 @@ if df.empty:
 baseline_revenue_risk = df.loc[df["churn_probability"] >= 0.7, "MonthlyCharges"].sum()
 
 retention_effectiveness = st.slider(
-    "Efetividade da campanha de retencao (%)",
+    "Efetividade da campanha de retenção (%)",
     min_value=0,
     max_value=100,
     value=25,
-    help="Percentual estimado de recuperacao da receita em risco.",
+    help="Percentual estimado de recuperação da receita em risco.",
 )
 
 recovered = baseline_revenue_risk * (retention_effectiveness / 100)

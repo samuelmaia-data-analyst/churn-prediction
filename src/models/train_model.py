@@ -58,7 +58,7 @@ class ModelTrainer:
         if not target_name:
             raise RuntimeError("Nenhum modelo treinado para salvar")
         if target_name not in self.models:
-            raise ValueError(f"Modelo nao encontrado: {target_name}")
+            raise ValueError(f"Modelo não encontrado: {target_name}")
 
         path = Path(self.config["models"]["save_path"]) / f"{target_name}.joblib"
         path.parent.mkdir(parents=True, exist_ok=True)

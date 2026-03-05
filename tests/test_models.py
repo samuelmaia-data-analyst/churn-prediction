@@ -82,6 +82,6 @@ def test_churn_predictor_returns_business_payload() -> None:
     payload["TotalCharges"] = float(payload["TotalCharges"])
     result = predictor.predict_from_dict(payload)
 
-    assert result.churn in {"Sim", "Nao"}
+    assert result.churn in {"Sim", "Não"}
     assert 0.0 <= result.probability <= 1.0
-    assert result.risk_level in {"Baixo", "Medio", "Alto"}
+    assert result.risk_level in {"Baixo", "Médio", "Alto"}

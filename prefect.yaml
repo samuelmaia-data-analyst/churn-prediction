@@ -8,7 +8,7 @@ pull: []
 deployments:
   - name: daily-enterprise-run
     version: "1.0.0"
-    description: "Execucao diaria do pipeline enterprise de churn."
+    description: "Execução diária do pipeline enterprise de churn."
     tags:
       - enterprise
       - daily

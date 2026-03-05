@@ -170,7 +170,7 @@ def render_header() -> None:
         """
         <div class="hero">
             <h1 class="hero-title">Churn Prediction System</h1>
-            <p class="hero-subtitle">Monitoramento de cancelamento e predicao individual de risco</p>
+            <p class="hero-subtitle">Monitoramento de cancelamento e predição individual de risco</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -190,7 +190,7 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
             df = load_data(DATA_PATH)
             st.success(f"Dados: {len(df):,} registros")
         else:
-            st.error("Dataset nao encontrado")
+            st.error("Dataset não encontrado")
 
         if MODEL_PATH.exists():
             model = load_model(MODEL_PATH)
@@ -200,13 +200,13 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
             else:
                 st.warning("Modelo encontrado, mas sem suporte a predict_proba")
         else:
-            st.error("Modelo nao encontrado")
+            st.error("Modelo não encontrado")
 
         if PREPROCESSOR_PATH.exists():
             preprocessor = load_preprocessor(PREPROCESSOR_PATH)
             st.success("Pre-processador carregado")
         else:
-            st.warning("Pre-processador nao encontrado (inferencia pode falhar)")
+            st.warning("Pré-processador não encontrado (inferência pode falhar)")
 
         st.markdown("---")
         st.markdown(
@@ -225,7 +225,7 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
 
 def apply_filters(df: pd.DataFrame) -> pd.DataFrame:
     st.markdown("---")
-    st.markdown('<div class="section-title">Filtros de exploracao</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Filtros de exploração</div>', unsafe_allow_html=True)
 
     filter_col1, filter_col2 = st.columns(2)
 
@@ -239,7 +239,7 @@ def apply_filters(df: pd.DataFrame) -> pd.DataFrame:
         internet_options = ["Todos"]
         if "InternetService" in df.columns:
             internet_options += sorted(df["InternetService"].dropna().unique().tolist())
-        selected_internet = st.selectbox("Servico de internet", internet_options)
+        selected_internet = st.selectbox("Serviço de internet", internet_options)
 
     filtered_df = df.copy()
 
@@ -275,7 +275,7 @@ def render_metrics(df: pd.DataFrame) -> None:
 
 
 def render_charts(filtered_df: pd.DataFrame) -> None:
-    st.markdown('<div class="section-title">Analise visual</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Análise visual</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
     with col1:
@@ -285,7 +285,7 @@ def render_charts(filtered_df: pd.DataFrame) -> None:
             fig1 = px.pie(
                 values=churn_counts.values,
                 names=churn_counts.index,
-                title="Proporcao de Cancelamentos",
+            title="Proporção de Cancelamentos",
                 color=churn_counts.index,
                 color_discrete_map={"Yes": COLOR_ALERT, "No": COLOR_PRIMARY},
                 hole=0.48,
@@ -297,7 +297,7 @@ def render_charts(filtered_df: pd.DataFrame) -> None:
             )
             st.plotly_chart(fig1, use_container_width=True)
         else:
-            st.info("Coluna 'Churn' nao encontrada para gerar o grafico.")
+            st.info("Coluna 'Churn' não encontrada para gerar o gráfico.")
 
     with col2:
         st.subheader("Churn por Contrato")
@@ -315,7 +315,7 @@ def render_charts(filtered_df: pd.DataFrame) -> None:
             fig2.update_layout(margin=dict(l=10, r=10, t=48, b=10), title_font=dict(size=18))
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("Colunas necessarias para grafico de contrato nao encontradas.")
+            st.info("Colunas necessárias para gráfico de contrato não encontradas.")
 
 
 def render_data_preview(filtered_df: pd.DataFrame) -> None:
@@ -336,13 +336,13 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
 
 def render_prediction(model, preprocessor) -> None:
     st.markdown("---")
-    st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Predição individual</div>', unsafe_allow_html=True)
 
     with st.expander("Preencher dados do cliente", expanded=False):
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            gender = st.selectbox("Genero", ["Male", "Female"])
+            gender = st.selectbox("Gênero", ["Male", "Female"])
             senior = st.selectbox("Senior Citizen", [0, 1])
             partner = st.selectbox("Partner", ["Yes", "No"])
             dependents = st.selectbox("Dependents", ["Yes", "No"])
@@ -428,14 +428,14 @@ def render_prediction(model, preprocessor) -> None:
                     st.markdown(
                         """
                         <div class="risk-box">
-                            Priorize clientes com risco alto para contato proativo, revisao de contrato e oferta de retencao.
+                            Priorize clientes com risco alto para contato proativo, revisão de contrato e oferta de retenção.
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
             except Exception as exc:
-                st.error(f"Erro ao gerar previsao: {exc}")
+                st.error(f"Erro ao gerar previsão: {exc}")
 
 
 def render_footer() -> None:
@@ -464,7 +464,7 @@ def main() -> None:
     df, model, preprocessor, model_loaded = render_sidebar()
 
     if df is None:
-        st.error(f"Dataset nao encontrado em: {DATA_PATH}")
+        st.error(f"Dataset não encontrado em: {DATA_PATH}")
         st.stop()
 
     render_metrics(df)

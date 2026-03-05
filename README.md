@@ -1,47 +1,47 @@
-# Churn Prediction Pipeline (Enterprise)
+﻿# Churn Prediction Pipeline (Enterprise)
 
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](./.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
 [![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
 
-Idioma: **Portugues (PT-BR)** | [English](README.en.md)
+Idioma: **Português (PT-BR)** | [English](README.en.md)
 
 Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturado em camadas:
 
 - `raw -> bronze -> silver -> gold`
 - modelo de `churn prediction`
 - modelo de `next purchase prediction`
-- reporting executivo para consumo de negocio
-- orquestracao com `Prefect`
+- reporting executivo para consumo de negócio
+- orquestração com `Prefect`
 - data quality checks com `Pandera`
 - rastreabilidade de modelos com `MLflow`
 
-## Sumario
+## Sumário
 - [Destaques](#destaques)
 - [Arquitetura](#arquitetura)
-- [Streamlit (publico)](#streamlit-publico)
-- [Saidas de dados](#saidas-de-dados)
+- [Streamlit (público)](#streamlit-publico)
+- [Saídas de dados](#saidas-de-dados)
 - [Setup](#setup)
-- [Execucao do pipeline](#execucao-do-pipeline)
-- [Orquestracao com Prefect](#orquestracao-com-prefect)
+- [Execução do pipeline](#execucao-do-pipeline)
+- [Orquestração com Prefect](#orquestracao-com-prefect)
 - [Qualidade](#qualidade)
 - [Versionamento de artefatos](#versionamento-de-artefatos)
-- [Dashboard Executivo Multipagina](#dashboard-executivo-multipagina)
+- [Dashboard Executivo Multipágina](#dashboard-executivo-multipagina)
 - [Dados](#dados)
 
 ## Destaques
 - Arquitetura em camadas: `raw -> bronze -> silver -> gold`
-- Star schema no gold (`fato + dimensoes`)
-- Predicao de churn + predicao de proxima compra
-- Saidas executivas: `executive_report.json`, KPI CSV e priorizacao CSV
-- Orquestracao com `Prefect`
+- Star schema no gold (`fato + dimensões`)
+- Predição de churn + predição de próxima compra
+- Saídas executivas: `executive_report.json`, KPI CSV e priorização CSV
+- Orquestração com `Prefect`
 - Contratos de qualidade de dados com `Pandera`
 - Rastreabilidade de modelos com `MLflow`
-- Dashboard executivo multipagina em Streamlit
+- Dashboard executivo multipágina em Streamlit
 
 ## Arquitetura
-- Visao detalhada em [ARCHITECTURE.md](ARCHITECTURE.md)
-- Organizacao por dominio com contratos em `src/contracts` e modelagem em `src/modeling`
+- Visão detalhada em [ARCHITECTURE.md](ARCHITECTURE.md)
+- Organização por domínio com contratos em `src/contracts` e modelagem em `src/modeling`
 
 ## Modelagem de Churn
 
@@ -52,25 +52,25 @@ Logistic Regression
 ROC-AUC: 0.842
 ```
 
-### 2) Comparacao de modelos
-Ultimo run (`2026-03-05`) em `reports/executive_report.json -> model_metrics.model_comparison`:
+### 2) Comparação de modelos
+Último run (`2026-03-05`) em `reports/executive_report.json -> model_metrics.model_comparison`:
 
 | Model | ROC-AUC |
 |---|---:|
 | Logistic | 0.842 |
 | RandomForest | 0.818 |
 | XGBoost* | 0.843 |
-`*` fallback para `GradientBoosting` quando `xgboost` nao esta instalado.
+`*` fallback para `GradientBoosting` quando `xgboost` não está instalado.
 
 ### 3) Feature importance
-Top drivers de churn para narrativa de negocio:
+Top drivers de churn para narrativa de negócio:
 
 ```
 Top Drivers of Churn
 
-• Contract type
-• Tenure
-• Monthly charges
+- Contract type
+- Tenure
+- Monthly charges
 ```
 
 ### 4) Business insight
@@ -82,7 +82,7 @@ Key Insights
 Customers with month-to-month contracts
 show 3x+ higher churn risk.
 ```
-No ultimo run, o valor observado foi `6.3x`.
+No último run, o valor observado foi `6.3x`.
 
 ### 5) Pipeline visual
 Pipeline de dados e consumo de modelos:
@@ -93,11 +93,12 @@ flowchart LR
     B --> C[Silver]
     C --> D[Gold]
 ```
-## Streamlit (publico)
+
+## Streamlit (público)
 
 https://data-senior-analytics.streamlit.app/
 
-## Saidas de dados
+## Saídas de dados
 - `data/bronze/customer_churn_bronze.csv`
 - `data/silver/customer_churn_silver.csv`
 - `data/gold/dim_customer.csv`
@@ -119,15 +120,15 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Execucao do pipeline
+## Execução do pipeline
 
 ```bash
 python main.py --seed 42 --data-dir data --log-level INFO
 ```
 
-## Orquestracao com Prefect
+## Orquestração com Prefect
 
-Deploy configurado em [prefect.yaml](prefect.yaml) com agenda diaria (`07:00 UTC`).
+Deploy configurado em [prefect.yaml](prefect.yaml) com agenda diária (`07:00 UTC`).
 
 ```bash
 # 1) iniciar API local do Prefect (opcional, para UI local)
@@ -140,17 +141,17 @@ prefect worker start --pool default-agent-pool
 # 3) registrar deployment
 prefect deploy --all
 
-# 4) disparar execucao manual
+# 4) disparar execução manual
 prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
 ```
 
 ### Tracking de ML
 - MLflow local em `./mlruns`
-- modelos versionados por execucao no run do pipeline
+- modelos versionados por execução no run do pipeline
 
 ### Logging estruturado
 - logs JSON em `logs/pipeline.log`
-- cada execucao tem `run_id`
+- cada execução tem `run_id`
 
 ## Qualidade
 
@@ -162,10 +163,10 @@ prefect deployment run "enterprise-churn-pipeline/daily-enterprise-run"
   - `pytest -q`
 
 ## Versionamento de artefatos
-- `logs/` e `mlruns/` nao devem ser enviados para o Git.
-- versione apenas codigo, configuracoes e documentacao.
+- `logs/` e `mlruns/` não devem ser enviados para o Git.
+- versione apenas código, configurações e documentação.
 
-## Dashboard Executivo Multipagina
+## Dashboard Executivo Multipágina
 - `Executive Overview`
 - `Risk and Growth`
 - `Prioritization`
@@ -176,8 +177,8 @@ Com download direto de:
 - `customer_prioritization.csv`
 
 Comportamento de bootstrap do dashboard:
-- se `reports/` e `data/gold/` nao existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
-- se o pipeline falhar ou nao houver `data/raw`, o app gera fallback sintetico para nao ficar vazio.
+- se `reports/` e `data/gold/` não existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
+- se o pipeline falhar ou não houver `data/raw`, o app gera fallback sintético para não ficar vazio.
 
 ## Dados
 

@@ -62,7 +62,7 @@ class FeatureEngineer:
 
     def _generate_feature_names(self) -> None:
         if self.preprocessor is None:
-            raise RuntimeError("Preprocessador nao foi inicializado")
+            raise RuntimeError("Preprocessador não foi inicializado")
 
         numeric_features = list(self.config["features"]["numerical_features"])
         cat_encoder = self.preprocessor.named_transformers_["cat"].named_steps["onehot"]
@@ -73,7 +73,7 @@ class FeatureEngineer:
 
     def save_preprocessor(self, path: str = "models/preprocessor.joblib") -> None:
         if self.preprocessor is None:
-            raise RuntimeError("Preprocessador nao treinado. Rode fit_transform antes de salvar.")
+            raise RuntimeError("Preprocessador não treinado. Rode fit_transform antes de salvar.")
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(self.preprocessor, path)
 

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def load_raw_dataset(config: PipelineConfig) -> pd.DataFrame:
     if not config.raw_input_path.exists():
         raise FileNotFoundError(
-            f"Dataset nao encontrado em {config.raw_input_path}. "
+            f"Dataset não encontrado em {config.raw_input_path}. "
             "Baixe do Kaggle e coloque em data/raw."
         )
     df = pd.read_csv(config.raw_input_path)

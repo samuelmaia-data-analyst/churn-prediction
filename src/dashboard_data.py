@@ -111,12 +111,12 @@ def _generate_outputs_from_raw_or_synthetic(raw_df: pd.DataFrame) -> None:
     recommendations["next_purchase_prediction"] = next_purchase_prediction
     recommendations["action_recommendation"] = recommendations["churn_probability"].apply(
         lambda p: (
-            "Contato imediato + oferta premium de retencao"
+            "Contato imediato + oferta premium de retenção"
             if p >= 0.7
             else (
                 "Campanha de engajamento proativa"
                 if p >= 0.45
-                else "Monitoramento e nutricao de relacionamento"
+                else "Monitoramento e nutrição de relacionamento"
             )
         )
     )

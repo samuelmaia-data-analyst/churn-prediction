@@ -17,7 +17,7 @@ class DataLoader:
     def load_data(self) -> pd.DataFrame:
         dataset_path = Path(self.config["data"]["raw_path"])
         if not dataset_path.exists():
-            raise FileNotFoundError(f"Dataset nao encontrado: {dataset_path}")
+            raise FileNotFoundError(f"Dataset não encontrado: {dataset_path}")
 
         df = pd.read_csv(dataset_path)
         logger.info("Dados carregados: %s linhas, %s colunas", df.shape[0], df.shape[1])

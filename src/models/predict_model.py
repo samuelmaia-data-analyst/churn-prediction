@@ -19,7 +19,7 @@ class PredictionResult:
 
 
 class ChurnPredictor:
-    """Facade para inferencia de churn com artefatos persistidos."""
+    """Facade para inferência de churn com artefatos persistidos."""
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class ChurnPredictor:
                 missing.append(str(self.model_path))
             if not self.preprocessor_path.exists():
                 missing.append(str(self.preprocessor_path))
-            raise FileNotFoundError(f"Artefatos nao encontrados: {', '.join(missing)}")
+            raise FileNotFoundError(f"Artefatos não encontrados: {', '.join(missing)}")
 
         self.model = joblib.load(self.model_path)
         self.preprocessor = joblib.load(self.preprocessor_path)
@@ -54,7 +54,7 @@ class ChurnPredictor:
         if probability > 0.6:
             return "Alto"
         if probability > 0.3:
-            return "Medio"
+            return "Médio"
         return "Baixo"
 
     def predict_from_dict(self, customer_data: Mapping[str, Any]) -> PredictionResult:
@@ -68,7 +68,7 @@ class ChurnPredictor:
         probability = float(self.model.predict_proba(transformed)[0][1])
 
         return PredictionResult(
-            churn="Sim" if prediction == 1 else "Nao",
+            churn="Sim" if prediction == 1 else "Não",
             probability=round(probability, 4),
             risk_level=self._risk_level(probability),
         )

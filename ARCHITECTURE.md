@@ -1,4 +1,4 @@
-# Arquitetura do Projeto (Nível Sênior)
+﻿# Arquitetura do Projeto (Nível Sênior)
 
 ## Objetivo
 Padronizar o projeto para operação enterprise com:
@@ -55,5 +55,5 @@ Métricas principais continuam registradas em MLflow e `executive_report.json`.
 `Raw -> Bronze -> Silver -> Gold -> Modeling -> Reporting -> Dashboard/API`
 
 ## Evolução Recomendada
-1. Criar testes unitarios dedicados em `tests/test_modeling_pipeline.py`.
-2. Adicionar validacao de contrato JSON no CI.
+1. Criar testes unitários dedicados em `tests/test_modeling_pipeline.py`.
+2. Adicionar validação de contrato JSON no CI.

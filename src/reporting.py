@@ -19,12 +19,12 @@ class ReportOutputs:
 
 def _recommend_action(probability: float, next_purchase: float) -> str:
     if probability >= 0.7 and next_purchase >= 80:
-        return "Contato imediato + oferta premium de retencao"
+        return "Contato imediato + oferta premium de retenção"
     if probability >= 0.7:
-        return "Contato imediato + desconto de retencao"
+        return "Contato imediato + desconto de retenção"
     if probability >= 0.45:
         return "Campanha de engajamento proativa"
-    return "Monitoramento e nutricao de relacionamento"
+    return "Monitoramento e nutrição de relacionamento"
 
 
 def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
