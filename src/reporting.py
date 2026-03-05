@@ -7,11 +7,12 @@ from typing import Mapping
 import pandas as pd
 
 from src.config import PipelineConfig
+from src.contracts import ExecutiveReport
 
 
 @dataclass(frozen=True)
 class ReportOutputs:
-    executive_report: dict
+    executive_report: ExecutiveReport
     recommendations: pd.DataFrame
     kpi_summary: pd.DataFrame
 
@@ -54,11 +55,11 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
     }
 
     kpi_summary = pd.DataFrame([kpis])
-    executive_report = {
-        "kpis": kpis,
-        "model_metrics": dict(metrics),
-        "top_10_priorities": recommendations.head(10).to_dict(orient="records"),
-    }
+    executive_report = ExecutiveReport(
+        kpis=kpis,
+        model_metrics=dict(metrics),
+        top_10_priorities=recommendations.head(10).to_dict(orient="records"),
+    )
 
     return ReportOutputs(
         executive_report=executive_report,
@@ -72,7 +73,7 @@ def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> 
     config.gold_dir.mkdir(parents=True, exist_ok=True)
 
     with open(config.executive_report_path, "w", encoding="utf-8") as fp:
-        json.dump(outputs.executive_report, fp, ensure_ascii=False, indent=2)
+        json.dump(outputs.executive_report.to_dict(), fp, ensure_ascii=False, indent=2)
 
     outputs.kpi_summary.to_csv(config.gold_dir / "kpi_summary.csv", index=False)
     outputs.recommendations.to_csv(config.gold_dir / "customer_prioritization.csv", index=False)

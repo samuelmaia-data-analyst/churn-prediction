@@ -17,6 +17,7 @@ src/
   dashboard_data.py         # bootstrap/fallback para Streamlit
   contracts/
     executive_metrics.py    # contrato tipado de model_metrics
+    report_schema.py        # contrato tipado de executive_report.json
   modeling/
     churn.py                # features, pré-processamento e modelos de churn
     pipeline.py             # orquestra treino e score de modelos
@@ -54,6 +55,5 @@ Métricas principais continuam registradas em MLflow e `executive_report.json`.
 `Raw -> Bronze -> Silver -> Gold -> Modeling -> Reporting -> Dashboard/API`
 
 ## Evolução Recomendada
-1. Criar `src/contracts/report_schema.py` para tipar também `executive_report`.
-2. Criar testes unitários dedicados em `tests/test_modeling_pipeline.py`.
-3. Adicionar validação de contrato JSON no CI.
+1. Criar testes unitarios dedicados em `tests/test_modeling_pipeline.py`.
+2. Adicionar validacao de contrato JSON no CI.
