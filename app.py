@@ -14,7 +14,6 @@ import streamlit as st
 
 DATA_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 PRIMARY_MODEL_PATH = Path("models/enterprise_churn_model.joblib")
-PREPROCESSOR_PATH = Path("models/preprocessor.joblib")
 COLOR_BG_START = "#f7f9fc"
 COLOR_BG_END = "#eef3f9"
 COLOR_PRIMARY = "#164e63"
@@ -41,12 +40,6 @@ def load_data(path: Path) -> pd.DataFrame:
 @st.cache_resource(show_spinner=False)
 def load_model(path: Path):
     """Carrega o modelo treinado de churn."""
-    return joblib.load(path)
-
-
-@st.cache_resource(show_spinner=False)
-def load_preprocessor(path: Path):
-    """Carrega o pre-processador treinado de churn."""
     return joblib.load(path)
 
 
@@ -190,10 +183,9 @@ def render_header() -> None:
     )
 
 
-def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None, bool]:
+def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
     df: pd.DataFrame | None = None
     model = None
-    preprocessor = None
     model_loaded = False
 
     with st.sidebar:
@@ -207,19 +199,17 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
 
         if PRIMARY_MODEL_PATH.exists():
             model = load_model(PRIMARY_MODEL_PATH)
-            model_loaded = hasattr(model, "predict_proba")
+            model_loaded = (
+                hasattr(model, "predict_proba")
+                and hasattr(model, "named_steps")
+                and "prep" in model.named_steps
+            )
             if model_loaded:
                 st.success(f"Modelo carregado ({PRIMARY_MODEL_PATH.name})")
             else:
-                st.warning("Modelo encontrado, mas sem suporte a predict_proba")
+                st.error("Modelo incompativel. Gere novamente o enterprise_churn_model.joblib.")
         else:
             st.warning("Modelo enterprise nao encontrado. Rode o pipeline para habilitar predicao.")
-
-        if PREPROCESSOR_PATH.exists():
-            preprocessor = load_preprocessor(PREPROCESSOR_PATH)
-            st.success("Pre-processador carregado")
-        else:
-            st.info("Pre-processador opcional ausente (ok para modelo enterprise em pipeline).")
 
         st.markdown("---")
         st.markdown("""
@@ -231,7 +221,7 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, object | None,
             [LinkedIn](https://linkedin.com/in/samuelmaia-data-analyst)
             """)
 
-    return df, model, preprocessor, model_loaded
+    return df, model, model_loaded
 
 
 def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
@@ -369,7 +359,7 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
         st.dataframe(filtered_df[valid_cols].head(20), use_container_width=True)
 
 
-def render_prediction(model, preprocessor) -> None:
+def render_prediction(model) -> None:
     st.markdown("---")
     st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
 
@@ -430,15 +420,7 @@ def render_prediction(model, preprocessor) -> None:
                     ]
                 )
 
-                if hasattr(model, "named_steps") and "prep" in model.named_steps:
-                    model_input = input_data
-                else:
-                    model_input = (
-                        preprocessor.transform(input_data)
-                        if preprocessor is not None
-                        else input_data
-                    )
-                proba = model.predict_proba(model_input)[0][1]
+                proba = model.predict_proba(input_data)[0][1]
 
                 result_col1, result_col2 = st.columns(2)
 
@@ -504,7 +486,7 @@ def main() -> None:
     pio.templates.default = "plotly_white"
     inject_styles()
     render_header()
-    df, model, preprocessor, model_loaded = render_sidebar()
+    df, model, model_loaded = render_sidebar()
 
     if df is None:
         st.error(f"Dataset nao encontrado em: {DATA_PATH}")
@@ -523,7 +505,7 @@ def main() -> None:
     render_data_preview(preview_df)
 
     if model_loaded and model is not None:
-        render_prediction(model, preprocessor)
+        render_prediction(model)
 
     render_footer()
 
