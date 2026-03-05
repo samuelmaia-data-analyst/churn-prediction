@@ -101,5 +101,7 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     assert "## Contract Insight" in executive_brief
     assert "## Key Insights" in executive_brief
     assert "```mermaid" in executive_brief
+    assert config.action_playbook_path.exists()
     assert (config.gold_dir / "customer_prioritization.csv").exists()
     assert (config.gold_dir / "kpi_summary.csv").exists()
+    assert (config.gold_dir / "action_playbook.csv").exists()

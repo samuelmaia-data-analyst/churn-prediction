@@ -29,6 +29,7 @@ from src.config import PipelineConfig
 from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
 from src.logging_utils import configure_logging
 from src.ml import ModelOutputs, train_models_and_score
+from src.monitoring import run_drift_monitoring
 from src.reporting import ReportOutputs, build_business_outputs, persist_business_outputs
 from src.transformation import build_silver_layer, persist_silver
 from src.warehouse import StarSchema, build_star_schema, persist_star_schema
@@ -88,6 +89,11 @@ def reporting_task(config: PipelineConfig, model_outputs: ModelOutputs) -> Repor
     return outputs
 
 
+@task(retries=1, retry_delay_seconds=2)
+def monitoring_task(config: PipelineConfig, model_outputs: ModelOutputs) -> dict[str, object]:
+    return run_drift_monitoring(config, model_outputs.scored_df)
+
+
 @flow(name="enterprise-churn-pipeline")
 def run_pipeline(
     seed: int = 42,
@@ -117,14 +123,19 @@ def run_pipeline(
     warehouse_task(config, silver_df)
     model_outputs = ml_task(config, silver_df)
     reporting_task(config, model_outputs)
+    drift_result = monitoring_task(config, model_outputs)
 
     elapsed_seconds = time.perf_counter() - started_at
     logger.info(
-        "pipeline_done run_id=%s duration_seconds=%.2f churn_f1=%.4f churn_auc=%.4f",
+        (
+            "pipeline_done run_id=%s duration_seconds=%.2f churn_f1=%.4f "
+            "churn_auc=%.4f drift_status=%s"
+        ),
         run_id,
         elapsed_seconds,
         model_outputs.metrics["churn_f1"],
         model_outputs.metrics["churn_roc_auc"],
+        drift_result.get("status", "unknown"),
     )
 
 

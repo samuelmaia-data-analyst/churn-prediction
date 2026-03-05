@@ -8,6 +8,13 @@ import pandas as pd
 
 from src.config import PipelineConfig
 from src.contracts import ExecutiveReport
+from src.decisioning import (
+    action_for_segment,
+    build_action_playbook,
+    decision_threshold,
+    get_policy,
+    risk_segment,
+)
 
 
 @dataclass(frozen=True)
@@ -15,19 +22,13 @@ class ReportOutputs:
     executive_report: ExecutiveReport
     recommendations: pd.DataFrame
     kpi_summary: pd.DataFrame
-
-
-def _recommend_action(probability: float, next_purchase: float) -> str:
-    if probability >= 0.7 and next_purchase >= 80:
-        return "Contato imediato + oferta premium de retencao"
-    if probability >= 0.7:
-        return "Contato imediato + desconto de retencao"
-    if probability >= 0.45:
-        return "Campanha de engajamento proativa"
-    return "Monitoramento e nutricao de relacionamento"
+    action_playbook: pd.DataFrame
 
 
 def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
+    policy = get_policy("balanceada")
+    threshold = decision_threshold(policy)
+
     recommendations = scored_df[
         [
             "customerID",
@@ -37,15 +38,21 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
             "Contract",
         ]
     ].copy()
+
+    recommendations["risk_segment"] = recommendations["churn_probability"].apply(
+        lambda p: risk_segment(float(p), threshold)
+    )
     recommendations["action_recommendation"] = recommendations.apply(
-        lambda row: _recommend_action(row["churn_probability"], row["next_purchase_prediction"]),
+        lambda row: action_for_segment(row["risk_segment"], float(row["next_purchase_prediction"])),
         axis=1,
     )
+    recommendations["decision_threshold"] = threshold
+    recommendations["decision_policy"] = policy.name
     recommendations = recommendations.sort_values("churn_probability", ascending=False).reset_index(
         drop=True
     )
 
-    high_risk = recommendations[recommendations["churn_probability"] >= 0.7]
+    high_risk = recommendations[recommendations["risk_segment"] == "high"]
     kpis = {
         "total_customers": int(len(scored_df)),
         "churn_rate": float(scored_df["Churn"].mean()),
@@ -60,11 +67,13 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
         model_metrics=dict(metrics),
         top_10_priorities=recommendations.head(10).to_dict(orient="records"),
     )
+    action_playbook = build_action_playbook(recommendations, policy)
 
     return ReportOutputs(
         executive_report=executive_report,
         recommendations=recommendations,
         kpi_summary=kpi_summary,
+        action_playbook=action_playbook,
     )
 
 
@@ -190,6 +199,32 @@ flowchart LR
 """
 
 
+def _render_action_playbook(playbook: pd.DataFrame) -> str:
+    header = (
+        "| Rank | Customer | Action | Unit Cost (USD) | Expected Impact (USD) | "
+        "Expected ROI | Policy |\n"
+        "|---:|---|---|---:|---:|---:|---|"
+    )
+    rows = []
+    for _, row in playbook.iterrows():
+        template = (
+            "| {rank} | {customer} | {action} | {cost:.2f} | "
+            "{impact:.2f} | {roi:.2f} | {policy} |"
+        )
+        rows.append(
+            template.format(
+                rank=int(row["rank"]),
+                customer=row["customerID"],
+                action=row["action_recommendation"],
+                cost=float(row["unit_cost_usd"]),
+                impact=float(row["expected_impact_usd"]),
+                roi=float(row["expected_roi"]),
+                policy=row["decision_policy"],
+            )
+        )
+    return "# Action Playbook (Top 10)\n\n" + header + "\n" + "\n".join(rows) + "\n"
+
+
 def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> None:
     config.reports_dir.mkdir(parents=True, exist_ok=True)
     config.gold_dir.mkdir(parents=True, exist_ok=True)
@@ -200,6 +235,9 @@ def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> 
         fp.write(_render_model_card(outputs.executive_report))
     with open(config.executive_brief_path, "w", encoding="utf-8") as fp:
         fp.write(_render_executive_brief(outputs.executive_report, outputs.recommendations))
+    with open(config.action_playbook_path, "w", encoding="utf-8") as fp:
+        fp.write(_render_action_playbook(outputs.action_playbook))
 
     outputs.kpi_summary.to_csv(config.gold_dir / "kpi_summary.csv", index=False)
     outputs.recommendations.to_csv(config.gold_dir / "customer_prioritization.csv", index=False)
+    outputs.action_playbook.to_csv(config.gold_dir / "action_playbook.csv", index=False)

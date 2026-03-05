@@ -67,9 +67,25 @@ class PipelineConfig:
         return self.reports_dir / "executive_brief.md"
 
     @property
+    def action_playbook_path(self) -> Path:
+        return self.reports_dir / "action_playbook.md"
+
+    @property
     def churn_model_path(self) -> Path:
         return self.models_dir / "enterprise_churn_model.joblib"
 
     @property
     def next_purchase_model_path(self) -> Path:
         return self.models_dir / "enterprise_next_purchase_model.joblib"
+
+    @property
+    def monitoring_dir(self) -> Path:
+        return Path("reports")
+
+    @property
+    def drift_reference_path(self) -> Path:
+        return self.monitoring_dir / "drift_reference.csv"
+
+    @property
+    def drift_alert_path(self) -> Path:
+        return self.monitoring_dir / "drift_alert.json"

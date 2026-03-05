@@ -27,6 +27,9 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - [Qualidade](#qualidade)
 - [Versionamento de artefatos](#versionamento-de-artefatos)
 - [Dashboard Executivo Multipágina](#dashboard-executivo-multipagina)
+- [Politica de Decisao por Custo](#politica-de-decisao-por-custo)
+- [Action Playbook](#action-playbook)
+- [Monitoramento de Drift](#monitoramento-de-drift)
 - [Dados](#dados)
 
 ## Destaques
@@ -141,8 +144,11 @@ https://data-senior-analytics.streamlit.app/
 - `artifacts/reports/executive_report.json`
 - `artifacts/reports/model_card.md`
 - `artifacts/reports/executive_brief.md`
+- `artifacts/reports/action_playbook.md`
 - `data/gold/kpi_summary.csv`
 - `data/gold/customer_prioritization.csv`
+- `data/gold/action_playbook.csv`
+- `reports/drift_alert.json`
 
 ## Setup
 
@@ -212,6 +218,53 @@ Com download direto de:
 Comportamento de bootstrap do dashboard:
 - se `artifacts/reports/` e `data/gold/` não existirem e houver `data/raw`, o app gera os artefatos via pipeline real;
 - se o pipeline falhar ou não houver `data/raw`, o app gera fallback sintético para não ficar vazio.
+
+## Politica de Decisao por Custo
+
+Regra de threshold orientada por custo de erro:
+
+`threshold = Custo_FP / (Custo_FP + Custo_FN)`
+
+- `campanha_cara` (`FP=12`, `FN=3`): `threshold = 0.80`
+- `balanceada` (`FP=5`, `FN=5`): `threshold = 0.50`
+- `campanha_barata` (`FP=2`, `FN=8`): `threshold = 0.20`
+
+Leitura executiva:
+- campanha cara: aciona menos clientes, com maior precisão;
+- campanha barata: aciona mais clientes, com maior cobertura (recall).
+
+## Action Playbook
+
+Top 10 ações operacionais com custo, impacto esperado e ROI.
+
+Saídas:
+- `data/gold/action_playbook.csv`
+- `artifacts/reports/action_playbook.md`
+
+Colunas chave:
+- `rank`
+- `customerID`
+- `action_recommendation`
+- `unit_cost_usd`
+- `expected_impact_usd`
+- `expected_roi`
+- `decision_policy`
+
+## Monitoramento de Drift
+
+Monitoramento mínimo em runtime com:
+- `PSI` (Population Stability Index)
+- `KS` (Kolmogorov-Smirnov)
+
+Thresholds de alerta:
+- `PSI >= 0.20`
+- `KS >= 0.15`
+
+Arquivo de alerta gerado a cada execução:
+- `reports/drift_alert.json`
+
+Baseline de referência:
+- `reports/drift_reference.csv` (criado automaticamente no primeiro run)
 
 ## Dados
 
