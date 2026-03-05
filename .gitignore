@@ -35,6 +35,7 @@ Thumbs.db
 data/bronze/
 data/silver/
 data/gold/
+reports/
 reports/executive_report.json
 
 # Modelos enterprise gerados em runtime

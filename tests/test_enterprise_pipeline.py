@@ -88,5 +88,18 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     assert "kpis" in report
     assert "model_metrics" in report
     assert "top_10_priorities" in report
+    assert config.model_card_path.exists()
+    model_card = config.model_card_path.read_text(encoding="utf-8")
+    assert "## Baseline Model" in model_card
+    assert "## Model Comparison" in model_card
+    assert "## Top Drivers of Churn" in model_card
+    assert "```mermaid" in model_card
+    assert config.executive_brief_path.exists()
+    executive_brief = config.executive_brief_path.read_text(encoding="utf-8")
+    assert "## Executive Summary" in executive_brief
+    assert "## Risk Segmentation Plan" in executive_brief
+    assert "## Contract Insight" in executive_brief
+    assert "## Key Insights" in executive_brief
+    assert "```mermaid" in executive_brief
     assert (config.gold_dir / "customer_prioritization.csv").exists()
     assert (config.gold_dir / "kpi_summary.csv").exists()

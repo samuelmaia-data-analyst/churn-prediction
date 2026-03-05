@@ -105,6 +105,8 @@ https://data-senior-analytics.streamlit.app/
 - `data/gold/kpi_summary.csv`
 - `data/gold/customer_prioritization.csv`
 - `reports/executive_report.json`
+- `reports/model_card.md`
+- `reports/executive_brief.md`
 
 ## Setup
 ```bash

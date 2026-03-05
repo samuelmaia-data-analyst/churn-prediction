@@ -59,6 +59,14 @@ class PipelineConfig:
         return self.reports_dir / "executive_report.json"
 
     @property
+    def model_card_path(self) -> Path:
+        return self.reports_dir / "model_card.md"
+
+    @property
+    def executive_brief_path(self) -> Path:
+        return self.reports_dir / "executive_brief.md"
+
+    @property
     def churn_model_path(self) -> Path:
         return self.models_dir / "enterprise_churn_model.joblib"
 
