@@ -23,6 +23,7 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 
 ## Business Outcome Simulation (Executive Snapshot)
 Objetivo: transformar score tecnico em resultado financeiro defendivel para comite executivo.
+Baseado em dados reais (Kaggle Telco Customer Churn) e premissas operacionais explicitas de adocao, custo e SLA.
 
 - Valor protegido (carteira priorizada): `~$68k` por ciclo
 - Impacto esperado liquido (cenario base): `+$16k` por ciclo apos custo de acao

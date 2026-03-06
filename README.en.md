@@ -23,6 +23,7 @@ Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 
 ## Business Outcome Simulation (Executive Snapshot)
 Goal: convert technical scoring into defendable financial outcome for executive steering.
+Based on real data (Kaggle Telco Customer Churn) and explicit operating assumptions for adoption, cost, and SLA.
 
 - Protected value (prioritized portfolio): `~$68k` per cycle
 - Expected net impact (base scenario): `+$16k` per cycle after action cost
