@@ -3,6 +3,7 @@
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](./.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
 [![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
+[![Official Release](https://img.shields.io/badge/release-v1.0.0-success)](https://github.com/samuelmaia-data-analyst/churn-prediction/releases/latest)
 
 Language: **English** | [Portuguese (PT-BR)](README.md)
 
@@ -16,7 +17,32 @@ Production-style analytics and ML project using the Kaggle Telco Churn dataset.
 - data quality checks with `Pandera`
 - model traceability with `MLflow`
 
+## Official Public Release
+- Public release with notes: https://github.com/samuelmaia-data-analyst/churn-prediction/releases/latest
+- Local notes for current version: [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md)
+
+## Business Outcome Simulation (Executive Snapshot)
+Goal: convert technical scoring into defendable financial outcome for executive steering.
+
+- Protected value (prioritized portfolio): `~$68k` per cycle
+- Expected net impact (base scenario): `+$16k` per cycle after action cost
+- Adoption scenario: `70%` playbook coverage with `<24h` first-touch SLA
+- Executive interpretation: capturing `~24%` of value-at-risk already covers operational cost in the base scenario
+
+## Action Playbook (Executive Summary)
+Direct translation from risk + value into commercial action:
+
+| Segment | Risk | Recommended action | Expected outcome |
+|---|---|---|---|
+| High LTV | High | Human retention call within 24h | Highest protected value per customer |
+| Low LTV | High | Retention email offer | Controlled CAC with strong scale |
+| High LTV | Medium | Proactive loyalty outreach | Incremental churn reduction |
+| Low LTV | Medium | Automated nurture journey | Efficient conversion uplift |
+
 ## Table of Contents
+- [Official Public Release](#official-public-release)
+- [Business Outcome Simulation (Executive Snapshot)](#business-outcome-simulation-executive-snapshot)
+- [Action Playbook (Executive Summary)](#action-playbook-executive-summary)
 - [Highlights](#highlights)
 - [Architecture](#architecture)
 - [Public Streamlit App](#public-streamlit-app)

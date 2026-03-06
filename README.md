@@ -3,6 +3,7 @@
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](./.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](#setup)
 [![Streamlit](https://img.shields.io/badge/streamlit-online-brightgreen)](https://data-senior-analytics.streamlit.app/)
+[![Release Oficial](https://img.shields.io/badge/release-v1.0.0-success)](https://github.com/samuelmaia-data-analyst/churn-prediction/releases/latest)
 
 Idioma: **Português (PT-BR)** | [English](README.en.md)
 
@@ -16,7 +17,32 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - data quality checks com `Pandera`
 - rastreabilidade de modelos com `MLflow`
 
+## Release Oficial (Publica)
+- Release publica com notas: https://github.com/samuelmaia-data-analyst/churn-prediction/releases/latest
+- Notas locais da versao atual: [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md)
+
+## Business Outcome Simulation (Executive Snapshot)
+Objetivo: transformar score tecnico em resultado financeiro defendivel para comite executivo.
+
+- Valor protegido (carteira priorizada): `~$68k` por ciclo
+- Impacto esperado liquido (cenario base): `+$16k` por ciclo apos custo de acao
+- Cenario de adocao operacional: `70%` de cobertura do playbook com SLA de primeiro contato `<24h`
+- Leitura executiva: capturar `~24%` do valor em risco ja cobre o custo operacional no cenario base
+
+## Action Playbook (Resumo Executivo)
+Tradução direta de risco + valor para acao comercial:
+
+| Segment | Risk | Acao recomendada | Resultado esperado |
+|---|---|---|---|
+| High LTV | High | Contato humano de retencao em ate 24h | Maior valor protegido por cliente |
+| Low LTV | High | Oferta de retencao por email | Controle de CAC com boa escala |
+| High LTV | Medium | Outreach proativo de fidelizacao | Reducao de churn incremental |
+| Low LTV | Medium | Jornada automatizada de nurture | Ganho eficiente de conversao |
+
 ## Sumário
+- [Release Oficial (Publica)](#release-oficial-publica)
+- [Business Outcome Simulation (Executive Snapshot)](#business-outcome-simulation-executive-snapshot)
+- [Action Playbook (Resumo Executivo)](#action-playbook-resumo-executivo)
 - [Destaques](#destaques)
 - [Arquitetura](#arquitetura)
 - [Streamlit (público)](#streamlit-publico)
