@@ -221,9 +221,9 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
             ### Autor
             **Samuel de Andrade Maia**
 
-            [GitHub](https://github.com/samuelmaia-data-analyst)
+            [GitHub](https://github.com/samuelmaia-analytics)
 
-            [LinkedIn](https://linkedin.com/in/samuelmaia-data-analyst)
+            [LinkedIn](https://linkedin.com/in/samuelmaia-analytics)
             """
         )
 
