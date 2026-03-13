@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 import pandas as pd
 
 from src.config import PipelineConfig
+from src.validation import validate_raw_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ def load_raw_dataset(config: PipelineConfig) -> pd.DataFrame:
             "Baixe do Kaggle e coloque em data/raw."
         )
     df = pd.read_csv(config.raw_input_path)
+    report = validate_raw_dataframe(df)
     logger.info("raw_loaded rows=%s cols=%s", df.shape[0], df.shape[1])
+    logger.info("raw_validated %s", report.to_dict())
     return df
 
 

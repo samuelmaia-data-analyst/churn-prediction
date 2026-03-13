@@ -9,10 +9,11 @@ class PipelineConfig:
     data_dir: Path
     seed: int
     log_level: str
+    mlflow_tracking_uri: str = "file:./mlruns"
+    decision_policy: str = "balanceada"
 
     raw_filename: str = "WA_Fn-UseC_-Telco-Customer-Churn.csv"
     test_size: float = 0.2
-    mlflow_tracking_uri: str = "file:./mlruns"
 
     @property
     def raw_dir(self) -> Path:
@@ -37,6 +38,10 @@ class PipelineConfig:
     @property
     def models_dir(self) -> Path:
         return Path("artifacts/models")
+
+    @property
+    def model_registry_dir(self) -> Path:
+        return Path("models")
 
     @property
     def logs_dir(self) -> Path:
@@ -77,6 +82,18 @@ class PipelineConfig:
     @property
     def next_purchase_model_path(self) -> Path:
         return self.models_dir / "enterprise_next_purchase_model.joblib"
+
+    @property
+    def enterprise_bundle_path(self) -> Path:
+        return self.models_dir / "enterprise_churn_bundle.joblib"
+
+    @property
+    def versioned_model_path(self) -> Path:
+        return self.model_registry_dir / "model_v1.pkl"
+
+    @property
+    def model_metadata_path(self) -> Path:
+        return self.model_registry_dir / "model_metadata.json"
 
     @property
     def monitoring_dir(self) -> Path:

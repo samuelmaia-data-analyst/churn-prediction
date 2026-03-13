@@ -4,9 +4,17 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.preprocessing import FunctionTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+from src.feature_engineering import (
+    CATEGORICAL_FEATURES,
+    MODEL_FEATURES,
+    NUMERIC_FEATURES,
+    engineer_features,
+)
 
 try:
     from xgboost import XGBClassifier
@@ -14,30 +22,7 @@ except ImportError:  # pragma: no cover
     XGBClassifier = None
 
 
-FEATURES = [
-    "gender",
-    "SeniorCitizen",
-    "Partner",
-    "Dependents",
-    "tenure",
-    "PhoneService",
-    "MultipleLines",
-    "InternetService",
-    "OnlineSecurity",
-    "OnlineBackup",
-    "DeviceProtection",
-    "TechSupport",
-    "StreamingTV",
-    "StreamingMovies",
-    "Contract",
-    "PaperlessBilling",
-    "PaymentMethod",
-    "MonthlyCharges",
-    "TotalCharges",
-]
-
-NUMERIC_FEATURES = ["SeniorCitizen", "tenure", "MonthlyCharges", "TotalCharges"]
-CATEGORICAL_FEATURES = [feature for feature in FEATURES if feature not in NUMERIC_FEATURES]
+FEATURES = MODEL_FEATURES
 MODEL_DISPLAY_NAMES = {
     "Logistic": "Logistic Regression",
     "RandomForest": "RandomForest",
@@ -47,6 +32,10 @@ BUSINESS_FEATURE_NAMES = {
     "Contract": "Contract type",
     "tenure": "Tenure",
     "MonthlyCharges": "Monthly charges",
+    "charges_per_tenure": "Charges per tenure",
+    "service_count": "Service count",
+    "support_services_count": "Support services count",
+    "is_month_to_month": "Month-to-month customer",
 }
 PIPELINE_VISUAL = "Raw -> Bronze -> Silver -> Gold"
 
@@ -60,6 +49,10 @@ def build_preprocessor() -> ColumnTransformer:
     )
 
 
+def build_feature_engineering_step() -> FunctionTransformer:
+    return FunctionTransformer(engineer_features, validate=False)
+
+
 def add_next_purchase_target(df: pd.DataFrame) -> pd.Series:
     contract_factor = np.where(df["Contract"].eq("Month-to-month"), 1.04, 1.015)
     service_factor = np.where(df["InternetService"].eq("Fiber optic"), 1.025, 1.0)
@@ -71,12 +64,14 @@ def build_churn_models(seed: int) -> tuple[dict[str, Pipeline], dict[str, str]]:
     models = {
         "Logistic": Pipeline(
             steps=[
+                ("features", build_feature_engineering_step()),
                 ("prep", build_preprocessor()),
                 ("clf", LogisticRegression(max_iter=1500, random_state=seed)),
             ]
         ),
         "RandomForest": Pipeline(
             steps=[
+                ("features", build_feature_engineering_step()),
                 ("prep", build_preprocessor()),
                 ("clf", RandomForestClassifier(n_estimators=250, random_state=seed)),
             ]
@@ -90,6 +85,7 @@ def build_churn_models(seed: int) -> tuple[dict[str, Pipeline], dict[str, str]]:
     if XGBClassifier is not None:
         models["XGBoost"] = Pipeline(
             steps=[
+                ("features", build_feature_engineering_step()),
                 ("prep", build_preprocessor()),
                 (
                     "clf",
@@ -109,6 +105,7 @@ def build_churn_models(seed: int) -> tuple[dict[str, Pipeline], dict[str, str]]:
     else:
         models["XGBoost"] = Pipeline(
             steps=[
+                ("features", build_feature_engineering_step()),
                 ("prep", build_preprocessor()),
                 ("clf", GradientBoostingClassifier(random_state=seed)),
             ]

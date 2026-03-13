@@ -74,7 +74,12 @@ def _build_synthetic_raw(rows: int = 800) -> pd.DataFrame:
 
 
 def _generate_outputs_from_pipeline() -> bool:
-    config = PipelineConfig(data_dir=Path("data"), seed=42, log_level="INFO")
+    config = PipelineConfig(
+        data_dir=Path("data"),
+        seed=42,
+        log_level="INFO",
+        mlflow_tracking_uri="disabled",
+    )
     try:
         raw_df = load_raw_dataset(config)
         bronze_df = build_bronze_layer(raw_df)

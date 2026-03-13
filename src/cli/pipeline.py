@@ -26,6 +26,7 @@ except ImportError:  # pragma: no cover
 
 
 from src.config import PipelineConfig
+from src.decisioning import POLICIES
 from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
 from src.logging_utils import configure_logging
 from src.ml import ModelOutputs, train_models_and_score
@@ -51,6 +52,13 @@ def parse_args() -> argparse.Namespace:
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Nível de log",
+    )
+    parser.add_argument(
+        "--decision-policy",
+        type=str,
+        default="balanceada",
+        choices=sorted(POLICIES.keys()),
+        help="Politica de custo usada para definir o threshold global do classificador.",
     )
     return parser.parse_args()
 
@@ -100,6 +108,7 @@ def run_pipeline(
     data_dir: str = "data",
     log_level: str = "INFO",
     mlflow_tracking_uri: str = "file:./mlruns",
+    decision_policy: str = "balanceada",
 ) -> None:
     run_id = str(uuid4())
     config = PipelineConfig(
@@ -107,6 +116,7 @@ def run_pipeline(
         seed=seed,
         log_level=log_level,
         mlflow_tracking_uri=mlflow_tracking_uri,
+        decision_policy=decision_policy,
     )
     configure_logging(level=config.log_level, log_dir=config.logs_dir, run_id=run_id)
 
@@ -118,12 +128,16 @@ def run_pipeline(
         config.data_dir,
     )
 
-    bronze_df = bronze_task(config)
-    silver_df = silver_task(config, bronze_df)
-    warehouse_task(config, silver_df)
-    model_outputs = ml_task(config, silver_df)
-    reporting_task(config, model_outputs)
-    drift_result = monitoring_task(config, model_outputs)
+    try:
+        bronze_df = bronze_task(config)
+        silver_df = silver_task(config, bronze_df)
+        warehouse_task(config, silver_df)
+        model_outputs = ml_task(config, silver_df)
+        reporting_task(config, model_outputs)
+        drift_result = monitoring_task(config, model_outputs)
+    except Exception:
+        logger.exception("pipeline_failed run_id=%s", run_id)
+        raise
 
     elapsed_seconds = time.perf_counter() - started_at
     logger.info(
@@ -145,6 +159,7 @@ def main() -> None:
         seed=args.seed,
         data_dir=str(args.data_dir),
         log_level=args.log_level,
+        decision_policy=args.decision_policy,
     )
 
 

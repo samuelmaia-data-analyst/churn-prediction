@@ -19,8 +19,17 @@ class FeatureImportanceRow(TypedDict):
     importance: float
 
 
+class ConfusionMatrix(TypedDict):
+    tn: int
+    fp: int
+    fn: int
+    tp: int
+
+
 @dataclass(frozen=True)
 class ExecutiveMetrics:
+    churn_precision: float
+    churn_recall: float
     churn_f1: float
     churn_roc_auc: float
     next_purchase_mae: float
@@ -30,6 +39,11 @@ class ExecutiveMetrics:
     feature_importance: list[FeatureImportanceRow]
     top_drivers_of_churn: list[str]
     key_insights: list[str]
+    confusion_matrix: ConfusionMatrix
+    decision_threshold: float
+    decision_policy: dict[str, object]
+    cost_interpretation: dict[str, str]
+    risk_profiles: list[dict[str, object]]
     pipeline_visual: str
     model_comparison_note: str | None = None
 

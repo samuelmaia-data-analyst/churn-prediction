@@ -1,6 +1,7 @@
 """Compatibility layer: use src.modeling.predictor moving forward."""
 
 from src.modeling.predictor import (
+    DEFAULT_BUNDLE_PATH,
     DEFAULT_MODEL_PATH,
     DEFAULT_PREPROCESSOR_PATH,
     LEGACY_MODEL_PATH,
@@ -12,6 +13,7 @@ from src.modeling.predictor import (
 __all__ = [
     "ChurnPredictor",
     "PredictionResult",
+    "DEFAULT_BUNDLE_PATH",
     "DEFAULT_MODEL_PATH",
     "DEFAULT_PREPROCESSOR_PATH",
     "LEGACY_MODEL_PATH",

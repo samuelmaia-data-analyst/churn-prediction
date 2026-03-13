@@ -1,31 +1,28 @@
-﻿from __future__ import annotations
+"""Compatibility layer for processed dataset export using the canonical pipeline."""
+
+from __future__ import annotations
 
 import logging
 from pathlib import Path
 
-import pandas as pd
-import yaml
+from src.config import PipelineConfig
+from src.ingestion import build_bronze_layer, load_raw_dataset
+from src.transformation import build_silver_layer
 
 logger = logging.getLogger(__name__)
 
 
-class DataLoader:
-    def __init__(self, config_path: str = "config.yaml") -> None:
-        with open(config_path, "r", encoding="utf-8") as file:
-            self.config = yaml.safe_load(file)
+def main() -> None:
+    config = PipelineConfig(data_dir=Path("data"), seed=42, log_level="INFO")
+    raw_df = load_raw_dataset(config)
+    bronze_df = build_bronze_layer(raw_df)
+    silver_df = build_silver_layer(bronze_df)
 
-    def load_data(self) -> pd.DataFrame:
-        dataset_path = Path(self.config["data"]["raw_path"])
-        if not dataset_path.exists():
-            raise FileNotFoundError(f"Dataset não encontrado: {dataset_path}")
+    output_path = config.data_dir / "processed" / "telco_churn_processed.csv"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    silver_df.to_csv(output_path, index=False)
+    logger.info("processed_dataset_saved path=%s rows=%s", output_path, len(silver_df))
 
-        df = pd.read_csv(dataset_path)
-        logger.info("Dados carregados: %s linhas, %s colunas", df.shape[0], df.shape[1])
-        return df
 
-    def save_processed(self, df: pd.DataFrame) -> Path:
-        output_path = Path(self.config["data"]["processed_path"])
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(output_path, index=False)
-        logger.info("Dados salvos em: %s", output_path)
-        return output_path
+if __name__ == "__main__":
+    main()

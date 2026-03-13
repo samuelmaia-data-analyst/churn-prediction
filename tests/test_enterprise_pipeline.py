@@ -105,3 +105,27 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     assert (config.gold_dir / "customer_prioritization.csv").exists()
     assert (config.gold_dir / "kpi_summary.csv").exists()
     assert (config.gold_dir / "action_playbook.csv").exists()
+
+
+def test_decision_policy_changes_threshold(tmp_path: Path) -> None:
+    silver = build_silver_layer(build_bronze_layer(build_dataset(120)))
+
+    expensive_policy = PipelineConfig(
+        data_dir=tmp_path / "data_expensive",
+        seed=42,
+        log_level="INFO",
+        decision_policy="campanha_cara",
+    )
+    cheap_policy = PipelineConfig(
+        data_dir=tmp_path / "data_cheap",
+        seed=42,
+        log_level="INFO",
+        decision_policy="campanha_barata",
+    )
+
+    expensive_outputs = train_models_and_score(expensive_policy, silver)
+    cheap_outputs = train_models_and_score(cheap_policy, silver)
+
+    assert (
+        expensive_outputs.metrics["decision_threshold"] > cheap_outputs.metrics["decision_threshold"]
+    )

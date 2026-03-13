@@ -94,6 +94,9 @@ def _render_model_card(executive_report: ExecutiveReport) -> str:
     comparison = model_metrics.get("model_comparison", [])
     top_drivers = model_metrics.get("top_drivers_of_churn", [])
     insights = model_metrics.get("key_insights", [])
+    confusion = model_metrics.get("confusion_matrix", {})
+    threshold = float(model_metrics.get("decision_threshold", 0.5))
+    decision_policy = model_metrics.get("decision_policy", {})
     pipeline_visual = model_metrics.get("pipeline_visual", "Raw -> Bronze -> Silver -> Gold")
 
     comparison_rows = "\n".join(
@@ -108,6 +111,14 @@ def _render_model_card(executive_report: ExecutiveReport) -> str:
 - Logistic Regression
 - ROC-AUC: {float(baseline.get("roc_auc", 0.0)):.3f}
 
+## Classification Metrics
+- Precision: {float(model_metrics.get("churn_precision", 0.0)):.3f}
+- Recall: {float(model_metrics.get("churn_recall", 0.0)):.3f}
+- F1-score: {float(model_metrics.get("churn_f1", 0.0)):.3f}
+- ROC-AUC: {float(model_metrics.get("churn_roc_auc", 0.0)):.3f}
+- Decision threshold: {threshold:.2f}
+- Decision policy: {decision_policy.get("name", "-")}
+
 ## Model Comparison
 | Model | ROC-AUC |
 |---|---:|
@@ -118,6 +129,17 @@ def _render_model_card(executive_report: ExecutiveReport) -> str:
 
 ## Key Insights
 {insights_rows}
+
+## Confusion Matrix
+- True Negatives: {int(confusion.get("tn", 0))}
+- False Positives: {int(confusion.get("fp", 0))}
+- False Negatives: {int(confusion.get("fn", 0))}
+- True Positives: {int(confusion.get("tp", 0))}
+
+## Business Decision Policy
+- False positive cost: {float(decision_policy.get("fp_cost", 0.0)):.2f}
+- False negative cost: {float(decision_policy.get("fn_cost", 0.0)):.2f}
+- Policy rationale: {decision_policy.get("description", "-")}
 
 ## KPI Snapshot
 - Total Customers: {int(kpis.get("total_customers", 0))}
@@ -134,6 +156,12 @@ flowchart LR
 ```
 
 Referencia textual: `{pipeline_visual}`
+
+## Limitations and Governance
+- Dataset de referencia e sintetico para caso de negocio, nao prova causalidade.
+- Performance pode degradar com drift de mix de clientes, canais ou precificacao.
+- Threshold deve ser revisado conforme custo operacional, budget e capacidade comercial.
+- Recomendado monitorar drift, recalibrar threshold e auditar impacto financeiro por campanha.
 """
 
 
@@ -155,6 +183,8 @@ def _render_executive_brief(
 
     top_drivers = model_metrics.get("top_drivers_of_churn", [])
     key_insights = model_metrics.get("key_insights", [])
+    risk_profiles = model_metrics.get("risk_profiles", [])
+    cost_interpretation = model_metrics.get("cost_interpretation", {})
     segmentation_rows = "\n".join(
         [
             (
@@ -192,8 +222,19 @@ def _render_executive_brief(
 ## Top Drivers of Churn
 {chr(10).join(f"- {driver}" for driver in top_drivers)}
 
+## Risk Profiles with Highest Average Churn
+{chr(10).join(
+    f"- {row['contract']} + {row['internet_service']}: avg churn prob {float(row['avg_churn_probability']):.2%}, avg monthly charges ${float(row['avg_monthly_charges']):.2f}"
+    for row in risk_profiles
+)}
+
 ## Key Insights
 {chr(10).join(f"- {insight}" for insight in key_insights)}
+
+## Error Cost Interpretation
+- False positive: {cost_interpretation.get("false_positive", "-")}
+- False negative: {cost_interpretation.get("false_negative", "-")}
+- Trade-off: {cost_interpretation.get("business_tradeoff", "-")}
 
 ## Pipeline
 ```mermaid

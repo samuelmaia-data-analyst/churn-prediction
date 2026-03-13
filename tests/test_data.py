@@ -1,14 +1,18 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import pandas as pd
+import pytest
 
-from src.data.preprocess import DataPreprocessor
+from src.feature_engineering import engineer_features
+from src.ingestion import build_bronze_layer
+from src.transformation import build_silver_layer
+from src.validation import validate_raw_dataframe, validate_training_dataframe
 
 
-def build_raw_df() -> pd.DataFrame:
-    rows = []
-    for i in range(40):
-        rows.append(
+def build_raw_df(rows: int = 40) -> pd.DataFrame:
+    records = []
+    for i in range(rows):
+        records.append(
             {
                 "customerID": f"CUST-{i:03d}",
                 "gender": "Male" if i % 2 == 0 else "Female",
@@ -25,7 +29,7 @@ def build_raw_df() -> pd.DataFrame:
                 "TechSupport": "No",
                 "StreamingTV": "No",
                 "StreamingMovies": "No",
-                "Contract": "Month-to-month",
+                "Contract": "Month-to-month" if i % 2 == 0 else "One year",
                 "PaperlessBilling": "Yes",
                 "PaymentMethod": "Electronic check",
                 "MonthlyCharges": 40.0 + i,
@@ -33,26 +37,37 @@ def build_raw_df() -> pd.DataFrame:
                 "Churn": "Yes" if i % 2 == 0 else "No",
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(records)
 
 
-def test_clean_data_maps_target_and_totalcharges() -> None:
-    preprocessor = DataPreprocessor()
+def test_validation_and_silver_layer_keep_training_dataset_reliable() -> None:
     raw = build_raw_df()
 
-    clean = preprocessor.clean_data(raw)
+    report = validate_raw_dataframe(raw)
+    bronze = build_bronze_layer(raw)
+    silver = build_silver_layer(bronze)
+    validate_training_dataframe(silver)
 
-    assert "customerID" not in clean.columns
-    assert clean["TotalCharges"].dtype.kind in {"f", "i"}
-    assert clean["Churn"].isin([0, 1]).all()
+    assert report.rows == len(raw)
+    assert report.invalid_churn_labels == 0
+    assert "customerID" in silver.columns
+    assert silver["TotalCharges"].dtype.kind in {"f", "i"}
+    assert silver["Churn"].isin([0, 1]).all()
 
 
-def test_split_data_returns_train_and_test() -> None:
-    preprocessor = DataPreprocessor()
-    clean = preprocessor.clean_data(build_raw_df())
+def test_validate_raw_dataframe_rejects_invalid_target_label() -> None:
+    raw = build_raw_df()
+    raw.loc[0, "Churn"] = "Maybe"
 
-    X_train, X_test, y_train, y_test = preprocessor.split_data(clean)
+    with pytest.raises(ValueError, match="Churn"):
+        validate_raw_dataframe(raw)
 
-    assert len(X_train) > len(X_test)
-    assert len(y_train) == len(X_train)
-    assert len(y_test) == len(X_test)
+
+def test_engineer_features_adds_business_features() -> None:
+    silver = build_silver_layer(build_bronze_layer(build_raw_df()))
+    featured = engineer_features(silver)
+
+    assert {"charges_per_tenure", "service_count", "is_month_to_month", "tenure_band"}.issubset(
+        featured.columns
+    )
+    assert featured["service_count"].ge(0).all()
