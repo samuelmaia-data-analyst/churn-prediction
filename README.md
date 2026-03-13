@@ -17,6 +17,19 @@ Pipeline de analytics e ML com dataset Kaggle (Telco Customer Churn), estruturad
 - data quality checks com `Pandera`
 - rastreabilidade de modelos com `MLflow`
 
+## Contexto de Negócio
+
+Este projeto simula uma operação de telecom ou assinatura com pressão para reduzir churn, proteger receita recorrente e melhorar a eficiência das ações de retenção.
+O objetivo não é apenas prever cancelamento, mas transformar sinais de risco em priorização comercial, playbooks acionáveis e visibilidade executiva.
+
+## Stakeholders
+
+- Revenue Operations e CRM: definição da fila de atuação
+- Customer Success e Retenção: execução de playbooks por segmento
+- Marketing: leitura de valor por perfil e sensibilidade a oferta
+- Finanças: proteção de receita e retorno sobre custo de ação
+- Liderança executiva: visão consolidada de risco, impacto e capacidade operacional
+
 ## Release Oficial (Publica)
 - Release publica com notas: https://github.com/samuelmaia-data-analyst/churn-prediction/releases/latest
 - Notas locais da versao atual: [RELEASE_NOTES_v1.0.0.md](RELEASE_NOTES_v1.0.0.md)
@@ -39,6 +52,10 @@ Tradução direta de risco + valor para acao comercial:
 | Low LTV | High | Oferta de retencao por email | Controle de CAC com boa escala |
 | High LTV | Medium | Outreach proativo de fidelizacao | Reducao de churn incremental |
 | Low LTV | Medium | Jornada automatizada de nurture | Ganho eficiente de conversao |
+
+## Pergunta de Negócio que o Projeto Responde
+
+Quais clientes devem receber ação prioritária nesta semana, qual tipo de intervenção faz mais sentido por segmento e qual impacto financeiro esperado isso gera para a carteira?
 
 ## Sumário
 - [Release Oficial (Publica)](#release-oficial-publica)
