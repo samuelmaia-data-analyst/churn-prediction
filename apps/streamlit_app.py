@@ -1,6 +1,6 @@
 """
 Churn Prediction Dashboard - Streamlit
-Autor: Samuel de Andrade Maia
+Author: Samuel de Andrade Maia
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ def inject_styles() -> None:
                 linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
             color: var(--text);
         }}
-        html, body, [class*="css"]  {{
+        html, body, [class*="css"] {{
             font-family: "Space Grotesk", sans-serif;
         }}
         h1, h2, h3,
@@ -142,6 +142,13 @@ def inject_styles() -> None:
             color: var(--text);
             font-size: 0.96rem;
         }}
+        .status-box {{
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 12px;
+            padding: 0.75rem 0.85rem;
+            margin-bottom: 0.65rem;
+            background: rgba(255,255,255,0.06);
+        }}
         code {{
             font-family: "JetBrains Mono", monospace !important;
         }}
@@ -164,9 +171,10 @@ def render_header() -> None:
     st.markdown(
         """
         <div class="hero">
-            <h1 class="hero-title">Churn Prediction System</h1>
+            <h1 class="hero-title">Churn Prediction Control Room</h1>
             <p class="hero-subtitle">
-                Monitoramento de cancelamento e predicao individual de risco
+                Operational dashboard for churn monitoring, risk exploration,
+                and customer-level inference.
             </p>
         </div>
         """,
@@ -180,30 +188,40 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
     model_loaded = False
 
     with st.sidebar:
-        st.markdown("## Status")
+        st.markdown("## Runtime Status")
 
         if runtime.data_path.exists():
             df = load_data(runtime.data_path)
-            st.success(f"Dados: {len(df):,} registros")
+            st.success(f"Dataset ready: {len(df):,} rows")
         else:
-            st.error("Dataset nao encontrado")
+            st.error("Dataset not found")
 
         if runtime.bundle_path.exists():
             predictor = load_predictor(runtime.bundle_path)
             model_loaded = predictor.is_ready
             if model_loaded:
-                st.success(f"Bundle carregado ({runtime.bundle_path.name})")
+                st.success(f"Inference bundle ready: {runtime.bundle_path.name}")
             else:
-                st.error("Bundle incompativel. Gere novamente os artefatos do pipeline.")
+                st.error("Bundle loaded but incompatible with the current predictor contract.")
         else:
             st.warning(
-                "Bundle de inferencia nao encontrado. Rode o pipeline para habilitar predicao."
+                "Inference bundle not found. Run the training pipeline to enable predictions."
             )
+
+        st.markdown(
+            f"""
+            <div class="status-box">
+                <strong>Environment</strong><br>{RUNTIME_CONFIG.environment}<br><br>
+                <strong>Run ID</strong><br><code>{RUNTIME_CONFIG.run_id}</code>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         st.markdown("---")
         st.markdown(
             """
-            ### Autor
+            ### Maintainer
             **Samuel de Andrade Maia**
 
             [GitHub](https://github.com/samuelmaia-analytics)
@@ -217,23 +235,23 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
 
 def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
     st.markdown("---")
-    st.markdown('<div class="section-title">Filtros de exploracao</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Exploration Filters</div>', unsafe_allow_html=True)
 
     filter_col1, filter_col2 = st.columns(2)
 
     with filter_col1:
-        st.caption("Controla o grafico da esquerda")
+        st.caption("Controls the left-side chart")
         contract_options = ["Todos"]
         if "Contract" in df.columns:
             contract_options += sorted(df["Contract"].dropna().unique().tolist())
-        selected_contract = st.selectbox("Contrato", contract_options)
+        selected_contract = st.selectbox("Contract", contract_options)
 
     with filter_col2:
-        st.caption("Controla o grafico da direita")
+        st.caption("Controls the right-side chart")
         internet_options = ["Todos"]
         if "InternetService" in df.columns:
             internet_options += sorted(df["InternetService"].dropna().unique().tolist())
-        selected_internet = st.selectbox("Servico de internet", internet_options)
+        selected_internet = st.selectbox("Internet service", internet_options)
 
     left_chart_df, right_chart_df, preview_df = build_filtered_views(
         df=df,
@@ -244,21 +262,27 @@ def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.Data
 
 
 def render_metrics(df: pd.DataFrame) -> None:
-    st.markdown('<div class="section-title">Resumo executivo</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Portfolio Snapshot</div>', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     metrics = summarise_metrics(df)
 
     with col1:
-        st.metric("Total Clientes", f"{metrics['total_customers']:,}")
+        st.metric("Total Customers", f"{metrics['total_customers']:,}")
 
     with col2:
-        st.metric("Taxa de Churn", f"{metrics['churn_rate']:.1f}%")
+        st.metric("Churn Rate", f"{metrics['churn_rate']:.1f}%")
 
     with col3:
-        st.metric("Media Mensal", f"${metrics['avg_monthly']:.2f}")
+        st.metric("Average Monthly Charge", f"${metrics['avg_monthly']:.2f}")
 
     with col4:
-        st.metric("Media Tenure", f"{metrics['avg_tenure']:.1f} meses")
+        st.metric("Average Tenure", f"{metrics['avg_tenure']:.1f} months")
+
+    st.caption(
+        "This overview is computed from the raw telco customer dataset. "
+        "Detailed prioritization and value-at-risk views are available "
+        "in the dedicated Streamlit pages."
+    )
 
 
 def render_charts(
@@ -267,11 +291,11 @@ def render_charts(
     selected_contract: str,
     selected_internet: str,
 ) -> None:
-    st.markdown('<div class="section-title">Analise visual</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Risk Exploration</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader(f"Distribuicao de Churn (Contrato: {selected_contract})")
+        st.subheader(f"Churn Distribution by Contract: {selected_contract}")
         if "Churn" in left_chart_df.columns:
             churn_counts = (
                 left_chart_df["Churn"].value_counts().reindex(["No", "Yes"], fill_value=0)
@@ -279,7 +303,7 @@ def render_charts(
             fig1 = px.pie(
                 values=churn_counts.values,
                 names=churn_counts.index,
-                title=f"Proporcao de Cancelamentos (No/Yes) - Contrato: {selected_contract}",
+                title="Cancellation split across selected contract cohort",
                 color=churn_counts.index,
                 color_discrete_map={"Yes": COLOR_ALERT, "No": COLOR_PRIMARY},
                 hole=0.48,
@@ -291,10 +315,10 @@ def render_charts(
             )
             st.plotly_chart(fig1, use_container_width=True)
         else:
-            st.info("Coluna 'Churn' nao encontrada para gerar o grafico.")
+            st.info("Column 'Churn' not available for this chart.")
 
     with col2:
-        st.subheader(f"Churn por Contrato (Servico: {selected_internet})")
+        st.subheader(f"Contract Mix by Internet Service: {selected_internet}")
         if {"Contract", "Churn"}.issubset(right_chart_df.columns):
             contract_order = ["Month-to-month", "One year", "Two year"]
             contract_churn_rate = (
@@ -307,19 +331,19 @@ def render_charts(
             fig2 = px.bar(
                 x=contract_churn_rate.index,
                 y=contract_churn_rate.values,
-                title=f"Taxa de Churn (Yes) por Tipo de Contrato - Servico: {selected_internet}",
-                labels={"x": "Tipo de Contrato", "y": "Taxa (%)"},
+                title="Churn rate by contract type",
+                labels={"x": "Contract type", "y": "Rate (%)"},
                 color_discrete_sequence=[COLOR_SECONDARY],
             )
             fig2.update_traces(marker_line_color="#083344", marker_line_width=1.0)
             fig2.update_layout(margin=dict(l=10, r=10, t=48, b=10), title_font=dict(size=18))
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("Colunas necessarias para grafico de contrato nao encontradas.")
+            st.info("Required columns for contract view are unavailable.")
 
 
 def render_data_preview(filtered_df: pd.DataFrame) -> None:
-    with st.expander("Visualizar amostra de dados", expanded=False):
+    with st.expander("Preview source records", expanded=False):
         columns_to_show = [
             "customerID",
             "gender",
@@ -336,23 +360,26 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
 
 def render_prediction(predictor: ChurnPredictor) -> None:
     st.markdown("---")
-    st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-title">Customer-Level Prediction</div>',
+        unsafe_allow_html=True,
+    )
 
-    with st.expander("Preencher dados do cliente", expanded=False):
+    with st.expander("Enter customer profile", expanded=False):
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            gender = st.selectbox("Genero", ["Male", "Female"])
-            senior = st.selectbox("Senior Citizen", [0, 1])
+            gender = st.selectbox("Gender", ["Male", "Female"])
+            senior = st.selectbox("Senior citizen", [0, 1])
             partner = st.selectbox("Partner", ["Yes", "No"])
             dependents = st.selectbox("Dependents", ["Yes", "No"])
 
         with col2:
-            tenure = st.number_input("Tenure (meses)", 0, 100, 12)
+            tenure = st.number_input("Tenure (months)", 0, 100, 12)
             contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
-            paperless = st.selectbox("Paperless Billing", ["Yes", "No"])
+            paperless = st.selectbox("Paperless billing", ["Yes", "No"])
             payment = st.selectbox(
-                "Payment Method",
+                "Payment method",
                 [
                     "Electronic check",
                     "Mailed check",
@@ -362,12 +389,12 @@ def render_prediction(predictor: ChurnPredictor) -> None:
             )
 
         with col3:
-            monthly = st.number_input("Monthly Charges ($)", 0.0, 200.0, 65.5)
-            total = st.number_input("Total Charges ($)", 0.0, 10000.0, 786.0)
-            internet_service = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
-            phone_service = st.selectbox("Phone Service", ["Yes", "No"])
+            monthly = st.number_input("Monthly charges ($)", 0.0, 200.0, 65.5)
+            total = st.number_input("Total charges ($)", 0.0, 10000.0, 786.0)
+            internet_service = st.selectbox("Internet service", ["DSL", "Fiber optic", "No"])
+            phone_service = st.selectbox("Phone service", ["Yes", "No"])
 
-        if st.button("Prever churn"):
+        if st.button("Score customer"):
             try:
                 payload = build_prediction_payload(
                     gender=gender,
@@ -393,7 +420,7 @@ def render_prediction(predictor: ChurnPredictor) -> None:
                         go.Indicator(
                             mode="gauge+number",
                             value=proba * 100,
-                            title={"text": "Probabilidade de Churn"},
+                            title={"text": "Churn probability"},
                             gauge={
                                 "axis": {"range": [0, 100]},
                                 "bar": {"color": COLOR_PRIMARY},
@@ -410,21 +437,23 @@ def render_prediction(predictor: ChurnPredictor) -> None:
 
                 with result_col2:
                     if result.risk_level == "Alto":
-                        st.error(f"Alto risco de cancelamento ({proba:.1%})")
+                        st.error(f"High churn risk detected ({proba:.1%})")
                     else:
-                        st.success(f"Baixo risco de cancelamento ({proba:.1%})")
+                        st.success(f"Lower churn risk detected ({proba:.1%})")
                     st.markdown(
                         """
                         <div class="risk-box">
-                            Priorize clientes com risco alto para contato proativo,
-                            revisao de contrato e oferta de retencao.
+                            Use this score to trigger outreach, pricing review,
+                            or contract intervention. The intended operating model
+                            is prioritization by risk and value, not raw score
+                            inspection alone.
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
             except Exception as exc:
-                st.error(f"Erro ao gerar previsao: {exc}")
+                st.error(f"Prediction failed: {exc}")
 
 
 def render_footer() -> None:
@@ -432,8 +461,8 @@ def render_footer() -> None:
     st.markdown(
         """
         <div style='text-align: center; color: #355070; padding: 0.35rem 0 0.8rem 0;'>
-            <p>Desenvolvido por <strong>Samuel de Andrade Maia</strong></p>
-            <p>2026 - Churn Prediction System</p>
+            <p>Developed by <strong>Samuel de Andrade Maia</strong></p>
+            <p>2026 - Churn Prediction Data Product</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -442,8 +471,8 @@ def render_footer() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Churn Prediction - Samuel Maia",
-        page_icon="CS",
+        page_title="Churn Prediction Control Room",
+        page_icon="CR",
         layout="wide",
     )
 
@@ -456,7 +485,7 @@ def main() -> None:
     model_loaded = sidebar_state.model_loaded
 
     if df is None:
-        st.error(f"Dataset nao encontrado em: {DASHBOARD_RUNTIME.data_path}")
+        st.error(f"Dataset not found at: {DASHBOARD_RUNTIME.data_path}")
         st.stop()
 
     render_metrics(df)
@@ -465,7 +494,7 @@ def main() -> None:
         df
     )
     if left_chart_df.empty and right_chart_df.empty:
-        st.warning("Nenhum registro encontrado com os filtros selecionados.")
+        st.warning("No records matched the selected filters.")
         st.stop()
 
     render_charts(left_chart_df, right_chart_df, selected_contract, selected_internet)

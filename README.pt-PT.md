@@ -1,26 +1,26 @@
 # Churn Prediction Data Product
 
-Idioma: [EN](README.md) | **PT-BR** | [PT-PT](README.pt-PT.md)
+Idioma: [EN](README.md) | [PT-BR](README.pt-BR.md) | **PT-PT**
 
-Pipeline de dados e machine learning para churn de clientes, com foco em operação analítica, confiabilidade de execução e tradução do score em ações de retenção.
+Pipeline de dados e machine learning para churn de clientes, com foco na operação analítica, fiabilidade da execução e tradução do score em ações de retenção.
 
-Este repositório foi estruturado para se comportar como um produto de dados pequeno, mas crível:
+Este repositório foi estruturado para se comportar como um produto de dados pequeno, mas credível:
 
 - pipeline em camadas com responsabilidades explícitas
-- artefatos reprocessáveis e observáveis
-- saídas orientadas a negócio, não apenas métricas de modelo
+- artefactos reprocessáveis e observáveis
+- saídas orientadas para o negócio, não apenas métricas de modelo
 - contratos testados e automação de qualidade
 
-## Por Que Este Projeto Existe
+## Porque Este Projeto Existe
 
 Em muitos portfólios, churn aparece como notebook e gráfico. Aqui o objetivo é diferente: mostrar como um caso aplicado de ML pode ser implementado como sistema de dados sustentável.
 
 O projeto responde a quatro perguntas práticas:
 
-1. Quais clientes apresentam maior risco de churn?
-2. Quais clientes devem ser priorizados primeiro?
-3. Como o threshold muda quando o custo operacional da campanha muda?
-4. Quais artefatos o time de negócio precisa para agir sobre o score?
+1. Que clientes apresentam maior risco de churn?
+2. Que clientes devem ser priorizados primeiro?
+3. Como é que o threshold muda quando o custo operacional da campanha muda?
+4. De que artefactos precisa a equipa de negócio para agir sobre o score?
 
 ## O Que o Repositório Entrega
 
@@ -28,10 +28,10 @@ O projeto responde a quatro perguntas práticas:
 - tratamento e validação `bronze -> silver`
 - camada analítica `silver -> gold`
 - treino de modelos com comparação de candidatos
-- thresholding sensível a custo
-- persistência de artefatos de inferência
+- thresholding sensível ao custo
+- persistência de artefactos de inferência
 - relatórios executivos e playbook de ação
-- monitoramento leve de drift
+- monitorização leve de drift
 - testes automatizados e CI
 
 ## Quickstart
@@ -47,14 +47,14 @@ copy .env.example .env
 
 ### 2. Adicionar o dataset
 
-Arquivo esperado:
+Ficheiro esperado:
 
 `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
 Fonte do dataset:
 
 - Kaggle: `blastchar/telco-customer-churn`
-- arquivo utilizado neste projeto: `WA_Fn-UseC_-Telco-Customer-Churn.csv`
+- ficheiro utilizado neste projeto: `WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
 ### 3. Executar o pipeline
 
@@ -76,12 +76,12 @@ make typecheck
 .
 |-- .github/                  # CI, templates e padrões de colaboração
 |-- apps/                     # apps principais (Streamlit/FastAPI)
-|-- assets/                   # imagens e mídia do repositório
+|-- assets/                   # imagens e media do repositório
 |-- data/                     # datasets e camadas locais de pipeline
 |-- docs/                     # arquitetura, operação e convenções
 |-- notebooks/                # exploração isolada do caminho produtivo
 |-- pages/                    # páginas do Streamlit
-|-- src/                      # código canônico do produto de dados
+|-- src/                      # código canónico do produto de dados
 |-- tests/                    # contratos e regressão
 |-- .env.example              # configuração base por ambiente
 |-- Makefile                  # comandos padrão
@@ -110,24 +110,24 @@ Componentes centrais:
 - `src/pipelines/monitoring.py`: baseline e alerta de drift com PSI/KS
 - `src/cli/pipeline.py`: orquestração ponta a ponta
 
-Pastas como `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. A implementação canônica está em `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
+Pastas como `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. A implementação canónica está em `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
 
 Arquitetura detalhada:
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Operação e Confiabilidade
+## Operação e Fiabilidade
 
-O projeto implementa controles proporcionais ao escopo:
+O projeto implementa controlos proporcionais ao seu âmbito:
 
 - configuração por `.env` e variáveis de ambiente
-- isolamento de artefatos por contexto de execução
+- isolamento de artefactos por contexto de execução
 - logging estruturado com `run_id`
-- persistência atômica de CSV, JSON e Markdown
+- persistência atómica de CSV, JSON e Markdown
 - metadados de run em `artifacts/metadata/`
 - manifests versionados para `gold` e model registry
 - validação de schema antes do treino
-- monitoramento simples de drift
+- monitorização simples de drift
 - reprocessamento local sem estado manual oculto
 
 Guia operacional:
@@ -175,8 +175,8 @@ Os gates de qualidade estão definidos em:
 
 - reduzir ou eliminar a camada legada restante em `src/models`
 - adicionar validações de contrato mais estritas para outputs gold e reporting
-- plugar armazenamento remoto para artefatos e tracking
-- expor inferência e metadata por meio de um contrato de API versionado
+- ligar armazenamento remoto para artefactos e tracking
+- expor inferência e metadata através de um contrato de API versionado
 
 ## Colaboração
 

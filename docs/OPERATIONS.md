@@ -1,10 +1,10 @@
 # Operations
 
-## Configuração
+## Configuration
 
-O projeto suporta configuração por `.env` e variáveis de ambiente.
+The project supports configuration through `.env` and environment variables.
 
-Variáveis principais:
+Primary variables:
 
 - `CHURN_ENV`
 - `CHURN_DATA_DIR`
@@ -15,35 +15,35 @@ Variáveis principais:
 - `CHURN_DECISION_POLICY`
 - `CHURN_MLFLOW_TRACKING_URI`
 
-## Execução Local
+## Local Execution
 
-### Pipeline principal
+### Main pipeline
 
 ```bash
 .venv\Scripts\python.exe -m src.cli.pipeline --data-dir data --log-level INFO --decision-policy balanceada --environment dev
 ```
 
-### Testes
+### Tests
 
 ```bash
 make test
 ```
 
-### Lint e type check
+### Lint and type check
 
 ```bash
 make lint
 make typecheck
 ```
 
-## Artefatos Relevantes
+## Relevant Artifacts
 
 ### Logs
 
 - `artifacts/logs/pipeline.log`
 - `artifacts/logs/pipeline_<run_id>.log`
 
-### Metadata de execução
+### Execution metadata
 
 - `artifacts/metadata/latest_run.json`
 - `artifacts/metadata/pipeline_run_<run_id>.json`
@@ -67,44 +67,44 @@ make typecheck
 
 - `data/gold/_manifest.json`
 
-## Reprocessamento
+## Reprocessing
 
-O pipeline foi estruturado para permitir rerun local sem dependência de estado manual em memória.
+The pipeline is structured to allow local reruns without hidden in-memory state.
 
-Regras práticas:
+Practical rules:
 
-- trate `data/raw/` como entrada
-- trate `data/bronze`, `data/silver`, `data/gold` como camadas regeneráveis
-- trate `artifacts/` e `models/` como outputs de execução
+- treat `data/raw/` as input
+- treat `data/bronze`, `data/silver`, and `data/gold` as regenerable layers
+- treat `artifacts/` and `models/` as execution outputs
 
-## Incidentes Comuns
+## Common Incidents
 
-### Dataset ausente
+### Dataset missing
 
-Sintoma:
+Symptom:
 
-`FileNotFoundError` na ingestão.
+`FileNotFoundError` during ingestion.
 
-Ação:
+Action:
 
-adicionar o CSV esperado em `data/raw/`.
+Place the expected CSV file under `data/raw/`.
 
-### Ambiente sem dependências
+### Environment missing dependencies
 
-Sintoma:
+Symptom:
 
-falha em import de `joblib`, `mlflow` ou `mypy`.
+import failures for `joblib`, `mlflow`, or `mypy`.
 
-Ação:
+Action:
 
-reinstalar dependências com `pip install -r requirements.txt`.
+Reinstall dependencies with `pip install -r requirements.txt`.
 
-### Bundle de inferência ausente
+### Inference bundle missing
 
-Sintoma:
+Symptom:
 
-API ou dashboard iniciam sem readiness ou falham ao prever.
+The API or dashboard starts without readiness or fails to predict.
 
-Ação:
+Action:
 
-executar novamente o pipeline principal para reconstruir os artefatos versionados de inferência.
+Run the main pipeline again to rebuild the versioned inference artifacts.

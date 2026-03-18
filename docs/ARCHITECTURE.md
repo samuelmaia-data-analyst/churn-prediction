@@ -1,18 +1,18 @@
 # Architecture
 
-## Objetivo
+## Objective
 
-Organizar o problema de churn como produto de dados, não apenas experimento de ML.
+Model the churn use case as a data product, not only as an ML experiment.
 
-## Princípios
+## Design Principles
 
-- uma trilha canônica de pipeline
-- camadas com responsabilidade explícita
-- contratos entre modelagem e reporting
-- compatibilidade retroativa isolada
-- artefatos e logs tratados como outputs de primeira classe
+- one canonical execution path for the pipeline
+- explicit responsibilities by layer
+- contracts between modeling, reporting, and consumption layers
+- backward compatibility isolated from the main implementation path
+- artifacts and logs treated as first-class outputs
 
-## Fluxo de Dados
+## Data Flow
 
 ```text
 raw
@@ -24,38 +24,38 @@ raw
   -> dashboard/api
 ```
 
-## Domínios Principais
+## Core Domains
 
-### Runtime e Configuração
+### Runtime and Configuration
 
 - `src/runtime/config.py`
 - `src/runtime/logging.py`
 - `src/cli/pipeline.py`
 
-Responsabilidade:
+Responsibility:
 
-definir ambiente, `run_id`, paths resolvidos, metadata e observabilidade.
+Define environment, `run_id`, resolved paths, execution metadata, and logging behavior.
 
-### Ingestion e Quality Gate
+### Ingestion and Quality Gate
 
 - `src/pipelines/ingestion.py`
 - `src/pipelines/transformation.py`
 - `src/pipelines/validation.py`
 
-Responsabilidade:
+Responsibility:
 
-garantir que dados de entrada sejam válidos e reproduzíveis antes de modelagem.
+Guarantee that input data is valid and reproducible before training or reporting.
 
-### Feature e Modeling
+### Feature Engineering and Modeling
 
 - `src/pipelines/feature_engineering.py`
 - `src/modeling/churn.py`
 - `src/modeling/pipeline.py`
 - `src/modeling/predictor.py`
 
-Responsabilidade:
+Responsibility:
 
-treinar, avaliar, persistir e servir artefatos de inferência.
+Train, evaluate, persist, and serve inference artifacts.
 
 ### Analytics Output
 
@@ -63,35 +63,35 @@ treinar, avaliar, persistir e servir artefatos de inferência.
 - `src/pipelines/reporting.py`
 - `src/pipelines/dashboard_data.py`
 
-Responsabilidade:
+Responsibility:
 
-entregar gold layer, priorização, KPIs, model card e playbook operacional.
+Produce gold layer outputs, prioritization artifacts, KPIs, model card material, and operator-facing playbooks.
 
-## Decisões Importantes
+## Key Decisions
 
-### Threshold por política de custo
+### Cost-Sensitive Decision Threshold
 
-O threshold global não é fixo. Ele é derivado da política de custo para refletir contexto operacional.
+The global threshold is not fixed. It is derived from the selected campaign cost policy to reflect the operational context of retention.
 
-### Wrappers legados mantidos
+### Compatibility Layers Remain Explicit
 
-Pastas como `src/data`, `src/features`, `src/models` e wrappers em `src/*.py` ainda existem por compatibilidade.
-O isolamento da compatibilidade agora fica explicitado em `src/compat/`.
-O caminho canônico está em `src/runtime/`, `src/pipelines/` e `src/modeling/`.
+Packages such as `src/data`, `src/features`, `src/models`, and wrappers under `src/*.py` still exist for compatibility.
+The compatibility boundary is explicit in `src/compat/`.
+The canonical implementation lives under `src/runtime/`, `src/pipelines/`, and `src/modeling/`.
 
-### Orquestração local e explícita
+### Local and Explicit Orchestration
 
-O pipeline principal usa execução local com retry explícito. Isso reduz ruído operacional, evita acoplamento desnecessário com orquestrador externo e deixa o caminho padrão mais reproduzível para review técnico.
+The primary pipeline path uses local orchestration with explicit retry behavior. This keeps the default execution path reproducible and avoids unnecessary coupling to a heavier external orchestrator for a portfolio-scale project.
 
-### Monitoramento proporcional
+### Proportional Monitoring
 
-O drift monitoring implementa PSI/KS simples porque o objetivo é demonstrar critério de engenharia sem simular uma plataforma completa.
+Drift monitoring uses PSI and KS in a lightweight implementation. The goal is to demonstrate sound engineering judgment without pretending this repository is a full production platform.
 
-## Limites Atuais
+## Current Limits
 
-- sem scheduler distribuído real
-- sem lakehouse ou warehouse externo
-- sem artifact store remoto
-- sem deploy de inferência em produção
+- no distributed scheduler
+- no external warehouse or lakehouse
+- no remote artifact store
+- no production deployment of inference serving
 
-Esses limites são conscientes e devem ser tratados como roadmap, não como lacuna escondida.
+These limits are intentional. They should be treated as roadmap items, not hidden gaps.

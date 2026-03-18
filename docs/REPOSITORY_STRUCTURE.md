@@ -1,67 +1,67 @@
 # Repository Structure
 
-## Visão Geral
+## Overview
 
-O repositório está organizado para separar:
+The repository is organized to separate:
 
-- código canônico
-- exploração
-- automação
-- documentação
-- artefatos de execução
+- canonical implementation
+- exploration
+- automation
+- documentation
+- execution artifacts
 
-## Árvore Comentada
+## Annotated Tree
 
 ```text
 .
 |-- .github/
 |   |-- workflows/               # CI
-|   `-- ISSUE_TEMPLATE/          # templates de issue
-|-- apps/                        # entrypoints de aplicação
-|-- assets/                      # imagens e demos
+|   `-- ISSUE_TEMPLATE/          # issue templates
+|-- apps/                        # application entry points
+|-- assets/                      # images and demos
 |-- data/
-|   |-- raw/                     # input esperado
-|   |-- bronze/                  # camada regenerável
-|   |-- silver/                  # camada regenerável
-|   `-- gold/                    # camada regenerável
-|-- docs/                        # documentação de arquitetura e operação
-|-- notebooks/                   # exploração e análise
-|-- pages/                       # páginas Streamlit
+|   |-- raw/                     # expected input
+|   |-- bronze/                  # regenerable layer
+|   |-- silver/                  # regenerable layer
+|   `-- gold/                    # regenerable layer
+|-- docs/                        # architecture and operations documentation
+|-- notebooks/                   # exploration and analysis
+|-- pages/                       # Streamlit pages
 |-- src/
-|   |-- cli/                     # interfaces de linha de comando
-|   |-- compat/                  # backward compatibility explícita
-|   |-- contracts/               # contratos tipados
-|   |-- modeling/                # treino e inferência
-|   |-- pipelines/               # pipeline canônico e business logic
-|   |-- runtime/                 # configuração e logging
-|   |-- utils/                   # helpers pequenos e compartilhados
-|   `-- *.py                     # wrappers de compatibilidade na raiz
-|-- tests/                       # testes automatizados
-|-- artifacts/                   # outputs de execução
-`-- models/                      # model registry local
+|   |-- cli/                     # command-line interfaces
+|   |-- compat/                  # explicit backward compatibility
+|   |-- contracts/               # typed contracts
+|   |-- modeling/                # training and inference
+|   |-- pipelines/               # canonical pipeline and business logic
+|   |-- runtime/                 # configuration and logging
+|   |-- utils/                   # small shared helpers
+|   `-- *.py                     # compatibility wrappers at package root
+|-- tests/                       # automated tests
+|-- artifacts/                   # execution outputs
+`-- models/                      # local model registry
 ```
 
-## Convenções
+## Conventions
 
-### O que deve ir em `src/`
+### What belongs in `src/`
 
-código de negócio, pipeline, modelagem e persistência.
+Business logic, pipelines, modeling, persistence, and reusable application code.
 
-### O que não deve ir em `src/`
+### What does not belong in `src/`
 
-exploração, screenshots, dados brutos, templates de GitHub e anotações ad-hoc.
+Exploration, screenshots, raw data, GitHub templates, and ad-hoc notes.
 
-### O que deve ir em `docs/`
+### What belongs in `docs/`
 
-arquitetura, operação, convenções e guias de colaboração.
+Architecture, operations, repository conventions, and collaboration guidance.
 
-### O que deve ir em `notebooks/`
+### What belongs in `notebooks/`
 
-EDA, experimentos e validações exploratórias. Nada em notebook deve ser dependência do caminho canônico do pipeline.
+EDA, experiments, and exploratory validation. Nothing in a notebook should be a dependency of the canonical pipeline path.
 
-## Estrutura Canônica Atual
+## Canonical Structure
 
-Sem quebrar compatibilidade, a estrutura canônica agora é:
+Without breaking compatibility, the canonical structure is now:
 
 ```text
 src/
@@ -73,4 +73,4 @@ src/
   utils/
 ```
 
-Wrappers na raiz de `src/` continuam existindo para backward compatibility. Código novo deve apontar para `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
+Wrappers at the root of `src/` still exist for backward compatibility. New code should target `src/runtime/`, `src/pipelines/`, `src/modeling/`, and `src/compat/`.

@@ -1,6 +1,6 @@
 # Docs Index
 
-Documentacao de apoio para operacao, arquitetura e colaboracao do repositorio.
+Supporting documentation for repository architecture, operations, and collaboration workflows.
 
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 - [OPERATIONS.md](OPERATIONS.md)

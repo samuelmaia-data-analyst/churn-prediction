@@ -2,29 +2,30 @@ from __future__ import annotations
 
 import streamlit as st
 
-from src.dashboard_data import PRIORITIZATION_PATH, load_prioritization
+from apps.dashboard_runtime import load_dashboard_assets
 
 st.set_page_config(page_title="Prioritization", page_icon="PR", layout="wide")
 st.title("Prioritization")
-st.caption("Clientes priorizados por risco de churn e recomendação de ação")
+st.caption("Operational list of customers ranked by churn risk and recommended action.")
 
-df = load_prioritization()
+assets = load_dashboard_assets()
+df = assets.prioritization
 if df.empty:
-    st.warning("Rode o pipeline para gerar customer_prioritization.csv.")
+    st.warning("Run the pipeline to generate customer_prioritization.csv.")
     st.stop()
 
 top_n = st.slider(
-    "Quantidade de clientes priorizados",
+    "Number of prioritized customers",
     min_value=10,
     max_value=min(len(df), 500),
     value=min(50, len(df)),
-    help="Seleciona quantos clientes de maior risco exibir.",
+    help="Select how many high-risk customers to display.",
 )
 
 prioritized = df.head(top_n)
 st.dataframe(prioritized, use_container_width=True)
 
-with open(PRIORITIZATION_PATH, "rb") as fp:
+with open(assets.prioritization_path, "rb") as fp:
     st.download_button(
         "Download customer_prioritization.csv",
         data=fp,

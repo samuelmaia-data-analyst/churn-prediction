@@ -8,6 +8,14 @@ import pandas as pd
 import streamlit as st
 
 from src.modeling.predictor import ChurnPredictor
+from src.pipelines.dashboard_data import (
+    KPI_PATH,
+    PRIORITIZATION_PATH,
+    REPORT_PATH,
+    load_executive_report,
+    load_kpis,
+    load_prioritization,
+)
 from src.runtime.config import PipelineConfig
 
 
@@ -28,6 +36,24 @@ class SidebarState:
     model_loaded: bool
 
 
+@dataclass(frozen=True)
+class DashboardAssets:
+    report: dict[str, Any]
+    kpis: pd.DataFrame
+    prioritization: pd.DataFrame
+    report_path: Path
+    kpi_path: Path
+    prioritization_path: Path
+
+    @property
+    def is_ready(self) -> bool:
+        return bool(self.report) and not self.kpis.empty and not self.prioritization.empty
+
+    @property
+    def report_metadata(self) -> dict[str, Any]:
+        return self.report.get("metadata", {}) if self.report else {}
+
+
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
     df_loaded = pd.read_csv(path)
@@ -44,6 +70,18 @@ def load_predictor(bundle_path: Path) -> ChurnPredictor:
     predictor = ChurnPredictor(bundle_path=bundle_path)
     predictor.load_artifacts()
     return predictor
+
+
+@st.cache_data(show_spinner=False)
+def load_dashboard_assets() -> DashboardAssets:
+    return DashboardAssets(
+        report=load_executive_report(),
+        kpis=load_kpis(),
+        prioritization=load_prioritization(),
+        report_path=REPORT_PATH,
+        kpi_path=KPI_PATH,
+        prioritization_path=PRIORITIZATION_PATH,
+    )
 
 
 def build_prediction_payload(
@@ -116,3 +154,66 @@ def build_filtered_views(
         preview_df = preview_df[preview_df["InternetService"] == selected_internet]
 
     return left_chart_df, right_chart_df, preview_df
+
+
+def build_portfolio_summary(prioritization: pd.DataFrame) -> dict[str, Any]:
+    if prioritization.empty:
+        return {
+            "high_risk_customers": 0,
+            "high_risk_revenue": 0.0,
+            "month_to_month_share": 0.0,
+            "avg_next_purchase": 0.0,
+        }
+
+    high_risk = prioritization[prioritization["risk_segment"].eq("high")]
+    month_to_month_share = float(prioritization["Contract"].eq("Month-to-month").mean()) * 100
+    return {
+        "high_risk_customers": int(len(high_risk)),
+        "high_risk_revenue": float(high_risk["MonthlyCharges"].sum()),
+        "month_to_month_share": month_to_month_share,
+        "avg_next_purchase": float(prioritization["next_purchase_prediction"].mean()),
+    }
+
+
+def build_risk_distribution(prioritization: pd.DataFrame) -> pd.DataFrame:
+    if prioritization.empty or "risk_segment" not in prioritization.columns:
+        return pd.DataFrame(columns=["risk_segment", "customers"])
+
+    risk_order = ["high", "medium", "low"]
+    distribution = (
+        prioritization["risk_segment"]
+        .value_counts()
+        .rename_axis("risk_segment")
+        .reset_index(name="customers")
+    )
+    distribution["risk_segment"] = pd.Categorical(
+        distribution["risk_segment"], categories=risk_order, ordered=True
+    )
+    return distribution.sort_values("risk_segment").reset_index(drop=True)
+
+
+def simulate_retention_impact(
+    prioritization: pd.DataFrame,
+    retention_effectiveness: int,
+    risk_threshold: float = 0.7,
+) -> dict[str, float]:
+    if prioritization.empty:
+        return {
+            "baseline_revenue_risk": 0.0,
+            "recovered_revenue": 0.0,
+            "remaining_revenue_risk": 0.0,
+        }
+
+    baseline_revenue_risk = float(
+        prioritization.loc[
+            prioritization["churn_probability"] >= risk_threshold,
+            "MonthlyCharges",
+        ].sum()
+    )
+    recovered = baseline_revenue_risk * (retention_effectiveness / 100)
+    remaining = baseline_revenue_risk - recovered
+    return {
+        "baseline_revenue_risk": baseline_revenue_risk,
+        "recovered_revenue": recovered,
+        "remaining_revenue_risk": remaining,
+    }

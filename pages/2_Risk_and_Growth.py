@@ -3,25 +3,40 @@ from __future__ import annotations
 import plotly.express as px
 import streamlit as st
 
-from src.dashboard_data import load_prioritization
+from apps.dashboard_runtime import (
+    build_portfolio_summary,
+    build_risk_distribution,
+    load_dashboard_assets,
+)
 
 st.set_page_config(page_title="Risk and Growth", page_icon="RG", layout="wide")
 st.title("Risk and Growth")
-st.caption("Distribuicao de risco e potencial de receita futura")
+st.caption("Portfolio-level risk distribution and forward revenue opportunity view.")
 
-df = load_prioritization()
+assets = load_dashboard_assets()
+df = assets.prioritization
 if df.empty:
-    st.warning("Rode o pipeline para gerar customer_prioritization.csv.")
+    st.warning("Run the pipeline to generate customer_prioritization.csv.")
     st.stop()
 
+summary = build_portfolio_summary(df)
+sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
+sum_col1.metric("High Risk Customers", f"{summary['high_risk_customers']:,}")
+sum_col2.metric("Revenue at Risk", f"${summary['high_risk_revenue']:,.2f}")
+sum_col3.metric("Month-to-Month Share", f"{summary['month_to_month_share']:.1f}%")
+sum_col4.metric("Avg. Next Purchase", f"${summary['avg_next_purchase']:,.2f}")
+
+risk_distribution = build_risk_distribution(df)
 col1, col2 = st.columns(2)
 with col1:
-    fig_risk = px.histogram(
-        df,
-        x="churn_probability",
-        nbins=20,
-        title="Distribution of Churn Probability",
-        labels={"churn_probability": "Churn Probability"},
+    fig_risk = px.bar(
+        risk_distribution,
+        x="risk_segment",
+        y="customers",
+        title="Customer Distribution by Risk Segment",
+        labels={"risk_segment": "Risk segment", "customers": "Customers"},
+        color="risk_segment",
+        color_discrete_map={"high": "#dc2626", "medium": "#f59e0b", "low": "#0f766e"},
     )
     st.plotly_chart(fig_risk, use_container_width=True)
 
@@ -31,10 +46,10 @@ with col2:
         x="churn_probability",
         y="next_purchase_prediction",
         color="Contract",
-        title="Risk vs Next Purchase Prediction",
+        title="Risk vs. Next Purchase Prediction",
         labels={
-            "churn_probability": "Churn Probability",
-            "next_purchase_prediction": "Next Purchase Prediction",
+            "churn_probability": "Churn probability",
+            "next_purchase_prediction": "Next purchase prediction",
         },
     )
     st.plotly_chart(fig_growth, use_container_width=True)
