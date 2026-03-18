@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import logging
 
 import numpy as np
 import pandas as pd
@@ -17,12 +17,16 @@ from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
 from src.ml import train_models_and_score
 from src.reporting import build_business_outputs, persist_business_outputs
 from src.transformation import build_silver_layer, persist_silver
+from src.utils.io import write_csv_atomic, write_json_atomic
 from src.warehouse import build_star_schema, persist_star_schema
 
-REPORT_PATH = Path("artifacts/reports/executive_report.json")
-PRIORITIZATION_PATH = Path("data/gold/customer_prioritization.csv")
-KPI_PATH = Path("data/gold/kpi_summary.csv")
-RAW_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
+logger = logging.getLogger(__name__)
+
+DEFAULT_CONFIG = PipelineConfig.from_runtime(mlflow_tracking_uri="disabled", run_id="dashboard")
+REPORT_PATH = DEFAULT_CONFIG.executive_report_path
+PRIORITIZATION_PATH = DEFAULT_CONFIG.gold_dir / "customer_prioritization.csv"
+KPI_PATH = DEFAULT_CONFIG.gold_dir / "kpi_summary.csv"
+RAW_PATH = DEFAULT_CONFIG.raw_input_path
 
 
 def _build_synthetic_raw(rows: int = 800) -> pd.DataFrame:
@@ -75,10 +79,14 @@ def _build_synthetic_raw(rows: int = 800) -> pd.DataFrame:
 
 def _generate_outputs_from_pipeline() -> bool:
     config = PipelineConfig(
-        data_dir=Path("data"),
-        seed=42,
-        log_level="INFO",
+        data_dir=DEFAULT_CONFIG.data_dir,
+        seed=DEFAULT_CONFIG.seed,
+        log_level=DEFAULT_CONFIG.log_level,
         mlflow_tracking_uri="disabled",
+        environment=DEFAULT_CONFIG.environment,
+        run_id="dashboard",
+        artifacts_dir=DEFAULT_CONFIG.artifacts_dir,
+        model_registry_dir=DEFAULT_CONFIG.model_registry_dir,
     )
     try:
         raw_df = load_raw_dataset(config)
@@ -92,9 +100,14 @@ def _generate_outputs_from_pipeline() -> bool:
         persist_star_schema(config, schema)
 
         model_outputs = train_models_and_score(config, silver_df)
-        report_outputs = build_business_outputs(model_outputs.scored_df, model_outputs.metrics)
+        report_outputs = build_business_outputs(
+            config,
+            model_outputs.scored_df,
+            model_outputs.metrics,
+        )
         persist_business_outputs(config, report_outputs)
     except Exception:
+        logger.exception("dashboard_pipeline_generation_failed run_id=%s", config.run_id)
         return False
     return True
 
@@ -173,23 +186,22 @@ def _generate_outputs_from_raw_or_synthetic(raw_df: pd.DataFrame) -> None:
         "note": "Fallback dashboard metrics (pipeline outputs unavailable).",
     }
 
-    PRIORITIZATION_PATH.parent.mkdir(parents=True, exist_ok=True)
-    KPI_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    recommendations.to_csv(PRIORITIZATION_PATH, index=False)
-    pd.DataFrame([kpis]).to_csv(KPI_PATH, index=False)
-    with open(REPORT_PATH, "w", encoding="utf-8") as fp:
-        json.dump(
-            {
-                "kpis": kpis,
-                "model_metrics": model_metrics,
-                "top_10_priorities": recommendations.head(10).to_dict(orient="records"),
+    write_csv_atomic(PRIORITIZATION_PATH, recommendations)
+    write_csv_atomic(KPI_PATH, pd.DataFrame([kpis]))
+    write_json_atomic(
+        REPORT_PATH,
+        {
+            "metadata": {
+                "schema_version": "1.1.0",
+                "generated_at_utc": pd.Timestamp.utcnow().isoformat(),
+                "run_id": "dashboard-fallback",
+                "environment": DEFAULT_CONFIG.environment,
             },
-            fp,
-            ensure_ascii=False,
-            indent=2,
-        )
+            "kpis": kpis,
+            "model_metrics": model_metrics,
+            "top_10_priorities": recommendations.head(10).to_dict(orient="records"),
+        },
+    )
 
 
 def ensure_dashboard_outputs() -> None:
@@ -198,6 +210,11 @@ def ensure_dashboard_outputs() -> None:
     if RAW_PATH.exists() and _generate_outputs_from_pipeline():
         return
 
+    logger.warning(
+        "dashboard_fallback_outputs_activated raw_exists=%s report_path=%s",
+        RAW_PATH.exists(),
+        REPORT_PATH,
+    )
     if RAW_PATH.exists():
         raw_df = pd.read_csv(RAW_PATH)
     else:

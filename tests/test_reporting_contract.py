@@ -14,11 +14,17 @@ def test_executive_report_contract_is_stable(tmp_path) -> None:
     bronze = build_bronze_layer(raw)
     silver = build_silver_layer(bronze)
     model_outputs = train_models_and_score(config, silver)
-    report_outputs = build_business_outputs(model_outputs.scored_df, model_outputs.metrics)
+    report_outputs = build_business_outputs(config, model_outputs.scored_df, model_outputs.metrics)
 
     payload = report_outputs.executive_report.to_dict()
 
-    assert set(payload.keys()) == {"kpis", "model_metrics", "top_10_priorities"}
+    assert set(payload.keys()) == {"metadata", "kpis", "model_metrics", "top_10_priorities"}
+    assert set(payload["metadata"].keys()) == {
+        "schema_version",
+        "generated_at_utc",
+        "run_id",
+        "environment",
+    }
     assert set(payload["kpis"].keys()) == {
         "total_customers",
         "churn_rate",

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from typing import Mapping
 
 import pandas as pd
 
 from src.config import PipelineConfig
-from src.contracts import ExecutiveReport
+from src.contracts import ArtifactEntry, ArtifactManifest, ExecutiveReport
 from src.decisioning import (
     action_for_segment,
     build_action_playbook,
@@ -17,6 +16,7 @@ from src.decisioning import (
     risk_segment,
     threshold_for_value_segment,
 )
+from src.utils.io import write_csv_atomic, write_json_atomic, write_text_atomic
 
 
 @dataclass(frozen=True)
@@ -27,8 +27,13 @@ class ReportOutputs:
     action_playbook: pd.DataFrame
 
 
-def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object]) -> ReportOutputs:
-    policy = get_policy("balanceada")
+def build_business_outputs(
+    config: PipelineConfig,
+    scored_df: pd.DataFrame,
+    metrics: Mapping[str, object],
+) -> ReportOutputs:
+    policy_name = str(metrics.get("decision_policy", {}).get("name", "balanceada"))
+    policy = get_policy(policy_name)
     base_threshold = decision_threshold(policy)
 
     recommendations = scored_df[
@@ -72,6 +77,12 @@ def build_business_outputs(scored_df: pd.DataFrame, metrics: Mapping[str, object
 
     kpi_summary = pd.DataFrame([kpis])
     executive_report = ExecutiveReport(
+        metadata={
+            "schema_version": "1.1.0",
+            "generated_at_utc": pd.Timestamp.utcnow().isoformat(),
+            "run_id": config.run_id,
+            "environment": config.environment,
+        },
         kpis=kpis,
         model_metrics=dict(metrics),
         top_10_priorities=recommendations.head(10).to_dict(orient="records"),
@@ -195,10 +206,7 @@ def _render_executive_brief(
                 f"| Medium | Threshold minus 0.20 band | {len(medium_risk)} | "
                 "Proactive loyalty outreach / automated nurture journey |"
             ),
-            (
-                f"| Low | Below medium-risk band | {len(low_risk)} | "
-                "Monitor and upsell trigger |"
-            ),
+            (f"| Low | Below medium-risk band | {len(low_risk)} | " "Monitor and upsell trigger |"),
         ]
     )
 
@@ -223,10 +231,7 @@ def _render_executive_brief(
 {chr(10).join(f"- {driver}" for driver in top_drivers)}
 
 ## Risk Profiles with Highest Average Churn
-{chr(10).join(
-    f"- {row['contract']} + {row['internet_service']}: avg churn prob {float(row['avg_churn_probability']):.2%}, avg monthly charges ${float(row['avg_monthly_charges']):.2f}"
-    for row in risk_profiles
-)}
+{chr(10).join(_format_risk_profile(row) for row in risk_profiles)}
 
 ## Key Insights
 {chr(10).join(f"- {insight}" for insight in key_insights)}
@@ -244,6 +249,14 @@ flowchart LR
     C --> D[Gold]
 ```
 """
+
+
+def _format_risk_profile(row: Mapping[str, object]) -> str:
+    return (
+        f"- {row['contract']} + {row['internet_service']}: "
+        f"avg churn prob {float(row['avg_churn_probability']):.2%}, "
+        f"avg monthly charges ${float(row['avg_monthly_charges']):.2f}"
+    )
 
 
 def _render_action_playbook(playbook: pd.DataFrame) -> str:
@@ -270,18 +283,42 @@ def _render_action_playbook(playbook: pd.DataFrame) -> str:
 
 
 def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> None:
-    config.reports_dir.mkdir(parents=True, exist_ok=True)
-    config.gold_dir.mkdir(parents=True, exist_ok=True)
+    write_json_atomic(config.executive_report_path, outputs.executive_report.to_dict())
+    write_text_atomic(config.model_card_path, _render_model_card(outputs.executive_report))
+    write_text_atomic(
+        config.executive_brief_path,
+        _render_executive_brief(outputs.executive_report, outputs.recommendations),
+    )
+    write_text_atomic(config.action_playbook_path, _render_action_playbook(outputs.action_playbook))
 
-    with open(config.executive_report_path, "w", encoding="utf-8") as fp:
-        json.dump(outputs.executive_report.to_dict(), fp, ensure_ascii=False, indent=2)
-    with open(config.model_card_path, "w", encoding="utf-8") as fp:
-        fp.write(_render_model_card(outputs.executive_report))
-    with open(config.executive_brief_path, "w", encoding="utf-8") as fp:
-        fp.write(_render_executive_brief(outputs.executive_report, outputs.recommendations))
-    with open(config.action_playbook_path, "w", encoding="utf-8") as fp:
-        fp.write(_render_action_playbook(outputs.action_playbook))
-
-    outputs.kpi_summary.to_csv(config.gold_dir / "kpi_summary.csv", index=False)
-    outputs.recommendations.to_csv(config.gold_dir / "customer_prioritization.csv", index=False)
-    outputs.action_playbook.to_csv(config.gold_dir / "action_playbook.csv", index=False)
+    write_csv_atomic(config.gold_dir / "kpi_summary.csv", outputs.kpi_summary)
+    write_csv_atomic(config.gold_dir / "customer_prioritization.csv", outputs.recommendations)
+    write_csv_atomic(config.gold_dir / "action_playbook.csv", outputs.action_playbook)
+    gold_manifest = ArtifactManifest(
+        schema_version="1.0.0",
+        artifact_type="gold_layer",
+        generated_at_utc=pd.Timestamp.utcnow().isoformat(),
+        run_id=config.run_id,
+        environment=config.environment,
+        entries=[
+            ArtifactEntry(
+                name="kpi_summary",
+                path=str((config.gold_dir / "kpi_summary.csv").as_posix()),
+                format="csv",
+                rows=int(len(outputs.kpi_summary)),
+            ),
+            ArtifactEntry(
+                name="customer_prioritization",
+                path=str((config.gold_dir / "customer_prioritization.csv").as_posix()),
+                format="csv",
+                rows=int(len(outputs.recommendations)),
+            ),
+            ArtifactEntry(
+                name="action_playbook",
+                path=str((config.gold_dir / "action_playbook.csv").as_posix()),
+                format="csv",
+                rows=int(len(outputs.action_playbook)),
+            ),
+        ],
+    )
+    write_json_atomic(config.gold_manifest_path, gold_manifest.to_dict())

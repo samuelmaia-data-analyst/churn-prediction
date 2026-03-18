@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 from src.config import PipelineConfig
+from src.utils.io import write_csv_atomic
 
 
 @dataclass(frozen=True)
@@ -136,8 +137,7 @@ def build_star_schema(silver_df: pd.DataFrame) -> StarSchema:
 
 
 def persist_star_schema(config: PipelineConfig, schema: StarSchema) -> None:
-    config.gold_dir.mkdir(parents=True, exist_ok=True)
-    schema.dim_customer.to_csv(config.gold_dir / "dim_customer.csv", index=False)
-    schema.dim_contract.to_csv(config.gold_dir / "dim_contract.csv", index=False)
-    schema.dim_service.to_csv(config.gold_dir / "dim_service.csv", index=False)
-    schema.fact_customer_churn.to_csv(config.gold_dir / "fact_customer_churn.csv", index=False)
+    write_csv_atomic(config.gold_dir / "dim_customer.csv", schema.dim_customer)
+    write_csv_atomic(config.gold_dir / "dim_contract.csv", schema.dim_contract)
+    write_csv_atomic(config.gold_dir / "dim_service.csv", schema.dim_service)
+    write_csv_atomic(config.gold_dir / "fact_customer_churn.csv", schema.fact_customer_churn)

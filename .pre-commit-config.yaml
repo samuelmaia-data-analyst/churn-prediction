@@ -1,18 +1,31 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
-        files: ^(main\.py|src/|tests/|pages/)
+        files: ^(app\.py|api\.py|main\.py|predict_customer\.py|save_processed_data\.py|apps/|src/|tests/|pages/)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.6
     hooks:
       - id: ruff
-        files: ^(main\.py|src/|tests/|pages/)
+        args: ["--fix"]
+        files: ^(app\.py|api\.py|main\.py|predict_customer\.py|save_processed_data\.py|apps/|src/|tests/|pages/)
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        files: ^(main\.py|src/|tests/|pages/)
+        files: ^(app\.py|api\.py|main\.py|predict_customer\.py|save_processed_data\.py|apps/|src/|tests/|pages/)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        files: ^src/

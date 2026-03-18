@@ -1,73 +1,137 @@
-# Churn Prediction for Customer Retention
+# Churn Prediction Data Product
 
-Language: **International** | [PT-BR](README.pt-BR.md) | [EURO](README.euro.md)
+Pipeline de dados e machine learning para churn de clientes, com foco em operação analítica, confiabilidade de execução e tradução do score em ações de retenção.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Streamlit-2ea44f)](https://data-senior-analytics.streamlit.app/)
+Este repositório foi organizado para se comportar como um produto de dados pequeno, mas real:
 
-Professional analytics and machine learning case focused on customer retention. The project predicts churn, prioritizes customers by risk and value, and translates model outputs into retention actions that business teams can execute.
+- pipeline em camadas com fronteiras claras
+- artefatos reprocessáveis e observáveis
+- saídas orientadas a negócio, não apenas métricas de modelo
+- contratos testados e automação de qualidade
 
-## Business Problem
+## Por Que Este Projeto Existe
 
-Subscription businesses lose revenue when they react only after cancellation. A churn model becomes valuable when it helps answer:
+Em muitos portfólios, churn aparece como notebook e gráfico. Aqui o objetivo é diferente: mostrar como um problema de ML aplicado pode ser tratado como sistema de dados.
 
-- which customers are most likely to leave
-- which customers should be prioritized first
-- what trade-off exists between campaign cost and missed churners
-- which retention levers are supported by the model drivers
+O projeto responde a quatro perguntas:
 
-## Canonical Architecture
+1. Quais clientes apresentam maior risco de churn?
+2. Quais clientes devem ser priorizados primeiro?
+3. Como o threshold muda quando o custo operacional da campanha muda?
+4. Quais artefatos o time de negócio precisa para agir sobre o score?
 
-The project uses one primary ML path:
+## O Que o Repositório Entrega
 
-- `src/ingestion.py`: raw ingestion and bronze layer
-- `src/transformation.py`: silver preparation and schema checks
-- `src/feature_engineering.py`: reusable business features
-- `src/modeling/pipeline.py`: model training, evaluation, persistence, MLflow
-- `src/modeling/predictor.py`: inference from saved artifacts
-- `src/reporting.py`: executive outputs, model card, action playbook
-- `tests/`: preprocessing, feature engineering, training and inference checks
+- ingestão `raw -> bronze`
+- tratamento e validação `bronze -> silver`
+- camada analítica `silver -> gold`
+- treino de modelos com comparação de candidatos
+- thresholding sensível a custo
+- persistência de artefatos de inferência
+- relatórios executivos e playbook de ação
+- monitoramento simples de drift
+- testes automatizados e CI
 
-Legacy folders under `src/data`, `src/features`, and `src/models` remain only as compatibility wrappers.
+## Quickstart
 
-## Modeling Approach
+### 1. Preparar ambiente
 
-The training pipeline:
+```bash
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+copy .env.example .env
+```
 
-1. validates schema and training readiness
-2. engineers business features such as `charges_per_tenure`, `service_count`, `is_month_to_month`
-3. compares `Logistic Regression`, `Random Forest`, and `XGBoost` fallback
-4. selects the champion model by `ROC-AUC`
-5. evaluates with:
-   - `Precision`
-   - `Recall`
-   - `F1-score`
-   - `ROC-AUC`
-   - confusion matrix
-   - risk profile summary
-6. persists:
-   - champion model
-   - inference bundle
-   - metadata
-   - executive report artifacts
+### 2. Adicionar dataset
 
-## Cost-Sensitive Thresholding
+Arquivo esperado:
 
-The global classification threshold is derived from business error cost:
+`data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
-`threshold = FP_cost / (FP_cost + FN_cost)`
+Fonte:
 
-Available policies:
+`Kaggle - Telco Customer Churn`
 
-- `campanha_cara`
-- `balanceada`
-- `campanha_barata`
+### 3. Executar pipeline
 
-Business interpretation:
+```bash
+.venv\Scripts\python.exe -m src.cli.pipeline --data-dir data --log-level INFO --decision-policy balanceada --environment dev
+```
 
-- expensive campaign: higher threshold, higher precision
-- cheaper campaign: lower threshold, higher recall
+### 4. Validar qualidade
 
-## Standard Commands
+```bash
+make test
+make lint
+make typecheck
+```
+
+## Estrutura do Repositório
+
+```text
+.
+|-- .github/                  # CI, templates e padrões de colaboração
+|-- apps/                     # apps principais (Streamlit/FastAPI)
+|-- assets/                   # imagens e mídia do repositório
+|-- data/                     # datasets e camadas locais de pipeline
+|-- docs/                     # arquitetura, operação e convenções
+|-- notebooks/                # exploração isolada do pipeline produtivo
+|-- pages/                    # páginas do Streamlit
+|-- src/                      # código canônico do produto de dados
+|-- tests/                    # contratos e regressão
+|-- .env.example              # configuração base por ambiente
+|-- Makefile                  # comandos padrão
+|-- pyproject.toml            # configuração de ferramentas
+`-- README.md                 # entrada principal do repositório
+```
+
+Mapa detalhado:
+
+- [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
+
+## Arquitetura
+
+Fluxo principal:
+
+`raw -> bronze -> silver -> gold -> model artifacts -> reporting -> dashboard/api`
+
+Componentes centrais:
+
+- `src/config.py`: configuração de runtime, paths e ambiente
+- `src/ingestion.py`: leitura do raw e camada bronze
+- `src/transformation.py`: limpeza e silver layer
+- `src/feature_engineering.py`: features de negócio reutilizáveis
+- `src/modeling/pipeline.py`: treino, score, persistência e metadata
+- `src/reporting.py`: executive report, model card e action playbook
+- `src/monitoring.py`: baseline e alerta de drift com PSI/KS
+- `src/cli/pipeline.py`: orquestração ponta a ponta
+
+Pastas `src/data`, `src/features` e `src/models` existem apenas como camada de compatibilidade. O caminho canônico é `src/`, `src/modeling/` e `src/compat/`.
+
+Arquitetura detalhada:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+## Operação e Confiabilidade
+
+O projeto implementa controles proporcionais ao escopo:
+
+- configuração por `.env` e variáveis de ambiente
+- isolamento de artefatos por contexto de execução
+- logging estruturado com `run_id`
+- persistência atômica de CSV, JSON e Markdown
+- metadados de run em `artifacts/metadata/`
+- manifests versionados para `gold` e model registry
+- validação de schema antes do treino
+- monitoramento simples de drift
+- reprocessamento local sem dependências manuais de estado
+
+Guia operacional:
+
+- [docs/OPERATIONS.md](docs/OPERATIONS.md)
+
+## Comandos Principais
 
 ```bash
 make install
@@ -76,51 +140,45 @@ make train-cheap
 make train-expensive
 make test
 make lint
+make typecheck
 make predict
 ```
 
-Equivalent training command:
+## Qualidade de Engenharia
 
-```bash
-python -m src.cli.pipeline --seed 42 --data-dir data --log-level INFO --decision-policy balanceada
-```
+Ferramentas usadas:
 
-## Artifacts
+- `pytest`
+- `ruff`
+- `black`
+- `isort`
+- `mypy`
+- `pre-commit`
+- `GitHub Actions`
 
-Main generated artifacts:
+Os gates de qualidade estão definidos em:
 
-- `artifacts/models/enterprise_churn_model.joblib`
-- `artifacts/models/enterprise_churn_bundle.joblib`
-- `models/model_v1.pkl`
-- `models/model_metadata.json`
-- `artifacts/reports/executive_report.json`
-- `artifacts/reports/model_card.md`
-- `artifacts/reports/executive_brief.md`
-- `artifacts/reports/action_playbook.md`
+- [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
-## Model Interpretation
+## Documentação Complementar
 
-The project exposes both feature importance and business interpretation:
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/OPERATIONS.md](docs/OPERATIONS.md)
+- [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
 
-- contract structure and tenure are relevant churn drivers
-- high-risk profiles are surfaced by contract and internet service mix
-- false positives and false negatives are explained in operational and financial terms
+## Roadmap Realista
 
-This supports retention actions such as:
+- reduzir ou eliminar a camada legada restante em `src/models`
+- adicionar validações de contrato mais estritas para gold e reporting
+- plugar armazenamento remoto para artefatos e tracking
+- expor inferência e metadata via API com contrato versionado
 
-- migrating fragile contracts to more stable plans
-- intervening on price-sensitive customers
-- improving onboarding and support for low-tenure customers
+## Colaboração
 
-## Validation
+Pull requests, bugs e melhorias devem seguir:
 
-Validated locally with:
+- [CONTRIBUTING.md](CONTRIBUTING.md)
 
-```bash
-.venv\Scripts\python.exe -m pytest -q tests/test_data.py tests/test_features.py tests/test_models.py tests/test_enterprise_pipeline.py tests/test_reporting_contract.py
-```
-
-## Dataset
-
-Source: Kaggle Telco Customer Churn  
-Expected file: `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
+O objetivo não é inflar complexidade. O objetivo é manter o repositório legível, testável e defensável em review técnico.

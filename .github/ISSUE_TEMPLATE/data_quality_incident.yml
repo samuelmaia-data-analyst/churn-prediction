@@ -1,0 +1,35 @@
+name: Data quality incident
+description: Reportar problema de schema, consistencia ou qualidade de dados.
+title: "[Data Quality] "
+labels: ["data-quality"]
+body:
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Sintoma
+      description: Descreva a anomalia observada.
+      placeholder: churn labels invalidos, duplicidade de customerID, null spike...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: Em qual camada o problema aparece?
+      placeholder: raw, bronze, silver, gold, reporting
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Inclua arquivo, query, sample, run_id ou report afetado.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impacto
+      description: Qual o efeito sobre pipeline, modelo ou dashboard?
+    validations:
+      required: true

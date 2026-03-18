@@ -1,4 +1,4 @@
-.PHONY: install train train-cheap train-expensive test lint format predict process
+.PHONY: install train train-cheap train-expensive test lint format typecheck predict process
 
 install:
 	.venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -17,9 +17,15 @@ test:
 
 lint:
 	.venv\Scripts\python.exe -m ruff check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+	.venv\Scripts\python.exe -m black --check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+	.venv\Scripts\python.exe -m isort --check-only app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
 
 format:
 	.venv\Scripts\python.exe -m black app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+	.venv\Scripts\python.exe -m isort app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+
+typecheck:
+	.venv\Scripts\python.exe -m mypy src
 
 predict:
 	.venv\Scripts\python.exe -m src.cli.predict_customer

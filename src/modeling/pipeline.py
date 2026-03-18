@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import json
 import logging
+import warnings
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
 from src.config import PipelineConfig
-from src.contracts import ExecutiveMetrics
+from src.contracts import ArtifactEntry, ArtifactManifest, ExecutiveMetrics
 from src.decisioning import DecisionPolicy, decision_threshold, get_policy
 from src.feature_engineering import BASE_MODEL_FEATURES
 from src.modeling.churn import (
@@ -36,14 +36,26 @@ from src.modeling.churn import (
     month_to_month_risk_ratio,
     top_feature_drivers,
 )
+from src.utils.io import write_json_atomic
 from src.validation import validate_training_dataframe
 
 logger = logging.getLogger(__name__)
 
 try:
-    import mlflow
-    import mlflow.sklearn
-    from mlflow.models import infer_signature
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            category=DeprecationWarning,
+            module=r"mlflow\.gateway\.config",
+        )
+        warnings.filterwarnings(
+            "ignore",
+            category=FutureWarning,
+            module=r"mlflow\.gateway\.config",
+        )
+        import mlflow
+        import mlflow.sklearn
+        from mlflow.models import infer_signature
 except ImportError:  # pragma: no cover
     mlflow = None
     infer_signature = None
@@ -53,6 +65,14 @@ except ImportError:  # pragma: no cover
 class ModelOutputs:
     scored_df: pd.DataFrame
     metrics: dict[str, object]
+
+
+def _prepare_mlflow_example(df: pd.DataFrame) -> pd.DataFrame:
+    example = df.copy()
+    integer_columns = example.select_dtypes(include=["int", "int32", "int64"]).columns
+    for column in integer_columns:
+        example[column] = example[column].astype(float)
+    return example
 
 
 def _risk_profile_summary(scored_df: pd.DataFrame, top_n: int = 3) -> list[dict[str, object]]:
@@ -242,7 +262,8 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
     )
 
     config.models_dir.mkdir(parents=True, exist_ok=True)
-    config.model_registry_dir.mkdir(parents=True, exist_ok=True)
+    config.resolved_model_registry_dir.mkdir(parents=True, exist_ok=True)
+    config.metadata_dir.mkdir(parents=True, exist_ok=True)
     joblib.dump(champion_model, config.churn_model_path)
     joblib.dump(next_purchase_model, config.next_purchase_model_path)
     joblib.dump(champion_model, config.versioned_model_path)
@@ -260,11 +281,14 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
     )
 
     metadata = {
+        "schema_version": "1.1.0",
         "model_version": "v1.0.0",
         "model_file": str(config.versioned_model_path.as_posix()),
         "bundle_file": str(config.enterprise_bundle_path.as_posix()),
         "algorithm": model_aliases[best_key],
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "run_id": config.run_id,
+        "environment": config.environment,
         "seed": config.seed,
         "base_features": BASE_MODEL_FEATURES,
         "features": FEATURES,
@@ -284,8 +308,32 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
             "next_purchase_mae": metrics["next_purchase_mae"],
         },
     }
-    with open(config.model_metadata_path, "w", encoding="utf-8") as fp:
-        json.dump(metadata, fp, ensure_ascii=False, indent=2)
+    write_json_atomic(config.model_metadata_path, metadata)
+    registry_manifest = ArtifactManifest(
+        schema_version="1.0.0",
+        artifact_type="model_registry",
+        generated_at_utc=datetime.now(timezone.utc).isoformat(),
+        run_id=config.run_id,
+        environment=config.environment,
+        entries=[
+            ArtifactEntry(
+                name="champion_model",
+                path=str(config.versioned_model_path.as_posix()),
+                format="joblib",
+            ),
+            ArtifactEntry(
+                name="bundle",
+                path=str(config.enterprise_bundle_path.as_posix()),
+                format="joblib",
+            ),
+            ArtifactEntry(
+                name="model_metadata",
+                path=str(config.model_metadata_path.as_posix()),
+                format="json",
+            ),
+        ],
+    )
+    write_json_atomic(config.model_registry_manifest_path, registry_manifest.to_dict())
 
     if mlflow is not None and config.mlflow_tracking_uri.lower() != "disabled":
         mlflow.set_tracking_uri(config.mlflow_tracking_uri)
@@ -300,8 +348,8 @@ def train_models_and_score(config: PipelineConfig, silver_df: pd.DataFrame) -> M
             mlflow.log_metric("churn_roc_auc", metrics["churn_roc_auc"])
             mlflow.log_metric("next_purchase_mae", metrics["next_purchase_mae"])
 
-            churn_input_example = X_train.head(5).copy()
-            next_purchase_input_example = X_np_train.head(5).copy()
+            churn_input_example = _prepare_mlflow_example(X_train.head(5))
+            next_purchase_input_example = _prepare_mlflow_example(X_np_train.head(5))
 
             if infer_signature is not None:
                 churn_signature = infer_signature(

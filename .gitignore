@@ -30,6 +30,7 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
+.env
 
 # Pipeline outputs gerados
 data/bronze/
@@ -40,6 +41,8 @@ reports/executive_report.json
 artifacts/
 
 # Modelos enterprise gerados em runtime
+models/*
+!models/README.md
 models/enterprise_churn_model.joblib
 models/enterprise_next_purchase_model.joblib
 

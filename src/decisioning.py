@@ -111,9 +111,7 @@ def build_action_playbook(recommendations: pd.DataFrame) -> pd.DataFrame:
         playbook["expected_roi_usd_per_customer"] * playbook["Customers"]
     )
 
-    playbook["Segment"] = playbook["Segment"].map(
-        {"high_ltv": "High LTV", "low_ltv": "Low LTV"}
-    )
+    playbook["Segment"] = playbook["Segment"].map({"high_ltv": "High LTV", "low_ltv": "Low LTV"})
     playbook["Risk"] = playbook["Risk"].str.capitalize()
     playbook["risk_order"] = playbook["Risk"].map({"High": 0, "Medium": 1, "Low": 2}).fillna(99)
     playbook = playbook.sort_values(["risk_order", "Segment"]).reset_index(drop=True)

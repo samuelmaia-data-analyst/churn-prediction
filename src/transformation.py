@@ -33,6 +33,7 @@ except ImportError:  # pragma: no cover
     pa = _PanderaFallback()
 
 from src.config import PipelineConfig
+from src.utils.io import write_csv_atomic
 
 REQUIRED_COLUMNS = {
     "customerID",
@@ -145,5 +146,4 @@ def build_silver_layer(bronze_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def persist_silver(config: PipelineConfig, silver_df: pd.DataFrame) -> None:
-    config.silver_dir.mkdir(parents=True, exist_ok=True)
-    silver_df.to_csv(config.silver_output_path, index=False)
+    write_csv_atomic(config.silver_output_path, silver_df)

@@ -1,5 +1,5 @@
-"""Compatibility layer: use src.modeling.trainer moving forward."""
+"""Compatibility wrapper. Prefer importing trainer classes from `src.compat` or `src.modeling`."""
 
-from src.modeling.trainer import ModelTrainer
+from src.compat.modeling import ModelTrainer
 
 __all__ = ["ModelTrainer"]

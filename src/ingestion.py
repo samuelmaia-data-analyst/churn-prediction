@@ -6,7 +6,8 @@ from datetime import UTC, datetime
 import pandas as pd
 
 from src.config import PipelineConfig
-from src.validation import validate_raw_dataframe
+from src.utils.io import write_csv_atomic
+from src.validation import persist_validation_report, validate_raw_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ def load_raw_dataset(config: PipelineConfig) -> pd.DataFrame:
         )
     df = pd.read_csv(config.raw_input_path)
     report = validate_raw_dataframe(df)
+    persist_validation_report(report, config.data_quality_report_path)
     logger.info("raw_loaded rows=%s cols=%s", df.shape[0], df.shape[1])
     logger.info("raw_validated %s", report.to_dict())
     return df
@@ -32,6 +34,5 @@ def build_bronze_layer(raw_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def persist_bronze(config: PipelineConfig, bronze_df: pd.DataFrame) -> None:
-    config.bronze_dir.mkdir(parents=True, exist_ok=True)
-    bronze_df.to_csv(config.bronze_output_path, index=False)
+    write_csv_atomic(config.bronze_output_path, bronze_df)
     logger.info("bronze_saved path=%s", config.bronze_output_path)

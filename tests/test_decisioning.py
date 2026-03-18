@@ -29,8 +29,9 @@ def test_action_playbook_has_actionable_contract() -> None:
 
     assert {"Segment", "Risk", "Action", "Expected ROI"}.issubset(playbook.columns)
     assert (
-        playbook.loc[(playbook["Segment"] == "High LTV") & (playbook["Risk"] == "High"), "Action"]
-        .iloc[0]
+        playbook.loc[
+            (playbook["Segment"] == "High LTV") & (playbook["Risk"] == "High"), "Action"
+        ].iloc[0]
         == "Call retention"
     )
     assert (

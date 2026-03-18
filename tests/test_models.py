@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from src.config import PipelineConfig
-from src.modeling.predictor import ChurnPredictor
-from src.modeling.pipeline import train_models_and_score
-from tests.test_data import build_raw_df
 from src.ingestion import build_bronze_layer
+from src.modeling.pipeline import train_models_and_score
+from src.modeling.predictor import ChurnPredictor
 from src.transformation import build_silver_layer
+from tests.test_data import build_raw_df
 
 
 def test_training_outputs_business_metrics_and_persisted_artifacts(tmp_path) -> None:
@@ -22,6 +22,7 @@ def test_training_outputs_business_metrics_and_persisted_artifacts(tmp_path) -> 
     assert "risk_profiles" in outputs.metrics
     assert config.enterprise_bundle_path.exists()
     assert config.model_metadata_path.exists()
+    assert config.model_registry_manifest_path.exists()
 
 
 def test_predictor_uses_bundle_generated_by_training_pipeline(tmp_path) -> None:

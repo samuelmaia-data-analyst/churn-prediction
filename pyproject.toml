@@ -17,6 +17,9 @@ churn-process-data = "src.cli.save_processed_data:main"
 pythonpath = ["."]
 testpaths = ["tests"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
 [tool.black]
 line-length = 100
 target-version = ["py312"]
@@ -37,3 +40,4 @@ python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
+files = ["src"]

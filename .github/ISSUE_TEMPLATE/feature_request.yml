@@ -1,0 +1,36 @@
+name: Feature request
+description: Propor melhoria de produto, engenharia ou colaboracao.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Qual dor ou oportunidade motivou a sugestao?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: O que deve ser construido ou alterado?
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impacto esperado
+      description: Qual o ganho tecnico, operacional ou de portfolio?
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade percebida
+      options:
+        - alta
+        - media
+        - baixa
+    validations:
+      required: true

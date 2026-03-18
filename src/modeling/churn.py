@@ -4,10 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.preprocessing import FunctionTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
 from src.feature_engineering import (
     CATEGORICAL_FEATURES,
@@ -66,7 +65,14 @@ def build_churn_models(seed: int) -> tuple[dict[str, Pipeline], dict[str, str]]:
             steps=[
                 ("features", build_feature_engineering_step()),
                 ("prep", build_preprocessor()),
-                ("clf", LogisticRegression(max_iter=1500, random_state=seed)),
+                (
+                    "clf",
+                    LogisticRegression(
+                        max_iter=1500,
+                        random_state=seed,
+                        solver="liblinear",
+                    ),
+                ),
             ]
         ),
         "RandomForest": Pipeline(

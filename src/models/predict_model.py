@@ -1,6 +1,6 @@
-"""Compatibility layer: use src.modeling.predictor moving forward."""
+"""Compatibility wrapper. Prefer importing predictor classes from `src.compat` or `src.modeling`."""
 
-from src.modeling.predictor import (
+from src.compat.modeling import (
     DEFAULT_BUNDLE_PATH,
     DEFAULT_MODEL_PATH,
     DEFAULT_PREPROCESSOR_PATH,

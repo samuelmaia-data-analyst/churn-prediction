@@ -1,0 +1,45 @@
+name: Bug report
+description: Reportar defeito funcional, regressao ou problema de operacao.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Descreva o comportamento observado.
+      placeholder: O pipeline falha ao persistir metadata apos treino...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+      description: O que deveria acontecer?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para reproduzir
+      description: Inclua comandos, contexto e arquivos relevantes.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs e evidências
+      description: Cole stack trace, log estruturado, screenshot ou output relevante.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área afetada
+      options:
+        - pipeline
+        - modelagem
+        - reporting
+        - dashboard
+        - runtime/configuracao
+        - ci/cd
+    validations:
+      required: true

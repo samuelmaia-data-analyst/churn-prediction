@@ -12,8 +12,16 @@ class KPIValues(TypedDict):
     avg_next_purchase_prediction: float
 
 
+class ReportMetadata(TypedDict):
+    schema_version: str
+    generated_at_utc: str
+    run_id: str
+    environment: str
+
+
 @dataclass(frozen=True)
 class ExecutiveReport:
+    metadata: ReportMetadata
     kpis: KPIValues
     model_metrics: dict[str, object]
     top_10_priorities: list[dict[str, object]]

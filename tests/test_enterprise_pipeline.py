@@ -66,7 +66,7 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     bronze = build_bronze_layer(dataset)
     silver = build_silver_layer(bronze)
     model_outputs = train_models_and_score(config, silver)
-    report_outputs = build_business_outputs(model_outputs.scored_df, model_outputs.metrics)
+    report_outputs = build_business_outputs(config, model_outputs.scored_df, model_outputs.metrics)
     persist_business_outputs(config, report_outputs)
 
     assert {"churn_probability", "next_purchase_prediction"}.issubset(
@@ -86,6 +86,7 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     with open(config.executive_report_path, "r", encoding="utf-8") as fp:
         report = json.load(fp)
     assert "kpis" in report
+    assert "metadata" in report
     assert "model_metrics" in report
     assert "top_10_priorities" in report
     assert config.model_card_path.exists()
@@ -105,6 +106,7 @@ def test_ml_outputs_and_executive_report_contract(tmp_path: Path) -> None:
     assert (config.gold_dir / "customer_prioritization.csv").exists()
     assert (config.gold_dir / "kpi_summary.csv").exists()
     assert (config.gold_dir / "action_playbook.csv").exists()
+    assert config.gold_manifest_path.exists()
 
 
 def test_decision_policy_changes_threshold(tmp_path: Path) -> None:
@@ -127,5 +129,6 @@ def test_decision_policy_changes_threshold(tmp_path: Path) -> None:
     cheap_outputs = train_models_and_score(cheap_policy, silver)
 
     assert (
-        expensive_outputs.metrics["decision_threshold"] > cheap_outputs.metrics["decision_threshold"]
+        expensive_outputs.metrics["decision_threshold"]
+        > cheap_outputs.metrics["decision_threshold"]
     )

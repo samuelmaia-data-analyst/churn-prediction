@@ -1,12 +1,14 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pprint import pprint
 
+from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor
 
 
 def predict_single_customer(customer_data: dict) -> dict:
-    predictor = ChurnPredictor()
+    config = PipelineConfig.from_runtime(run_id="predict-cli")
+    predictor = ChurnPredictor(bundle_path=config.enterprise_bundle_path)
     result = predictor.predict_from_dict(customer_data)
     return {
         "churn": result.churn,

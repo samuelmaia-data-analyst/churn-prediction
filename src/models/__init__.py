@@ -1,7 +1,5 @@
-"""Compatibility exports. Prefer importing from src.modeling directly."""
+"""Compatibility wrapper package. Prefer importing from `src.compat` or `src.modeling`."""
 
-from src.modeling.predictor import ChurnPredictor, PredictionResult
-from src.modeling.trainer import ModelTrainer
-from src.modeling.tuner import tune_random_forest
+from src.compat.modeling import ChurnPredictor, ModelTrainer, PredictionResult, tune_random_forest
 
 __all__ = ["ChurnPredictor", "PredictionResult", "ModelTrainer", "tune_random_forest"]

@@ -65,14 +65,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     support_columns = ["OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport"]
 
     featured["charges_per_tenure"] = featured["TotalCharges"] / tenure_safe
-    featured["service_count"] = (
-        featured[service_columns].isin(["Yes"]).sum(axis=1)
-        + featured["InternetService"].isin(["DSL", "Fiber optic"]).astype(int)
-    )
+    featured["service_count"] = featured[service_columns].isin(["Yes"]).sum(axis=1) + featured[
+        "InternetService"
+    ].isin(["DSL", "Fiber optic"]).astype(int)
     featured["support_services_count"] = featured[support_columns].isin(["Yes"]).sum(axis=1)
-    featured["is_month_to_month"] = np.where(
-        featured["Contract"].eq("Month-to-month"), "Yes", "No"
-    )
+    featured["is_month_to_month"] = np.where(featured["Contract"].eq("Month-to-month"), "Yes", "No")
     featured["is_fiber_customer"] = np.where(
         featured["InternetService"].eq("Fiber optic"), "Yes", "No"
     )

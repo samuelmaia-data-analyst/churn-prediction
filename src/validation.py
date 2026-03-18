@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 import pandas as pd
 
 from src.transformation import REQUIRED_COLUMNS
+from src.utils.io import write_json_atomic
 
 
 @dataclass(frozen=True)
@@ -58,3 +59,7 @@ def validate_training_dataframe(df: pd.DataFrame) -> None:
         raise ValueError("Coluna tenure contem valores negativos.")
     if (df["MonthlyCharges"] < 0).any() or (df["TotalCharges"] < 0).any():
         raise ValueError("Colunas de cobranca contem valores negativos.")
+
+
+def persist_validation_report(report: ValidationReport, output_path) -> None:
+    write_json_atomic(output_path, report.to_dict())

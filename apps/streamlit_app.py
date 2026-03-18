@@ -3,18 +3,28 @@ Churn Prediction Dashboard - Streamlit
 Autor: Samuel de Andrade Maia
 """
 
-from pathlib import Path
+from __future__ import annotations
 
-import joblib
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
 
-DATA_PATH = Path("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
-PRIMARY_MODEL_PATH = Path("artifacts/models/enterprise_churn_model.joblib")
-LEGACY_PRIMARY_MODEL_PATH = Path("models/enterprise_churn_model.joblib")
+from apps.dashboard_runtime import (
+    DashboardRuntime,
+    SidebarState,
+    build_filtered_views,
+    build_prediction_payload,
+    load_data,
+    load_predictor,
+    summarise_metrics,
+)
+from src.config import PipelineConfig
+from src.modeling.predictor import ChurnPredictor
+
+RUNTIME_CONFIG = PipelineConfig.from_runtime(run_id="streamlit")
+DASHBOARD_RUNTIME = DashboardRuntime.from_config(RUNTIME_CONFIG)
 COLOR_BG_START = "#f7f9fc"
 COLOR_BG_END = "#eef3f9"
 COLOR_PRIMARY = "#164e63"
@@ -22,26 +32,6 @@ COLOR_SECONDARY = "#0f766e"
 COLOR_ALERT = "#dc2626"
 COLOR_TEXT = "#0b1f33"
 COLOR_MUTED = "#5b6b80"
-
-
-@st.cache_data(show_spinner=False)
-def load_data(path: Path) -> pd.DataFrame:
-    """Carrega e prepara o dataset para o dashboard."""
-    df_loaded = pd.read_csv(path)
-
-    if "TotalCharges" in df_loaded.columns:
-        df_loaded["TotalCharges"] = pd.to_numeric(df_loaded["TotalCharges"], errors="coerce")
-        df_loaded["TotalCharges"] = df_loaded["TotalCharges"].fillna(
-            df_loaded["TotalCharges"].median()
-        )
-
-    return df_loaded
-
-
-@st.cache_resource(show_spinner=False)
-def load_model(path: Path):
-    """Carrega o modelo treinado de churn."""
-    return joblib.load(path)
 
 
 def inject_styles() -> None:
@@ -184,36 +174,31 @@ def render_header() -> None:
     )
 
 
-def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
+def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
     df: pd.DataFrame | None = None
-    model = None
+    predictor: ChurnPredictor | None = None
     model_loaded = False
 
     with st.sidebar:
         st.markdown("## Status")
 
-        if DATA_PATH.exists():
-            df = load_data(DATA_PATH)
+        if runtime.data_path.exists():
+            df = load_data(runtime.data_path)
             st.success(f"Dados: {len(df):,} registros")
         else:
             st.error("Dataset nao encontrado")
 
-        model_path = (
-            PRIMARY_MODEL_PATH if PRIMARY_MODEL_PATH.exists() else LEGACY_PRIMARY_MODEL_PATH
-        )
-        if model_path.exists():
-            model = load_model(model_path)
-            model_loaded = (
-                hasattr(model, "predict_proba")
-                and hasattr(model, "named_steps")
-                and "prep" in model.named_steps
-            )
+        if runtime.bundle_path.exists():
+            predictor = load_predictor(runtime.bundle_path)
+            model_loaded = predictor.is_ready
             if model_loaded:
-                st.success(f"Modelo carregado ({model_path.name})")
+                st.success(f"Bundle carregado ({runtime.bundle_path.name})")
             else:
-                st.error("Modelo incompativel. Gere novamente o enterprise_churn_model.joblib.")
+                st.error("Bundle incompativel. Gere novamente os artefatos do pipeline.")
         else:
-            st.warning("Modelo enterprise nao encontrado. Rode o pipeline para habilitar predicao.")
+            st.warning(
+                "Bundle de inferencia nao encontrado. Rode o pipeline para habilitar predicao."
+            )
 
         st.markdown("---")
         st.markdown(
@@ -227,7 +212,7 @@ def render_sidebar() -> tuple[pd.DataFrame | None, object | None, bool]:
             """
         )
 
-    return df, model, model_loaded
+    return SidebarState(dataframe=df, predictor=predictor, model_loaded=model_loaded)
 
 
 def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
@@ -250,46 +235,30 @@ def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.Data
             internet_options += sorted(df["InternetService"].dropna().unique().tolist())
         selected_internet = st.selectbox("Servico de internet", internet_options)
 
-    # Left chart: filtered by Contract only.
-    left_chart_df = df.copy()
-    if selected_contract != "Todos" and "Contract" in left_chart_df.columns:
-        left_chart_df = left_chart_df[left_chart_df["Contract"] == selected_contract]
-
-    # Right chart: filtered by InternetService only.
-    right_chart_df = df.copy()
-    if selected_internet != "Todos" and "InternetService" in right_chart_df.columns:
-        right_chart_df = right_chart_df[right_chart_df["InternetService"] == selected_internet]
-
-    # Data preview: intersection of both filters to avoid ambiguity.
-    preview_df = df.copy()
-    if selected_contract != "Todos" and "Contract" in preview_df.columns:
-        preview_df = preview_df[preview_df["Contract"] == selected_contract]
-    if selected_internet != "Todos" and "InternetService" in preview_df.columns:
-        preview_df = preview_df[preview_df["InternetService"] == selected_internet]
-
+    left_chart_df, right_chart_df, preview_df = build_filtered_views(
+        df=df,
+        selected_contract=selected_contract,
+        selected_internet=selected_internet,
+    )
     return left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet
 
 
 def render_metrics(df: pd.DataFrame) -> None:
     st.markdown('<div class="section-title">Resumo executivo</div>', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
+    metrics = summarise_metrics(df)
 
     with col1:
-        st.metric("Total Clientes", f"{len(df):,}")
+        st.metric("Total Clientes", f"{metrics['total_customers']:,}")
 
     with col2:
-        churn_rate = 0.0
-        if "Churn" in df.columns and len(df) > 0:
-            churn_rate = (df["Churn"].value_counts().get("Yes", 0) / len(df)) * 100
-        st.metric("Taxa de Churn", f"{churn_rate:.1f}%")
+        st.metric("Taxa de Churn", f"{metrics['churn_rate']:.1f}%")
 
     with col3:
-        avg_monthly = df["MonthlyCharges"].mean() if "MonthlyCharges" in df.columns else 0
-        st.metric("Media Mensal", f"${avg_monthly:.2f}")
+        st.metric("Media Mensal", f"${metrics['avg_monthly']:.2f}")
 
     with col4:
-        avg_tenure = df["tenure"].mean() if "tenure" in df.columns else 0
-        st.metric("Media Tenure", f"{avg_tenure:.1f} meses")
+        st.metric("Media Tenure", f"{metrics['avg_tenure']:.1f} meses")
 
 
 def render_charts(
@@ -365,7 +334,7 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
         st.dataframe(filtered_df[valid_cols].head(20), use_container_width=True)
 
 
-def render_prediction(model) -> None:
+def render_prediction(predictor: ChurnPredictor) -> None:
     st.markdown("---")
     st.markdown('<div class="section-title">Predicao individual</div>', unsafe_allow_html=True)
 
@@ -400,33 +369,22 @@ def render_prediction(model) -> None:
 
         if st.button("Prever churn"):
             try:
-                input_data = pd.DataFrame(
-                    [
-                        {
-                            "gender": gender,
-                            "SeniorCitizen": senior,
-                            "Partner": partner,
-                            "Dependents": dependents,
-                            "tenure": tenure,
-                            "PhoneService": phone_service,
-                            "MultipleLines": "No",
-                            "InternetService": internet_service,
-                            "OnlineSecurity": "No",
-                            "OnlineBackup": "No",
-                            "DeviceProtection": "No",
-                            "TechSupport": "No",
-                            "StreamingTV": "No",
-                            "StreamingMovies": "No",
-                            "Contract": contract,
-                            "PaperlessBilling": paperless,
-                            "PaymentMethod": payment,
-                            "MonthlyCharges": monthly,
-                            "TotalCharges": total,
-                        }
-                    ]
+                payload = build_prediction_payload(
+                    gender=gender,
+                    senior=senior,
+                    partner=partner,
+                    dependents=dependents,
+                    tenure=tenure,
+                    phone_service=phone_service,
+                    internet_service=internet_service,
+                    contract=contract,
+                    paperless=paperless,
+                    payment=payment,
+                    monthly=monthly,
+                    total=total,
                 )
-
-                proba = model.predict_proba(input_data)[0][1]
+                result = predictor.predict_from_dict(payload)
+                proba = result.probability
 
                 result_col1, result_col2 = st.columns(2)
 
@@ -451,7 +409,7 @@ def render_prediction(model) -> None:
                     st.plotly_chart(fig, use_container_width=True)
 
                 with result_col2:
-                    if proba >= 0.5:
+                    if result.risk_level == "Alto":
                         st.error(f"Alto risco de cancelamento ({proba:.1%})")
                     else:
                         st.success(f"Baixo risco de cancelamento ({proba:.1%})")
@@ -492,10 +450,13 @@ def main() -> None:
     pio.templates.default = "plotly_white"
     inject_styles()
     render_header()
-    df, model, model_loaded = render_sidebar()
+    sidebar_state = render_sidebar(DASHBOARD_RUNTIME)
+    df = sidebar_state.dataframe
+    predictor = sidebar_state.predictor
+    model_loaded = sidebar_state.model_loaded
 
     if df is None:
-        st.error(f"Dataset nao encontrado em: {DATA_PATH}")
+        st.error(f"Dataset nao encontrado em: {DASHBOARD_RUNTIME.data_path}")
         st.stop()
 
     render_metrics(df)
@@ -510,8 +471,8 @@ def main() -> None:
     render_charts(left_chart_df, right_chart_df, selected_contract, selected_internet)
     render_data_preview(preview_df)
 
-    if model_loaded and model is not None:
-        render_prediction(model)
+    if model_loaded and predictor is not None:
+        render_prediction(predictor)
 
     render_footer()
 

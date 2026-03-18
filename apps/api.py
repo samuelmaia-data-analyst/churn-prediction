@@ -1,13 +1,16 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor, PredictionResult
 
-predictor = ChurnPredictor()
+RUNTIME_CONFIG = PipelineConfig.from_runtime(run_id="api")
+predictor = ChurnPredictor(bundle_path=RUNTIME_CONFIG.enterprise_bundle_path)
 
 
 class CustomerData(BaseModel):
@@ -43,7 +46,7 @@ async def lifespan(_: FastAPI):
     try:
         predictor.load_artifacts()
     except FileNotFoundError:
-        # API segue no ar para facilitar health-check mesmo sem artefatos.
+        # API permanece disponivel para health-check mesmo sem artefatos de inferencia.
         pass
     yield
 
@@ -62,8 +65,13 @@ def read_root() -> dict[str, str]:
 
 
 @app.get("/health")
-def health_check() -> dict[str, str]:
-    return {"status": "healthy" if predictor.is_ready else "unhealthy"}
+def health_check() -> dict[str, str | bool]:
+    return {
+        "status": "healthy" if predictor.is_ready else "unhealthy",
+        "ready": predictor.is_ready,
+        "bundle_path": str(RUNTIME_CONFIG.enterprise_bundle_path),
+        "bundle_exists": Path(RUNTIME_CONFIG.enterprise_bundle_path).exists(),
+    }
 
 
 @app.post("/predict", response_model=PredictionResponse)

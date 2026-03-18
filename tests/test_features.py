@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from src.feature_engineering import MODEL_FEATURES, engineer_features
-from src.modeling.churn import build_churn_models
-from tests.test_data import build_raw_df
 from src.ingestion import build_bronze_layer
+from src.modeling.churn import build_churn_models
 from src.transformation import build_silver_layer
+from tests.test_data import build_raw_df
 
 
 def test_model_pipeline_accepts_raw_business_features_and_engineers_the_rest() -> None:

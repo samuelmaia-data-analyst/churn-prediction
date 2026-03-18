@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
 
 from src.config import PipelineConfig
+from src.utils.io import write_csv_atomic, write_json_atomic
 
 DEFAULT_DRIFT_FEATURES = [
     "tenure",
@@ -58,8 +58,6 @@ def ks_statistic(baseline: pd.Series, current: pd.Series) -> float:
 
 
 def run_drift_monitoring(config: PipelineConfig, current_df: pd.DataFrame) -> dict[str, object]:
-    config.monitoring_dir.mkdir(parents=True, exist_ok=True)
-
     available_features = [f for f in DEFAULT_DRIFT_FEATURES if f in current_df.columns]
     current_snapshot = current_df[available_features].copy()
     status = "ok"
@@ -67,7 +65,7 @@ def run_drift_monitoring(config: PipelineConfig, current_df: pd.DataFrame) -> di
     per_feature: list[dict[str, object]] = []
 
     if not config.drift_reference_path.exists():
-        current_snapshot.to_csv(config.drift_reference_path, index=False)
+        write_csv_atomic(config.drift_reference_path, current_snapshot)
         payload = {
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "status": "cold_start",
@@ -75,8 +73,7 @@ def run_drift_monitoring(config: PipelineConfig, current_df: pd.DataFrame) -> di
             "reason": "Baseline de drift criada na primeira execucao.",
             "features": [],
         }
-        with open(config.drift_alert_path, "w", encoding="utf-8") as fp:
-            json.dump(payload, fp, ensure_ascii=False, indent=2)
+        write_json_atomic(config.drift_alert_path, payload)
         return payload
 
     baseline = pd.read_csv(config.drift_reference_path)
@@ -106,6 +103,5 @@ def run_drift_monitoring(config: PipelineConfig, current_df: pd.DataFrame) -> di
         "thresholds": {"psi_alert": 0.20, "ks_alert": 0.15},
         "features": per_feature,
     }
-    with open(config.drift_alert_path, "w", encoding="utf-8") as fp:
-        json.dump(payload, fp, ensure_ascii=False, indent=2)
+    write_json_atomic(config.drift_alert_path, payload)
     return payload
