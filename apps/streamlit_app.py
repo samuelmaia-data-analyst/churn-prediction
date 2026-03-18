@@ -20,8 +20,8 @@ from apps.dashboard_runtime import (
     load_predictor,
     summarise_metrics,
 )
-from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor
+from src.runtime.config import PipelineConfig
 
 RUNTIME_CONFIG = PipelineConfig.from_runtime(run_id="streamlit")
 DASHBOARD_RUNTIME = DashboardRuntime.from_config(RUNTIME_CONFIG)

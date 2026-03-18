@@ -6,8 +6,8 @@ import pandas as pd
 import yaml
 from sklearn.model_selection import train_test_split
 
-from src.ingestion import build_bronze_layer
-from src.transformation import build_silver_layer
+from src.pipelines.ingestion import build_bronze_layer
+from src.pipelines.transformation import build_silver_layer
 
 logger = logging.getLogger(__name__)
 

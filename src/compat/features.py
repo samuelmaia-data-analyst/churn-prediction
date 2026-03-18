@@ -7,8 +7,8 @@ import pandas as pd
 import yaml
 from sklearn.compose import ColumnTransformer
 
-from src.feature_engineering import engineer_features
 from src.modeling.churn import build_preprocessor
+from src.pipelines.feature_engineering import engineer_features
 
 
 class FeatureEngineer:

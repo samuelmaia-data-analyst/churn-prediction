@@ -4,7 +4,7 @@ import importlib
 
 import pandas as pd
 
-import src.dashboard_data as dashboard_data
+import src.pipelines.dashboard_data as dashboard_data
 
 
 def test_ensure_dashboard_outputs_with_synthetic_fallback(tmp_path, monkeypatch) -> None:

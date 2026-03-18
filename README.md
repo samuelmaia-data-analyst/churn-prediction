@@ -98,16 +98,16 @@ Fluxo principal:
 
 Componentes centrais:
 
-- `src/config.py`: configuração de runtime, paths e ambiente
-- `src/ingestion.py`: leitura do raw e camada bronze
-- `src/transformation.py`: limpeza e silver layer
-- `src/feature_engineering.py`: features de negócio reutilizáveis
+- `src/runtime/config.py`: configuração de runtime, paths e ambiente
+- `src/pipelines/ingestion.py`: leitura do raw e camada bronze
+- `src/pipelines/transformation.py`: limpeza e silver layer
+- `src/pipelines/feature_engineering.py`: features de negócio reutilizáveis
 - `src/modeling/pipeline.py`: treino, score, persistência e metadata
-- `src/reporting.py`: executive report, model card e action playbook
-- `src/monitoring.py`: baseline e alerta de drift com PSI/KS
+- `src/pipelines/reporting.py`: executive report, model card e action playbook
+- `src/pipelines/monitoring.py`: baseline e alerta de drift com PSI/KS
 - `src/cli/pipeline.py`: orquestração ponta a ponta
 
-Pastas `src/data`, `src/features` e `src/models` existem apenas como camada de compatibilidade. O caminho canônico é `src/`, `src/modeling/` e `src/compat/`.
+Pastas `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. O caminho canônico é `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
 
 Arquitetura detalhada:
 

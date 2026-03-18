@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.config import PipelineConfig
+from src.runtime.config import PipelineConfig
 
 
 def test_pipeline_config_reads_environment_from_dotenv(tmp_path: Path) -> None:

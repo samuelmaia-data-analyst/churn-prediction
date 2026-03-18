@@ -7,8 +7,8 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
-from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor
+from src.runtime.config import PipelineConfig
 
 
 @dataclass(frozen=True)

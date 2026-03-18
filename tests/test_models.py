@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from src.config import PipelineConfig
-from src.ingestion import build_bronze_layer
 from src.modeling.pipeline import train_models_and_score
 from src.modeling.predictor import ChurnPredictor
-from src.transformation import build_silver_layer
+from src.pipelines.ingestion import build_bronze_layer
+from src.pipelines.transformation import build_silver_layer
+from src.runtime.config import PipelineConfig
 from tests.test_data import build_raw_df
 
 

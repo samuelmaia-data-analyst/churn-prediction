@@ -28,8 +28,8 @@ raw
 
 ### Runtime e Configuração
 
-- `src/config.py`
-- `src/logging_utils.py`
+- `src/runtime/config.py`
+- `src/runtime/logging.py`
 - `src/cli/pipeline.py`
 
 Responsabilidade:
@@ -38,9 +38,9 @@ definir ambiente, `run_id`, paths resolvidos, metadata e observabilidade.
 
 ### Ingestion e Quality Gate
 
-- `src/ingestion.py`
-- `src/transformation.py`
-- `src/validation.py`
+- `src/pipelines/ingestion.py`
+- `src/pipelines/transformation.py`
+- `src/pipelines/validation.py`
 
 Responsabilidade:
 
@@ -48,7 +48,7 @@ garantir que dados de entrada sejam válidos e reproduzíveis antes de modelagem
 
 ### Feature e Modeling
 
-- `src/feature_engineering.py`
+- `src/pipelines/feature_engineering.py`
 - `src/modeling/churn.py`
 - `src/modeling/pipeline.py`
 - `src/modeling/predictor.py`
@@ -59,9 +59,9 @@ treinar, avaliar, persistir e servir artefatos de inferência.
 
 ### Analytics Output
 
-- `src/warehouse.py`
-- `src/reporting.py`
-- `src/dashboard_data.py`
+- `src/pipelines/warehouse.py`
+- `src/pipelines/reporting.py`
+- `src/pipelines/dashboard_data.py`
 
 Responsabilidade:
 
@@ -75,9 +75,9 @@ O threshold global não é fixo. Ele é derivado da política de custo para refl
 
 ### Wrappers legados mantidos
 
-Pastas como `src/data`, `src/features` e `src/models` ainda existem por compatibilidade.
+Pastas como `src/data`, `src/features`, `src/models` e wrappers em `src/*.py` ainda existem por compatibilidade.
 O isolamento da compatibilidade agora fica explicitado em `src/compat/`.
-O caminho canônico está em `src/` raiz e `src/modeling/`.
+O caminho canônico está em `src/runtime/`, `src/pipelines/` e `src/modeling/`.
 
 ### Orquestração local e explícita
 

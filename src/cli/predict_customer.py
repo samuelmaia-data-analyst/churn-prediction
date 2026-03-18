@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pprint import pprint
 
-from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor
+from src.runtime.config import PipelineConfig
 
 
 def predict_single_customer(customer_data: dict) -> dict:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src.decisioning import (
+from src.pipelines.decisioning import (
     build_action_playbook,
     customer_value_segment,
     threshold_for_value_segment,

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from src.feature_engineering import MODEL_FEATURES, engineer_features
-from src.ingestion import build_bronze_layer
 from src.modeling.churn import build_churn_models
-from src.transformation import build_silver_layer
+from src.pipelines.feature_engineering import MODEL_FEATURES, engineer_features
+from src.pipelines.ingestion import build_bronze_layer
+from src.pipelines.transformation import build_silver_layer
 from tests.test_data import build_raw_df
 
 

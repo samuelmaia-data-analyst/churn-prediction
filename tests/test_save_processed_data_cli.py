@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.cli.save_processed_data import export_processed_dataset
-from src.config import PipelineConfig
+from src.runtime.config import PipelineConfig
 
 
 def test_export_processed_dataset_uses_canonical_silver_path(tmp_path: Path) -> None:

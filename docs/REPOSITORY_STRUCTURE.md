@@ -32,8 +32,10 @@ O repositório está organizado para separar:
 |   |-- compat/                  # backward compatibility explícita
 |   |-- contracts/               # contratos tipados
 |   |-- modeling/                # treino e inferência
+|   |-- pipelines/               # pipeline canônico e business logic
+|   |-- runtime/                 # configuração e logging
 |   |-- utils/                   # helpers pequenos e compartilhados
-|   `-- ...                      # pipeline, reporting, monitoring
+|   `-- *.py                     # wrappers de compatibilidade na raiz
 |-- tests/                       # testes automatizados
 |-- artifacts/                   # outputs de execução
 `-- models/                      # model registry local
@@ -57,22 +59,18 @@ arquitetura, operação, convenções e guias de colaboração.
 
 EDA, experimentos e validações exploratórias. Nada em notebook deve ser dependência do caminho canônico do pipeline.
 
-## Estrutura Alvo de Evolução
+## Estrutura Canônica Atual
 
-Sem quebrar compatibilidade, a evolução desejada é:
+Sem quebrar compatibilidade, a estrutura canônica agora é:
 
 ```text
 src/
-  config/
   compat/
-  ingestion/
-  transformations/
-  validation/
+  contracts/
   pipelines/
   modeling/
-  reporting/
-  monitoring/
+  runtime/
   utils/
 ```
 
-O repositório ainda não foi movido integralmente para esse layout porque a prioridade atual foi elevar confiabilidade e colaboração sem introduzir refactor de alto risco.
+Wrappers na raiz de `src/` continuam existindo para backward compatibility. Código novo deve apontar para `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.

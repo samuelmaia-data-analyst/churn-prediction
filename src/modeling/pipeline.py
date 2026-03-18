@@ -19,10 +19,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-from src.config import PipelineConfig
 from src.contracts import ArtifactEntry, ArtifactManifest, ExecutiveMetrics
-from src.decisioning import DecisionPolicy, decision_threshold, get_policy
-from src.feature_engineering import BASE_MODEL_FEATURES
 from src.modeling.churn import (
     BUSINESS_FEATURE_NAMES,
     FEATURES,
@@ -36,8 +33,11 @@ from src.modeling.churn import (
     month_to_month_risk_ratio,
     top_feature_drivers,
 )
+from src.pipelines.decisioning import DecisionPolicy, decision_threshold, get_policy
+from src.pipelines.feature_engineering import BASE_MODEL_FEATURES
+from src.pipelines.validation import validate_training_dataframe
+from src.runtime.config import PipelineConfig
 from src.utils.io import write_json_atomic
-from src.validation import validate_training_dataframe
 
 logger = logging.getLogger(__name__)
 

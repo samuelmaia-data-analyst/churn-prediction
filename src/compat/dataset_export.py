@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from src.cli.save_processed_data import export_processed_dataset
-from src.config import PipelineConfig
+from src.runtime.config import PipelineConfig
 
 logger = logging.getLogger(__name__)
 

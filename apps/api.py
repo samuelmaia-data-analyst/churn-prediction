@@ -6,8 +6,8 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.config import PipelineConfig
 from src.modeling.predictor import ChurnPredictor, PredictionResult
+from src.runtime.config import PipelineConfig
 
 RUNTIME_CONFIG = PipelineConfig.from_runtime(run_id="api")
 predictor = ChurnPredictor(bundle_path=RUNTIME_CONFIG.enterprise_bundle_path)

@@ -10,16 +10,16 @@ from uuid import uuid4
 
 import pandas as pd
 
-from src.config import PipelineConfig
-from src.decisioning import POLICIES
-from src.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
-from src.logging_utils import configure_logging
 from src.ml import ModelOutputs, train_models_and_score
-from src.monitoring import run_drift_monitoring
-from src.reporting import ReportOutputs, build_business_outputs, persist_business_outputs
-from src.transformation import build_silver_layer, persist_silver
+from src.pipelines.decisioning import POLICIES
+from src.pipelines.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
+from src.pipelines.monitoring import run_drift_monitoring
+from src.pipelines.reporting import ReportOutputs, build_business_outputs, persist_business_outputs
+from src.pipelines.transformation import build_silver_layer, persist_silver
+from src.pipelines.warehouse import StarSchema, build_star_schema, persist_star_schema
+from src.runtime.config import PipelineConfig
+from src.runtime.logging import configure_logging
 from src.utils.io import write_json_atomic
-from src.warehouse import StarSchema, build_star_schema, persist_star_schema
 
 logger = logging.getLogger(__name__)
 TaskResult = TypeVar("TaskResult")

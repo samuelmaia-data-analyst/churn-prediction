@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
-from src.feature_engineering import (
+from src.pipelines.feature_engineering import (
     CATEGORICAL_FEATURES,
     MODEL_FEATURES,
     NUMERIC_FEATURES,

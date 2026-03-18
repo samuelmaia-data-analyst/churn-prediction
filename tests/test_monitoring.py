@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src.config import PipelineConfig
-from src.monitoring import run_drift_monitoring
+from src.pipelines.monitoring import run_drift_monitoring
+from src.runtime.config import PipelineConfig
 
 
 def test_drift_monitoring_creates_baseline_and_alert_file(tmp_path) -> None:

@@ -3,10 +3,10 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from src.feature_engineering import engineer_features
-from src.ingestion import build_bronze_layer
-from src.transformation import build_silver_layer
-from src.validation import validate_raw_dataframe, validate_training_dataframe
+from src.pipelines.feature_engineering import engineer_features
+from src.pipelines.ingestion import build_bronze_layer
+from src.pipelines.transformation import build_silver_layer
+from src.pipelines.validation import validate_raw_dataframe, validate_training_dataframe
 
 
 def build_raw_df(rows: int = 40) -> pd.DataFrame:

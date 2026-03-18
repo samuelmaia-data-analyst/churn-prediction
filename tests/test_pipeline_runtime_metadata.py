@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from src.cli.pipeline import run_pipeline
-from src.config import PipelineConfig
+from src.runtime.config import PipelineConfig
 
 
 def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Path) -> None:
