@@ -53,6 +53,23 @@ class DashboardAssets:
     def report_metadata(self) -> dict[str, Any]:
         return self.report.get("metadata", {}) if self.report else {}
 
+    @property
+    def is_fallback(self) -> bool:
+        run_id = str(self.report_metadata.get("run_id", ""))
+        return run_id == "dashboard-fallback"
+
+    @property
+    def generated_at_utc(self) -> str:
+        return str(self.report_metadata.get("generated_at_utc", "unknown"))
+
+    @property
+    def environment(self) -> str:
+        return str(self.report_metadata.get("environment", "unknown"))
+
+    @property
+    def schema_version(self) -> str:
+        return str(self.report_metadata.get("schema_version", "unknown"))
+
 
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
@@ -82,6 +99,34 @@ def load_dashboard_assets() -> DashboardAssets:
         kpi_path=KPI_PATH,
         prioritization_path=PRIORITIZATION_PATH,
     )
+
+
+def build_dashboard_status(assets: DashboardAssets) -> dict[str, str | bool]:
+    return {
+        "ready": assets.is_ready,
+        "fallback": assets.is_fallback,
+        "environment": assets.environment,
+        "schema_version": assets.schema_version,
+        "generated_at_utc": assets.generated_at_utc,
+        "run_id": str(assets.report_metadata.get("run_id", "unknown")),
+    }
+
+
+def normalize_filter_value(selected_value: str) -> str:
+    return "All" if selected_value in {"All", "Todos"} else selected_value
+
+
+def format_risk_level(risk_level: str) -> str:
+    risk_map = {
+        "alto": "High",
+        "high": "High",
+        "medio": "Medium",
+        "médio": "Medium",
+        "medium": "Medium",
+        "baixo": "Low",
+        "low": "Low",
+    }
+    return risk_map.get(risk_level.strip().lower(), risk_level)
 
 
 def build_prediction_payload(
@@ -139,19 +184,22 @@ def build_filtered_views(
     selected_contract: str,
     selected_internet: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    normalized_contract = normalize_filter_value(selected_contract)
+    normalized_internet = normalize_filter_value(selected_internet)
+
     left_chart_df = df.copy()
-    if selected_contract != "Todos" and "Contract" in left_chart_df.columns:
-        left_chart_df = left_chart_df[left_chart_df["Contract"] == selected_contract]
+    if normalized_contract != "All" and "Contract" in left_chart_df.columns:
+        left_chart_df = left_chart_df[left_chart_df["Contract"] == normalized_contract]
 
     right_chart_df = df.copy()
-    if selected_internet != "Todos" and "InternetService" in right_chart_df.columns:
-        right_chart_df = right_chart_df[right_chart_df["InternetService"] == selected_internet]
+    if normalized_internet != "All" and "InternetService" in right_chart_df.columns:
+        right_chart_df = right_chart_df[right_chart_df["InternetService"] == normalized_internet]
 
     preview_df = df.copy()
-    if selected_contract != "Todos" and "Contract" in preview_df.columns:
-        preview_df = preview_df[preview_df["Contract"] == selected_contract]
-    if selected_internet != "Todos" and "InternetService" in preview_df.columns:
-        preview_df = preview_df[preview_df["InternetService"] == selected_internet]
+    if normalized_contract != "All" and "Contract" in preview_df.columns:
+        preview_df = preview_df[preview_df["Contract"] == normalized_contract]
+    if normalized_internet != "All" and "InternetService" in preview_df.columns:
+        preview_df = preview_df[preview_df["InternetService"] == normalized_internet]
 
     return left_chart_df, right_chart_df, preview_df
 

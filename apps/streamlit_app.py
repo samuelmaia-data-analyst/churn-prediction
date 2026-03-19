@@ -14,187 +14,86 @@ import streamlit as st
 from apps.dashboard_runtime import (
     DashboardRuntime,
     SidebarState,
+    build_dashboard_status,
     build_filtered_views,
     build_prediction_payload,
+    format_risk_level,
+    load_dashboard_assets,
     load_data,
     load_predictor,
     summarise_metrics,
+)
+from apps.dashboard_ui import (
+    COLOR_ALERT,
+    COLOR_PRIMARY,
+    COLOR_SECONDARY,
+    configure_dashboard_page,
+    inject_global_styles,
+    render_footer,
+    render_page_hero,
+    render_sidebar_summary,
+    render_status_banner,
+    section_container,
 )
 from src.modeling.predictor import ChurnPredictor
 from src.runtime.config import PipelineConfig
 
 RUNTIME_CONFIG = PipelineConfig.from_runtime(run_id="streamlit")
 DASHBOARD_RUNTIME = DashboardRuntime.from_config(RUNTIME_CONFIG)
-COLOR_BG_START = "#f7f9fc"
-COLOR_BG_END = "#eef3f9"
-COLOR_PRIMARY = "#164e63"
-COLOR_SECONDARY = "#0f766e"
-COLOR_ALERT = "#dc2626"
-COLOR_TEXT = "#0b1f33"
-COLOR_MUTED = "#5b6b80"
 
 
-def inject_styles() -> None:
-    st.markdown(
-        f"""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
-        :root {{
-            --bg-start: {COLOR_BG_START};
-            --bg-end: {COLOR_BG_END};
-            --primary: {COLOR_PRIMARY};
-            --secondary: {COLOR_SECONDARY};
-            --alert: {COLOR_ALERT};
-            --text: {COLOR_TEXT};
-            --muted: {COLOR_MUTED};
-        }}
-        .stApp {{
-            background:
-                radial-gradient(circle at 8% 6%, rgba(22, 78, 99, 0.10), transparent 36%),
-                radial-gradient(circle at 85% 0%, rgba(15, 118, 110, 0.12), transparent 38%),
-                linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
-            color: var(--text);
-        }}
-        html, body, [class*="css"] {{
-            font-family: "Space Grotesk", sans-serif;
-        }}
-        h1, h2, h3,
-        [data-testid="stMarkdownContainer"] h1,
-        [data-testid="stMarkdownContainer"] h2 {{
-            color: var(--text);
-            letter-spacing: -0.02em;
-        }}
-        [data-testid="stHeaderActionElements"] {{
-            display: none !important;
-        }}
-        [data-testid="stSidebar"] {{
-            background: linear-gradient(
-                200deg,
-                rgba(22, 78, 99, 0.96) 0%,
-                rgba(11, 31, 51, 0.97) 100%
-            );
-        }}
-        [data-testid="stSidebar"] * {{
-            color: #f8fafc;
-        }}
-        [data-testid="stSidebar"] a {{
-            color: #99f6e4 !important;
-        }}
-        .hero {{
-            background: linear-gradient(125deg, rgba(22, 78, 99, 0.96), rgba(15, 118, 110, 0.92));
-            border-radius: 20px;
-            padding: 1.25rem 1.4rem;
-            box-shadow: 0 14px 42px rgba(11, 31, 51, 0.25);
-            margin-bottom: 0.9rem;
-        }}
-        .hero-title {{
-            color: #f8fafc;
-            margin: 0;
-            font-size: clamp(1.45rem, 4.5vw, 2.3rem);
-            font-weight: 700;
-            line-height: 1.15;
-        }}
-        .hero-subtitle {{
-            color: rgba(248, 250, 252, 0.92);
-            margin-top: 0.45rem;
-            font-size: 0.98rem;
-        }}
-        .section-title {{
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 0.2rem 0 0.65rem 0;
-        }}
-        [data-testid="stMetric"] {{
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(22, 78, 99, 0.18);
-            border-radius: 14px;
-            padding: 0.55rem 0.75rem;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-        }}
-        [data-testid="stMetricLabel"] {{
-            color: var(--muted);
-            font-weight: 600;
-        }}
-        [data-testid="stMetricValue"] {{
-            color: var(--primary);
-            font-size: 1.55rem;
-            font-weight: 700;
-        }}
-        .stButton > button {{
-            border-radius: 10px;
-            border: 1px solid rgba(22, 78, 99, 0.22);
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 8px 18px rgba(22, 78, 99, 0.25);
-        }}
-        .stButton > button:hover {{
-            border-color: rgba(22, 78, 99, 0.35);
-            background: linear-gradient(135deg, #0f4254, #0a5a53);
-            color: #fff;
-        }}
-        .risk-box {{
-            border-radius: 12px;
-            padding: 0.95rem 1rem;
-            border: 1px solid rgba(22, 78, 99, 0.20);
-            background: rgba(255, 255, 255, 0.72);
-            color: var(--text);
-            font-size: 0.96rem;
-        }}
-        .status-box {{
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 12px;
-            padding: 0.75rem 0.85rem;
-            margin-bottom: 0.65rem;
-            background: rgba(255,255,255,0.06);
-        }}
-        code {{
-            font-family: "JetBrains Mono", monospace !important;
-        }}
-        @media (max-width: 820px) {{
-            .hero {{
-                border-radius: 14px;
-                padding: 1rem 1rem;
-            }}
-            [data-testid="stMetric"] {{
-                padding: 0.55rem 0.65rem;
-            }}
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
+def render_operational_shell() -> None:
+    assets = load_dashboard_assets()
+    status = build_dashboard_status(assets)
+    render_page_hero(
+        eyebrow="Control Room",
+        title="Churn Prediction Control Room",
+        subtitle=(
+            "A production-minded workspace for portfolio monitoring, cohort exploration, "
+            "and customer-level scoring built from canonical churn artifacts."
+        ),
+        meta="Portfolio dashboard | SaaS-style analytical workspace",
     )
 
+    if status["fallback"]:
+        title = "Fallback artifacts currently in use"
+        body = (
+            "The dashboard is rendering synthetic or degraded outputs because the canonical "
+            "pipeline artifacts are not fully available."
+        )
+    elif status["ready"]:
+        title = "Canonical dashboard artifacts are ready"
+        body = "The dashboard is currently backed by the canonical reporting and model outputs."
+    else:
+        title = "Artifacts are partially available"
+        body = "Some dashboard views may remain limited until the canonical pipeline completes."
 
-def render_header() -> None:
-    st.markdown(
-        """
-        <div class="hero">
-            <h1 class="hero-title">Churn Prediction Control Room</h1>
-            <p class="hero-subtitle">
-                Operational dashboard for churn monitoring, risk exploration,
-                and customer-level inference.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    render_status_banner(
+        title=title,
+        body=body,
+        status_items=[
+            ("Environment", str(status["environment"])),
+            ("Schema", str(status["schema_version"])),
+            ("Run ID", str(status["run_id"])),
+            ("Generated", str(status["generated_at_utc"])),
+        ],
     )
 
 
 def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
-    df: pd.DataFrame | None = None
+    dataframe: pd.DataFrame | None = None
     predictor: ChurnPredictor | None = None
     model_loaded = False
 
     with st.sidebar:
-        st.markdown("## Runtime Status")
+        st.markdown("## Workspace Status")
+        st.caption("Runtime health, dataset readiness, and inference bundle availability.")
 
         if runtime.data_path.exists():
-            df = load_data(runtime.data_path)
-            st.success(f"Dataset ready: {len(df):,} rows")
+            dataframe = load_data(runtime.data_path)
+            st.success(f"Dataset ready with {len(dataframe):,} rows")
         else:
-            st.error("Dataset not found")
+            st.error("Dataset is missing from the configured raw layer.")
 
         if runtime.bundle_path.exists():
             predictor = load_predictor(runtime.bundle_path)
@@ -202,21 +101,24 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
             if model_loaded:
                 st.success(f"Inference bundle ready: {runtime.bundle_path.name}")
             else:
-                st.error("Bundle loaded but incompatible with the current predictor contract.")
+                st.error(
+                    "Inference bundle exists but does not match the current predictor contract."
+                )
         else:
-            st.warning(
-                "Inference bundle not found. Run the training pipeline to enable predictions."
-            )
+            st.warning("Inference bundle not found. Run the training pipeline to enable scoring.")
 
-        st.markdown(
-            f"""
-            <div class="status-box">
-                <strong>Environment</strong><br>{RUNTIME_CONFIG.environment}<br><br>
-                <strong>Run ID</strong><br><code>{RUNTIME_CONFIG.run_id}</code>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        render_sidebar_summary(RUNTIME_CONFIG)
+
+        with st.expander("Navigation Notes", expanded=False):
+            st.markdown(
+                """
+                - `Control Room`: high-level monitoring and customer scoring
+                - `Executive Overview`: board-level summary and artifact export
+                - `Risk and Growth`: cohort mix and opportunity view
+                - `Prioritization`: operational action list
+                - `Simulation`: campaign impact scenario planning
+                """
+            )
 
         st.markdown("---")
         st.markdown(
@@ -230,119 +132,169 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
             """
         )
 
-    return SidebarState(dataframe=df, predictor=predictor, model_loaded=model_loaded)
+    return SidebarState(dataframe=dataframe, predictor=predictor, model_loaded=model_loaded)
 
 
-def apply_filters(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
-    st.markdown("---")
-    st.markdown('<div class="section-title">Exploration Filters</div>', unsafe_allow_html=True)
+def render_portfolio_metrics(dataframe: pd.DataFrame) -> None:
+    metrics = summarise_metrics(dataframe)
+    columns = st.columns(4)
+    columns[0].metric("Total Customers", f"{metrics['total_customers']:,}")
+    columns[1].metric("Churn Rate", f"{metrics['churn_rate']:.1f}%")
+    columns[2].metric("Average Monthly Charge", f"${metrics['avg_monthly']:.2f}")
+    columns[3].metric("Average Tenure", f"{metrics['avg_tenure']:.1f} months")
 
+
+def render_filter_bar(
+    dataframe: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
     filter_col1, filter_col2 = st.columns(2)
 
     with filter_col1:
-        st.caption("Controls the left-side chart")
-        contract_options = ["Todos"]
-        if "Contract" in df.columns:
-            contract_options += sorted(df["Contract"].dropna().unique().tolist())
-        selected_contract = st.selectbox("Contract", contract_options)
+        contract_options = ["All"]
+        if "Contract" in dataframe.columns:
+            contract_options += sorted(dataframe["Contract"].dropna().unique().tolist())
+        selected_contract = st.selectbox(
+            "Contract cohort",
+            contract_options,
+            help="Filters the churn distribution chart and the preview table.",
+        )
 
     with filter_col2:
-        st.caption("Controls the right-side chart")
-        internet_options = ["Todos"]
-        if "InternetService" in df.columns:
-            internet_options += sorted(df["InternetService"].dropna().unique().tolist())
-        selected_internet = st.selectbox("Internet service", internet_options)
+        internet_options = ["All"]
+        if "InternetService" in dataframe.columns:
+            internet_options += sorted(dataframe["InternetService"].dropna().unique().tolist())
+        selected_internet = st.selectbox(
+            "Internet service segment",
+            internet_options,
+            help="Filters the contract mix chart and the preview table.",
+        )
 
-    left_chart_df, right_chart_df, preview_df = build_filtered_views(
-        df=df,
-        selected_contract=selected_contract,
-        selected_internet=selected_internet,
-    )
-    return left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet
-
-
-def render_metrics(df: pd.DataFrame) -> None:
-    st.markdown('<div class="section-title">Portfolio Snapshot</div>', unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
-    metrics = summarise_metrics(df)
-
-    with col1:
-        st.metric("Total Customers", f"{metrics['total_customers']:,}")
-
-    with col2:
-        st.metric("Churn Rate", f"{metrics['churn_rate']:.1f}%")
-
-    with col3:
-        st.metric("Average Monthly Charge", f"${metrics['avg_monthly']:.2f}")
-
-    with col4:
-        st.metric("Average Tenure", f"{metrics['avg_tenure']:.1f} months")
-
-    st.caption(
-        "This overview is computed from the raw telco customer dataset. "
-        "Detailed prioritization and value-at-risk views are available "
-        "in the dedicated Streamlit pages."
+    return (
+        *build_filtered_views(dataframe, selected_contract, selected_internet),
+        selected_contract,
+        selected_internet,
     )
 
 
-def render_charts(
+def render_overview_tab(dataframe: pd.DataFrame) -> None:
+    with section_container(
+        "Portfolio Snapshot",
+        (
+            "Use this summary as the first stop for portfolio health before moving "
+            "to prioritization and simulation."
+        ),
+    ):
+        render_portfolio_metrics(dataframe)
+        st.caption(
+            "These KPIs are derived from the raw telco dataset and provide a compact "
+            "view of customer base risk exposure."
+        )
+
+    with section_container(
+        "Execution Notes",
+        (
+            "The dashboard is designed around an operating model where the score "
+            "supports action, not isolated model inspection."
+        ),
+    ):
+        left_col, right_col = st.columns((1.25, 1))
+        with left_col:
+            st.markdown(
+                """
+                **What this workspace is optimized for**
+
+                - identifying exposure in the current customer portfolio
+                - exploring risk distribution by contract and service mix
+                - preparing action lists for retention teams
+                - testing simple intervention scenarios before campaign rollout
+                """
+            )
+        with right_col:
+            st.markdown(
+                """
+                **Suggested reading flow**
+
+                1. review portfolio KPIs here
+                2. inspect artifact-backed executive outputs
+                3. move to prioritization for action lists
+                4. use simulation to size campaign impact
+                """
+            )
+
+
+def render_exploration_tab(
+    dataframe: pd.DataFrame,
     left_chart_df: pd.DataFrame,
     right_chart_df: pd.DataFrame,
+    preview_df: pd.DataFrame,
     selected_contract: str,
     selected_internet: str,
 ) -> None:
-    st.markdown('<div class="section-title">Risk Exploration</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
+    with section_container(
+        "Cohort Filters",
+        (
+            "Filter the portfolio by contract and internet service to compare churn "
+            "exposure across commercial segments."
+        ),
+    ):
+        st.caption(
+            "The controls above update the cohort-level charts and the source-record "
+            "preview in the same view."
+        )
 
-    with col1:
-        st.subheader(f"Churn Distribution by Contract: {selected_contract}")
-        if "Churn" in left_chart_df.columns:
-            churn_counts = (
-                left_chart_df["Churn"].value_counts().reindex(["No", "Yes"], fill_value=0)
-            )
-            fig1 = px.pie(
-                values=churn_counts.values,
-                names=churn_counts.index,
-                title="Cancellation split across selected contract cohort",
-                color=churn_counts.index,
-                color_discrete_map={"Yes": COLOR_ALERT, "No": COLOR_PRIMARY},
-                hole=0.48,
-            )
-            fig1.update_layout(
-                margin=dict(l=10, r=10, t=48, b=10),
-                legend_title_text="Churn",
-                title_font=dict(size=18),
-            )
-            st.plotly_chart(fig1, use_container_width=True)
-        else:
-            st.info("Column 'Churn' not available for this chart.")
+    with section_container(
+        "Risk Exploration",
+        "Compare churn mix and contract-level churn rates without leaving the dashboard.",
+    ):
+        chart_col1, chart_col2 = st.columns(2)
 
-    with col2:
-        st.subheader(f"Contract Mix by Internet Service: {selected_internet}")
-        if {"Contract", "Churn"}.issubset(right_chart_df.columns):
-            contract_order = ["Month-to-month", "One year", "Two year"]
-            contract_churn_rate = (
-                right_chart_df.assign(churn_yes=right_chart_df["Churn"].eq("Yes").astype(float))
-                .groupby("Contract", as_index=True)["churn_yes"]
-                .mean()
-                .mul(100)
-                .reindex(contract_order, fill_value=0.0)
-            )
-            fig2 = px.bar(
-                x=contract_churn_rate.index,
-                y=contract_churn_rate.values,
-                title="Churn rate by contract type",
-                labels={"x": "Contract type", "y": "Rate (%)"},
-                color_discrete_sequence=[COLOR_SECONDARY],
-            )
-            fig2.update_traces(marker_line_color="#083344", marker_line_width=1.0)
-            fig2.update_layout(margin=dict(l=10, r=10, t=48, b=10), title_font=dict(size=18))
-            st.plotly_chart(fig2, use_container_width=True)
-        else:
-            st.info("Required columns for contract view are unavailable.")
+        with chart_col1:
+            st.subheader(f"Churn Distribution | {selected_contract}")
+            if "Churn" in left_chart_df.columns:
+                churn_counts = (
+                    left_chart_df["Churn"].value_counts().reindex(["No", "Yes"], fill_value=0)
+                )
+                figure = px.pie(
+                    values=churn_counts.values,
+                    names=churn_counts.index,
+                    title="Churn split within the selected contract cohort",
+                    color=churn_counts.index,
+                    color_discrete_map={"Yes": COLOR_ALERT, "No": COLOR_PRIMARY},
+                    hole=0.52,
+                )
+                figure.update_layout(
+                    margin=dict(l=10, r=10, t=48, b=10),
+                    legend_title_text="Churn",
+                    title_font=dict(size=18),
+                )
+                st.plotly_chart(figure, use_container_width=True)
+            else:
+                st.info("Column 'Churn' is not available for this chart.")
 
+        with chart_col2:
+            st.subheader(f"Contract Mix | {selected_internet}")
+            if {"Contract", "Churn"}.issubset(right_chart_df.columns):
+                contract_order = ["Month-to-month", "One year", "Two year"]
+                contract_churn_rate = (
+                    right_chart_df.assign(churn_yes=right_chart_df["Churn"].eq("Yes").astype(float))
+                    .groupby("Contract", as_index=True)["churn_yes"]
+                    .mean()
+                    .mul(100)
+                    .reindex(contract_order, fill_value=0.0)
+                )
+                figure = px.bar(
+                    x=contract_churn_rate.index,
+                    y=contract_churn_rate.values,
+                    title="Churn rate by contract type",
+                    labels={"x": "Contract type", "y": "Rate (%)"},
+                    color_discrete_sequence=[COLOR_SECONDARY],
+                )
+                figure.update_traces(marker_line_color="#083344", marker_line_width=1.0)
+                figure.update_layout(margin=dict(l=10, r=10, t=48, b=10), title_font=dict(size=18))
+                st.plotly_chart(figure, use_container_width=True)
+            else:
+                st.info("The required columns for the contract view are unavailable.")
 
-def render_data_preview(filtered_df: pd.DataFrame) -> None:
     with st.expander("Preview source records", expanded=False):
         columns_to_show = [
             "customerID",
@@ -354,154 +306,167 @@ def render_data_preview(filtered_df: pd.DataFrame) -> None:
             "InternetService",
             "Churn",
         ]
-        valid_cols = [col for col in columns_to_show if col in filtered_df.columns]
-        st.dataframe(filtered_df[valid_cols].head(20), use_container_width=True)
+        valid_columns = [column for column in columns_to_show if column in preview_df.columns]
+        st.dataframe(preview_df[valid_columns].head(20), use_container_width=True, hide_index=True)
 
 
-def render_prediction(predictor: ChurnPredictor) -> None:
-    st.markdown("---")
-    st.markdown(
-        '<div class="section-title">Customer-Level Prediction</div>',
-        unsafe_allow_html=True,
-    )
+def render_scoring_tab(predictor: ChurnPredictor | None, model_loaded: bool) -> None:
+    if not model_loaded or predictor is None:
+        st.info(
+            "Scoring is unavailable until the inference bundle is generated by the "
+            "training pipeline."
+        )
+        return
 
-    with st.expander("Enter customer profile", expanded=False):
-        col1, col2, col3 = st.columns(3)
+    with section_container(
+        "Customer-Level Scoring",
+        (
+            "Capture a representative profile and inspect the resulting churn risk "
+            "before pushing the customer into downstream action."
+        ),
+    ):
+        with st.form("customer_scoring_form"):
+            col1, col2, col3 = st.columns(3)
 
-        with col1:
-            gender = st.selectbox("Gender", ["Male", "Female"])
-            senior = st.selectbox("Senior citizen", [0, 1])
-            partner = st.selectbox("Partner", ["Yes", "No"])
-            dependents = st.selectbox("Dependents", ["Yes", "No"])
+            with col1:
+                gender = st.selectbox("Gender", ["Male", "Female"])
+                senior = st.selectbox("Senior citizen", [0, 1])
+                partner = st.selectbox("Partner", ["Yes", "No"])
+                dependents = st.selectbox("Dependents", ["Yes", "No"])
 
-        with col2:
-            tenure = st.number_input("Tenure (months)", 0, 100, 12)
-            contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
-            paperless = st.selectbox("Paperless billing", ["Yes", "No"])
-            payment = st.selectbox(
-                "Payment method",
-                [
-                    "Electronic check",
-                    "Mailed check",
-                    "Bank transfer (automatic)",
-                    "Credit card (automatic)",
-                ],
-            )
-
-        with col3:
-            monthly = st.number_input("Monthly charges ($)", 0.0, 200.0, 65.5)
-            total = st.number_input("Total charges ($)", 0.0, 10000.0, 786.0)
-            internet_service = st.selectbox("Internet service", ["DSL", "Fiber optic", "No"])
-            phone_service = st.selectbox("Phone service", ["Yes", "No"])
-
-        if st.button("Score customer"):
-            try:
-                payload = build_prediction_payload(
-                    gender=gender,
-                    senior=senior,
-                    partner=partner,
-                    dependents=dependents,
-                    tenure=tenure,
-                    phone_service=phone_service,
-                    internet_service=internet_service,
-                    contract=contract,
-                    paperless=paperless,
-                    payment=payment,
-                    monthly=monthly,
-                    total=total,
+            with col2:
+                tenure = st.number_input("Tenure (months)", min_value=0, max_value=100, value=12)
+                contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
+                paperless = st.selectbox("Paperless billing", ["Yes", "No"])
+                payment = st.selectbox(
+                    "Payment method",
+                    [
+                        "Electronic check",
+                        "Mailed check",
+                        "Bank transfer (automatic)",
+                        "Credit card (automatic)",
+                    ],
                 )
-                result = predictor.predict_from_dict(payload)
-                proba = result.probability
 
-                result_col1, result_col2 = st.columns(2)
+            with col3:
+                monthly = st.number_input(
+                    "Monthly charges ($)", min_value=0.0, max_value=200.0, value=65.5
+                )
+                total = st.number_input(
+                    "Total charges ($)", min_value=0.0, max_value=10000.0, value=786.0
+                )
+                internet_service = st.selectbox("Internet service", ["DSL", "Fiber optic", "No"])
+                phone_service = st.selectbox("Phone service", ["Yes", "No"])
 
-                with result_col1:
-                    fig = go.Figure(
-                        go.Indicator(
-                            mode="gauge+number",
-                            value=proba * 100,
-                            title={"text": "Churn probability"},
-                            gauge={
-                                "axis": {"range": [0, 100]},
-                                "bar": {"color": COLOR_PRIMARY},
-                                "steps": [
-                                    {"range": [0, 45], "color": "rgba(13, 148, 136, 0.35)"},
-                                    {"range": [45, 70], "color": "rgba(245, 158, 11, 0.28)"},
-                                    {"range": [70, 100], "color": "rgba(220, 38, 38, 0.30)"},
-                                ],
-                            },
-                        )
+            submitted = st.form_submit_button("Score Customer", use_container_width=True)
+
+        if not submitted:
+            return
+
+        try:
+            payload = build_prediction_payload(
+                gender=gender,
+                senior=senior,
+                partner=partner,
+                dependents=dependents,
+                tenure=tenure,
+                phone_service=phone_service,
+                internet_service=internet_service,
+                contract=contract,
+                paperless=paperless,
+                payment=payment,
+                monthly=monthly,
+                total=total,
+            )
+            result = predictor.predict_from_dict(payload)
+            probability = result.probability
+            risk_level = format_risk_level(result.risk_level)
+
+            result_col1, result_col2 = st.columns((1.05, 0.95))
+            with result_col1:
+                figure = go.Figure(
+                    go.Indicator(
+                        mode="gauge+number",
+                        value=probability * 100,
+                        title={"text": "Churn probability"},
+                        gauge={
+                            "axis": {"range": [0, 100]},
+                            "bar": {"color": COLOR_PRIMARY},
+                            "steps": [
+                                {"range": [0, 45], "color": "rgba(13, 148, 136, 0.35)"},
+                                {"range": [45, 70], "color": "rgba(245, 158, 11, 0.28)"},
+                                {"range": [70, 100], "color": "rgba(220, 38, 38, 0.30)"},
+                            ],
+                        },
                     )
-                    fig.update_layout(margin=dict(l=10, r=10, t=56, b=0), height=280)
-                    st.plotly_chart(fig, use_container_width=True)
+                )
+                figure.update_layout(margin=dict(l=10, r=10, t=56, b=0), height=280)
+                st.plotly_chart(figure, use_container_width=True)
 
-                with result_col2:
-                    if result.risk_level == "Alto":
-                        st.error(f"High churn risk detected ({proba:.1%})")
-                    else:
-                        st.success(f"Lower churn risk detected ({proba:.1%})")
-                    st.markdown(
-                        """
-                        <div class="risk-box">
-                            Use this score to trigger outreach, pricing review,
-                            or contract intervention. The intended operating model
-                            is prioritization by risk and value, not raw score
-                            inspection alone.
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-            except Exception as exc:
-                st.error(f"Prediction failed: {exc}")
-
-
-def render_footer() -> None:
-    st.markdown("---")
-    st.markdown(
-        """
-        <div style='text-align: center; color: #355070; padding: 0.35rem 0 0.8rem 0;'>
-            <p>Developed by <strong>Samuel de Andrade Maia</strong></p>
-            <p>2026 - Churn Prediction Data Product</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            with result_col2:
+                st.metric("Risk Level", risk_level)
+                st.metric("Probability", f"{probability:.1%}")
+                if risk_level == "High":
+                    st.error("Escalate this customer into the highest-priority retention queue.")
+                elif risk_level == "Medium":
+                    st.warning("This customer warrants guided outreach and commercial review.")
+                else:
+                    st.success("This customer can remain outside the immediate intervention queue.")
+                st.caption(
+                    "Use the probability together with value and contract context. "
+                    "The expected operating mode is prioritization by risk and "
+                    "business value."
+                )
+        except Exception as exc:
+            st.error(f"Prediction failed: {exc}")
 
 
 def main() -> None:
-    st.set_page_config(
-        page_title="Churn Prediction Control Room",
-        page_icon="CR",
-        layout="wide",
-    )
-
+    configure_dashboard_page(page_title="Churn Prediction Control Room", page_icon="CR")
     pio.templates.default = "plotly_white"
-    inject_styles()
-    render_header()
-    sidebar_state = render_sidebar(DASHBOARD_RUNTIME)
-    df = sidebar_state.dataframe
-    predictor = sidebar_state.predictor
-    model_loaded = sidebar_state.model_loaded
+    inject_global_styles()
+    render_operational_shell()
 
-    if df is None:
+    sidebar_state = render_sidebar(DASHBOARD_RUNTIME)
+    dataframe = sidebar_state.dataframe
+
+    if dataframe is None:
         st.error(f"Dataset not found at: {DASHBOARD_RUNTIME.data_path}")
         st.stop()
 
-    render_metrics(df)
+    with section_container(
+        "Exploration Filters",
+        (
+            "Adjust the active cohort before reviewing the portfolio overview, "
+            "cohort charts, and source records."
+        ),
+    ):
+        left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet = (
+            render_filter_bar(dataframe)
+        )
 
-    left_chart_df, right_chart_df, preview_df, selected_contract, selected_internet = apply_filters(
-        df
+    overview_tab, exploration_tab, scoring_tab = st.tabs(
+        ["Overview", "Explore Cohorts", "Score Customer"]
     )
-    if left_chart_df.empty and right_chart_df.empty:
-        st.warning("No records matched the selected filters.")
-        st.stop()
 
-    render_charts(left_chart_df, right_chart_df, selected_contract, selected_internet)
-    render_data_preview(preview_df)
+    with overview_tab:
+        render_overview_tab(dataframe)
 
-    if model_loaded and predictor is not None:
-        render_prediction(predictor)
+    with exploration_tab:
+        if left_chart_df.empty and right_chart_df.empty:
+            st.warning("No records matched the selected filters.")
+        else:
+            render_exploration_tab(
+                dataframe,
+                left_chart_df,
+                right_chart_df,
+                preview_df,
+                selected_contract,
+                selected_internet,
+            )
+
+    with scoring_tab:
+        render_scoring_tab(sidebar_state.predictor, sidebar_state.model_loaded)
 
     render_footer()
 

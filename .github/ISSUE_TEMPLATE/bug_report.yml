@@ -1,45 +1,51 @@
 name: Bug report
-description: Reportar defeito funcional, regressao ou problema de operacao.
+description: Report a functional defect, regression, or operational failure.
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: textarea
-    id: problem
+    id: summary
     attributes:
-      label: Problema
-      description: Descreva o comportamento observado.
-      placeholder: O pipeline falha ao persistir metadata apos treino...
+      label: Summary
+      description: Describe the observed issue.
+      placeholder: The pipeline fails while persisting execution metadata after model training...
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Comportamento esperado
-      description: O que deveria acontecer?
+      label: Expected behavior
+      description: What should have happened?
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: Passos para reproduzir
-      description: Inclua comandos, contexto e arquivos relevantes.
+      label: Reproduction steps
+      description: Include commands, inputs, environment, and relevant files.
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: evidence
     attributes:
-      label: Logs e evidências
-      description: Cole stack trace, log estruturado, screenshot ou output relevante.
+      label: Logs and evidence
+      description: Paste stack traces, structured logs, screenshots, run_id, or artifact paths.
   - type: dropdown
-    id: area
+    id: affected_area
     attributes:
-      label: Área afetada
+      label: Affected area
       options:
         - pipeline
-        - modelagem
+        - modeling
         - reporting
         - dashboard
-        - runtime/configuracao
+        - api
+        - runtime/configuration
         - ci/cd
     validations:
       required: true
+  - type: input
+    id: run_id
+    attributes:
+      label: Run ID
+      description: If applicable, include the pipeline run identifier.

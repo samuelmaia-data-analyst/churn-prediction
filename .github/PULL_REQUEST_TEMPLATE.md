@@ -1,30 +1,47 @@
 ## Summary
 
-Descreva a mudanca em 2-4 linhas.
+Describe the change in 2-4 lines.
 
-## Problem
+## Problem Statement
 
-Qual problema real esta sendo resolvido?
+What real problem does this pull request solve?
+
+## Scope of Change
+
+- [ ] pipeline behavior
+- [ ] modeling or inference
+- [ ] reporting or artifact contracts
+- [ ] dashboard or API consumption
+- [ ] runtime or configuration
+- [ ] documentation or collaboration workflow
 
 ## Technical Changes
 
-- item 1
-- item 2
+- change 1
+- change 2
 
 ## Validation
 
 - [ ] `make test`
 - [ ] `make lint`
 - [ ] `make typecheck`
-- [ ] validação manual relevante descrita abaixo
+- [ ] manual validation described below
+
+Manual validation notes:
 
 ## Risks and Trade-offs
 
-Liste riscos remanescentes, incompatibilidades ou pontos que exigem follow-up.
+List remaining risks, assumptions, backward-compatibility concerns, or follow-up items.
 
-## Checklist
+## Documentation Impact
 
-- [ ] atualizei testes quando necessario
-- [ ] atualizei README/docs quando necessario
-- [ ] nao introduzi hardcode de ambiente sem justificativa
-- [ ] preservei o caminho reprocessavel do pipeline
+- [ ] README updated if needed
+- [ ] docs updated if needed
+- [ ] no documentation changes required
+
+## Review Checklist
+
+- [ ] I did not introduce hidden environment assumptions
+- [ ] I preserved the canonical reprocessable pipeline path
+- [ ] I updated tests for contract or behavior changes
+- [ ] I avoided adding new logic to compatibility wrappers without justification

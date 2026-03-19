@@ -1,6 +1,8 @@
 # Churn Prediction Data Product
 
-Idioma: [EN](README.md) | **PT-BR** | [PT-PT](README.pt-PT.md)
+Idioma: [EN principal](README.md) | **PT-BR** | [PT-PT](README.pt-PT.md)
+
+O inglês é o idioma canônico da documentação do repositório. As versões PT-BR e PT-PT são mantidas como referências localizadas.
 
 Pipeline de dados e machine learning para churn de clientes, com foco em operação analítica, confiabilidade de execução e tradução do score em ações de retenção.
 
@@ -135,6 +137,7 @@ O projeto implementa controles proporcionais ao escopo:
 - validação de schema antes do treino
 - monitoramento simples de drift
 - reprocessamento local sem estado manual oculto
+- deployment opcional com Prefect mantido apenas como exemplo de agendamento, não como caminho canônico
 
 Guia operacional:
 
@@ -179,6 +182,7 @@ Os gates de qualidade estão definidos em:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/DASHBOARD.md](docs/DASHBOARD.md)
 - [docs/OPERATIONS.md](docs/OPERATIONS.md)
 - [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
 

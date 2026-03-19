@@ -6,11 +6,12 @@ push: []
 pull: []
 
 deployments:
-  - name: daily-enterprise-run
+  - name: optional-daily-pipeline-run
     version: "1.0.0"
-    description: "Execução diária do pipeline enterprise de churn."
+    description: "Optional Prefect deployment for scheduled execution of the canonical churn pipeline."
     tags:
-      - enterprise
+      - optional
+      - batch
       - daily
     entrypoint: src/cli/pipeline.py:run_pipeline
     parameters:
@@ -18,6 +19,8 @@ deployments:
       data_dir: data
       log_level: INFO
       mlflow_tracking_uri: file:./mlruns
+      decision_policy: balanceada
+      environment: prod
     schedules:
       - cron: "0 7 * * *"
         timezone: UTC

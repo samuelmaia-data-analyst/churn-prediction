@@ -23,11 +23,17 @@ Primary variables:
 .venv\Scripts\python.exe -m src.cli.pipeline --data-dir data --log-level INFO --decision-policy balanceada --environment dev
 ```
 
+This is the canonical execution path for local runs and for repository evaluation.
+
 ### Standalone drift detection
 
 ```bash
 .venv\Scripts\python.exe -m scripts.drift_detection --baseline data/baseline.csv --current data/current.csv
 ```
+
+### Optional Prefect deployment
+
+`prefect.yaml` is kept as an optional scheduling example, not as the primary execution path.
 
 ### Dependency installation
 
@@ -110,7 +116,12 @@ import failures for `joblib`, `mlflow`, or `mypy`.
 
 Action:
 
-Reinstall dependencies with `pip install -r requirements.txt`.
+Reinstall runtime and development dependencies with:
+
+```bash
+pip install -r requirements-runtime.txt
+pip install -r requirements-dev.txt
+```
 
 ### Inference bundle missing
 

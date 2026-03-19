@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
 from apps.dashboard_runtime import (
+    DashboardAssets,
+    build_dashboard_status,
     build_filtered_views,
     build_portfolio_summary,
     build_prediction_payload,
     build_risk_distribution,
+    format_risk_level,
+    normalize_filter_value,
     simulate_retention_impact,
     summarise_metrics,
 )
@@ -69,6 +75,58 @@ def test_build_filtered_views_splits_chart_and_preview_contexts() -> None:
     assert len(left_df) == 1
     assert len(right_df) == 1
     assert preview_df.empty
+
+
+def test_build_filtered_views_accepts_all_aliases() -> None:
+    df = pd.DataFrame(
+        {
+            "Contract": ["Month-to-month", "One year"],
+            "InternetService": ["DSL", "Fiber optic"],
+        }
+    )
+
+    left_df, right_df, preview_df = build_filtered_views(
+        df=df,
+        selected_contract="All",
+        selected_internet="Todos",
+    )
+
+    assert len(left_df) == 2
+    assert len(right_df) == 2
+    assert len(preview_df) == 2
+
+
+def test_build_dashboard_status_exposes_fallback_metadata() -> None:
+    assets = DashboardAssets(
+        report={
+            "metadata": {
+                "run_id": "dashboard-fallback",
+                "generated_at_utc": "2026-03-18T12:00:00Z",
+                "environment": "dev",
+                "schema_version": "v1",
+            }
+        },
+        kpis=pd.DataFrame({"metric": [1]}),
+        prioritization=pd.DataFrame({"customerID": ["0001"]}),
+        report_path=Path("unused"),
+        kpi_path=Path("unused"),
+        prioritization_path=Path("unused"),
+    )
+
+    status = build_dashboard_status(assets)
+
+    assert status["ready"] is True
+    assert status["fallback"] is True
+    assert status["environment"] == "dev"
+    assert status["schema_version"] == "v1"
+    assert status["run_id"] == "dashboard-fallback"
+
+
+def test_risk_level_and_filter_helpers_normalize_runtime_values() -> None:
+    assert normalize_filter_value("Todos") == "All"
+    assert normalize_filter_value("All") == "All"
+    assert format_risk_level("Alto") == "High"
+    assert format_risk_level("medium") == "Medium"
 
 
 def test_build_portfolio_summary_aggregates_high_risk_and_revenue() -> None:

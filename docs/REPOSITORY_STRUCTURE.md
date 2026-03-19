@@ -1,78 +1,96 @@
 # Repository Structure
 
-## Overview
+## Purpose
 
-The repository is organized to separate:
+The repository is organized to make the canonical implementation path obvious while still preserving a compatibility boundary for older entrypoints.
+
+The structure separates:
 
 - canonical implementation
+- operational scripts
 - exploration
-- automation
 - documentation
 - execution artifacts
-- operational scripts
+- compatibility layers
 
 ## Annotated Tree
 
 ```text
 .
-|-- .github/
-|   |-- workflows/               # CI
-|   `-- ISSUE_TEMPLATE/          # issue templates
-|-- apps/                        # application entry points
-|-- assets/                      # images and demos
+|-- .github/                    # CI, issue templates, PR template, ownership
+|-- apps/                       # Streamlit and FastAPI application entrypoints
+|-- assets/                     # images, media, and repository visuals
 |-- data/
-|   |-- raw/                     # expected input
-|   |-- bronze/                  # regenerable layer
-|   |-- silver/                  # regenerable layer
-|   `-- gold/                    # regenerable layer
-|-- docs/                        # architecture and operations documentation
-|-- notebooks/                   # exploration and analysis
-|-- pages/                       # Streamlit pages
-|-- scripts/                     # operational scripts and batch utilities
+|   |-- raw/                    # source input
+|   |-- bronze/                 # regenerable ingestion layer
+|   |-- silver/                 # regenerable cleaned layer
+|   `-- gold/                   # regenerable analytics outputs
+|-- docs/                       # architecture, operations, repository conventions
+|-- notebooks/                  # exploratory work only
+|-- pages/                      # Streamlit multi-page views
+|-- scripts/                    # operational scripts and standalone utilities
 |-- src/
-|   |-- cli/                     # command-line interfaces
-|   |-- compat/                  # explicit backward compatibility
-|   |-- contracts/               # typed contracts
-|   |-- modeling/                # training and inference
-|   |-- pipelines/               # canonical pipeline and business logic
-|   |-- runtime/                 # configuration and logging
-|   |-- utils/                   # small shared helpers
-|   `-- *.py                     # compatibility wrappers at package root
-|-- tests/                       # automated tests
-|-- artifacts/                   # execution outputs
-`-- models/                      # local model registry
+|   |-- cli/                    # canonical CLI entrypoints
+|   |-- compat/                 # explicit backward compatibility
+|   |-- contracts/              # typed contracts and schemas
+|   |-- modeling/               # training and inference logic
+|   |-- pipelines/              # ingestion, transformation, reporting, monitoring
+|   |-- runtime/                # configuration and structured logging
+|   |-- utils/                  # small shared helpers
+|   `-- *.py                    # compatibility wrappers at package root
+|-- tests/                      # automated regression and contract coverage
+|-- artifacts/                  # runtime outputs
+`-- models/                     # local model registry
 ```
 
-## Conventions
+## Canonical Paths
 
-### What belongs in `src/`
+New code should target:
 
-Business logic, pipelines, modeling, persistence, and reusable application code.
+- `src/runtime/`
+- `src/pipelines/`
+- `src/modeling/`
+- `src/compat/` only when compatibility is the explicit goal
+- `scripts/` for operational utilities that are not part of the application packages
 
-### What does not belong in `src/`
+## Non-Canonical Paths
 
-Exploration, screenshots, raw data, GitHub templates, and ad-hoc notes.
+The following exist primarily for backward compatibility or convenience:
 
-### What belongs in `docs/`
+- root entrypoints such as `app.py`, `api.py`, `main.py`
+- wrappers under `src/*.py`
+- legacy folders such as `src/data`, `src/features`, `src/models`
 
-Architecture, operations, repository conventions, and collaboration guidance.
+These paths should not receive new business logic unless the purpose of the change is compatibility itself.
 
-### What belongs in `notebooks/`
+## Placement Rules
 
-EDA, experiments, and exploratory validation. Nothing in a notebook should be a dependency of the canonical pipeline path.
+### `src/`
 
-## Canonical Structure
+Use for business logic, pipelines, runtime behavior, modeling, persistence, and reusable application code.
 
-Without breaking compatibility, the canonical structure is now:
+### `scripts/`
 
-```text
-src/
-  compat/
-  contracts/
-  pipelines/
-  modeling/
-  runtime/
-  utils/
-```
+Use for operational scripts that can run independently of the app packages, such as standalone checks or utility workflows.
 
-Wrappers at the root of `src/` still exist for backward compatibility. New code should target `src/runtime/`, `src/pipelines/`, `src/modeling/`, and `src/compat/`.
+### `docs/`
+
+Use for architecture, operations, collaboration standards, and repository conventions.
+
+### `notebooks/`
+
+Use for exploratory analysis only. Notebooks must not become dependencies of the canonical pipeline path.
+
+### `tests/`
+
+Use for regression, contract, runtime, and compatibility coverage.
+
+## Why This Matters
+
+A senior repository should make it easy to answer three questions immediately:
+
+1. Where is the real implementation?
+2. What is compatibility only?
+3. Which entrypoint is the preferred one for execution and review?
+
+This structure is intended to answer those questions without requiring guesswork.

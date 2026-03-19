@@ -1,7 +1,23 @@
 # Docs Index
 
-Supporting documentation for repository architecture, operations, and collaboration workflows.
+Supporting documentation for the canonical architecture, runtime model, and collaboration standard.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md)
-- [OPERATIONS.md](OPERATIONS.md)
-- [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md)
+Use this folder to understand how the repository is meant to behave in technical review and in day-to-day contribution.
+
+## Reading Order
+
+1. [ARCHITECTURE.md](ARCHITECTURE.md)
+2. [OPERATIONS.md](OPERATIONS.md)
+3. [DASHBOARD.md](DASHBOARD.md)
+4. [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md)
+
+## Document Roles
+
+- `ARCHITECTURE.md`: canonical boundaries between runtime, pipelines, modeling, compatibility, and outputs
+- `OPERATIONS.md`: local setup, execution path, quality gates, and operational expectations
+- `DASHBOARD.md`: Streamlit consumption layer, artifact sources, fallback semantics, and product intent
+- `REPOSITORY_STRUCTURE.md`: ownership of folders, scripts, compatibility wrappers, and root-level conventions
+
+## Maintenance Rule
+
+If a change affects setup, runtime behavior, dashboard consumption, or canonical package boundaries, update the corresponding document in the same pull request.

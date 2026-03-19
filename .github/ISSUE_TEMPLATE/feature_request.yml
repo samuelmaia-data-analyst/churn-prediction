@@ -1,36 +1,51 @@
 name: Feature request
-description: Propor melhoria de produto, engenharia ou colaboracao.
+description: Propose a repository, platform, or product improvement.
 title: "[Feature] "
 labels: ["enhancement"]
 body:
   - type: textarea
     id: context
     attributes:
-      label: Contexto
-      description: Qual dor ou oportunidade motivou a sugestao?
+      label: Context
+      description: What pain point or opportunity motivated this proposal?
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposta
-      description: O que deve ser construido ou alterado?
+      label: Proposed change
+      description: What should be built, changed, or removed?
     validations:
       required: true
   - type: textarea
     id: impact
     attributes:
-      label: Impacto esperado
-      description: Qual o ganho tecnico, operacional ou de portfolio?
+      label: Expected impact
+      description: What is the expected technical, operational, or portfolio payoff?
+    validations:
+      required: true
+  - type: dropdown
+    id: affected_area
+    attributes:
+      label: Primary area
+      options:
+        - repository structure
+        - data pipeline
+        - modeling
+        - reporting
+        - dashboard/api
+        - observability
+        - automation
+        - documentation
     validations:
       required: true
   - type: dropdown
     id: priority
     attributes:
-      label: Prioridade percebida
+      label: Priority
       options:
-        - alta
-        - media
-        - baixa
+        - high
+        - medium
+        - low
     validations:
       required: true

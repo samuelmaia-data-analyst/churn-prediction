@@ -4,52 +4,112 @@ import plotly.express as px
 import streamlit as st
 
 from apps.dashboard_runtime import (
+    build_dashboard_status,
     build_portfolio_summary,
     build_risk_distribution,
     load_dashboard_assets,
 )
+from apps.dashboard_ui import (
+    COLOR_ALERT,
+    COLOR_SECONDARY,
+    configure_dashboard_page,
+    inject_global_styles,
+    render_footer,
+    render_page_hero,
+    render_status_banner,
+    section_container,
+)
 
-st.set_page_config(page_title="Risk and Growth", page_icon="RG", layout="wide")
-st.title("Risk and Growth")
-st.caption("Portfolio-level risk distribution and forward revenue opportunity view.")
+configure_dashboard_page(page_title="Risk and Growth", page_icon="RG")
+inject_global_styles()
 
 assets = load_dashboard_assets()
-df = assets.prioritization
-if df.empty:
+status = build_dashboard_status(assets)
+dataframe = assets.prioritization
+
+render_page_hero(
+    eyebrow="Risk and Growth",
+    title="Portfolio Exposure and Growth Lens",
+    subtitle=(
+        "Inspect customer risk mix, contract concentration, and next-purchase opportunity in one "
+        "artifact-backed workspace."
+    ),
+    meta="Portfolio analytics | Growth lens | Contract mix",
+)
+
+if dataframe.empty:
     st.warning("Run the pipeline to generate customer_prioritization.csv.")
     st.stop()
 
-summary = build_portfolio_summary(df)
-sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
-sum_col1.metric("High Risk Customers", f"{summary['high_risk_customers']:,}")
-sum_col2.metric("Revenue at Risk", f"${summary['high_risk_revenue']:,.2f}")
-sum_col3.metric("Month-to-Month Share", f"{summary['month_to_month_share']:.1f}%")
-sum_col4.metric("Avg. Next Purchase", f"${summary['avg_next_purchase']:,.2f}")
+render_status_banner(
+    title="Prioritization artifact status",
+    body=(
+        "This page reads from the same prioritization artifact used by the downstream action list."
+        if not status["fallback"]
+        else "Fallback prioritization artifacts are currently being used."
+    ),
+    status_items=[
+        ("Environment", str(status["environment"])),
+        ("Schema", str(status["schema_version"])),
+        ("Run ID", str(status["run_id"])),
+    ],
+)
 
-risk_distribution = build_risk_distribution(df)
-col1, col2 = st.columns(2)
-with col1:
-    fig_risk = px.bar(
-        risk_distribution,
-        x="risk_segment",
-        y="customers",
-        title="Customer Distribution by Risk Segment",
-        labels={"risk_segment": "Risk segment", "customers": "Customers"},
-        color="risk_segment",
-        color_discrete_map={"high": "#dc2626", "medium": "#f59e0b", "low": "#0f766e"},
-    )
-    st.plotly_chart(fig_risk, use_container_width=True)
+summary = build_portfolio_summary(dataframe)
+with section_container(
+    "Portfolio KPIs",
+    (
+        "Use this summary to quantify the size of the immediate churn problem "
+        "before moving into campaign design."
+    ),
+):
+    summary_columns = st.columns(4)
+    summary_columns[0].metric("High-Risk Customers", f"{summary['high_risk_customers']:,}")
+    summary_columns[1].metric("Revenue at Risk", f"${summary['high_risk_revenue']:,.2f}")
+    summary_columns[2].metric("Month-to-Month Share", f"{summary['month_to_month_share']:.1f}%")
+    summary_columns[3].metric("Avg. Next Purchase", f"${summary['avg_next_purchase']:,.2f}")
 
-with col2:
-    fig_growth = px.scatter(
-        df,
-        x="churn_probability",
-        y="next_purchase_prediction",
-        color="Contract",
-        title="Risk vs. Next Purchase Prediction",
-        labels={
-            "churn_probability": "Churn probability",
-            "next_purchase_prediction": "Next purchase prediction",
-        },
-    )
-    st.plotly_chart(fig_growth, use_container_width=True)
+distribution_tab, opportunity_tab = st.tabs(["Risk Distribution", "Growth Opportunity"])
+
+with distribution_tab:
+    with section_container(
+        "Customer Distribution by Risk Segment",
+        "This chart shows the portfolio mix across high, medium, and low churn segments.",
+    ):
+        risk_distribution = build_risk_distribution(dataframe)
+        figure = px.bar(
+            risk_distribution,
+            x="risk_segment",
+            y="customers",
+            title="Customer distribution by risk segment",
+            labels={"risk_segment": "Risk segment", "customers": "Customers"},
+            color="risk_segment",
+            color_discrete_map={"high": COLOR_ALERT, "medium": "#f59e0b", "low": "#0f766e"},
+        )
+        figure.update_layout(margin=dict(l=10, r=10, t=48, b=10))
+        st.plotly_chart(figure, use_container_width=True)
+
+with opportunity_tab:
+    with section_container(
+        "Risk vs. Next Purchase Prediction",
+        (
+            "Plot churn probability against predicted next purchase value to find "
+            "accounts that justify intervention budget."
+        ),
+    ):
+        figure = px.scatter(
+            dataframe,
+            x="churn_probability",
+            y="next_purchase_prediction",
+            color="Contract",
+            title="Risk versus next purchase prediction",
+            labels={
+                "churn_probability": "Churn probability",
+                "next_purchase_prediction": "Next purchase prediction",
+            },
+            color_discrete_sequence=[COLOR_SECONDARY, "#38bdf8", "#f59e0b"],
+        )
+        figure.update_layout(margin=dict(l=10, r=10, t=48, b=10))
+        st.plotly_chart(figure, use_container_width=True)
+
+render_footer()
