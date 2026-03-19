@@ -53,6 +53,13 @@ Canonical implementation paths:
 
 Compatibility wrappers still exist under `src/*.py` and some root entrypoints, but they are not the preferred path for new code.
 
+UI-specific paths:
+
+- `apps/streamlit_app.py`: control room and customer-level scoring entrypoint
+- `apps/dashboard_ui.py`: shared dashboard layout shell, styling, and UI helpers
+- `apps/dashboard_runtime.py`: shared dashboard asset loading and status helpers
+- `pages/`: executive, risk, prioritization, and simulation views
+
 See:
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -64,11 +71,13 @@ See:
 ```text
 .
 |-- .github/                  # CI, issue templates, PR template, ownership
-|-- apps/                     # Streamlit and FastAPI entrypoints
+|-- apps/                     # Streamlit, FastAPI, and shared dashboard helpers
+|-- artifacts/                # execution metadata and generated runtime artifacts
 |-- data/                     # raw/bronze/silver/gold local layers
 |-- docs/                     # architecture, operations, repository conventions
+|-- models/                   # local model registry and generated bundles
 |-- notebooks/                # exploratory work only
-|-- pages/                    # Streamlit multi-page views
+|-- pages/                    # Streamlit multi-page business views
 |-- scripts/                  # operational scripts and utilities
 |-- src/                      # canonical implementation
 |-- tests/                    # automated test suite

@@ -83,12 +83,14 @@ make typecheck
 ```text
 .
 |-- .github/                  # CI, templates e padrões de colaboração
-|-- apps/                     # apps principais (Streamlit/FastAPI)
+|-- apps/                     # Streamlit, FastAPI e helpers compartilhados do dashboard
 |-- assets/                   # imagens e mídia do repositório
+|-- artifacts/                # metadados de execução e artefatos gerados em runtime
 |-- data/                     # datasets e camadas locais de pipeline
 |-- docs/                     # arquitetura, operação e convenções
+|-- models/                   # registry local de modelos e bundles gerados
 |-- notebooks/                # exploração isolada do caminho produtivo
-|-- pages/                    # páginas do Streamlit
+|-- pages/                    # visões de negócio multipágina no Streamlit
 |-- src/                      # código canônico do produto de dados
 |-- tests/                    # contratos e regressão
 |-- .env.example              # configuração base por ambiente
@@ -119,6 +121,13 @@ Componentes centrais:
 - `src/cli/pipeline.py`: orquestração ponta a ponta
 
 Pastas como `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. A implementação canônica está em `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
+
+Caminhos específicos da UI:
+
+- `apps/streamlit_app.py`: entrypoint do control room e score individual
+- `apps/dashboard_ui.py`: shell visual compartilhado, estilos e helpers de layout
+- `apps/dashboard_runtime.py`: carregamento compartilhado de artefatos e status
+- `pages/`: páginas executiva, risco, priorização e simulação
 
 Arquitetura detalhada:
 
