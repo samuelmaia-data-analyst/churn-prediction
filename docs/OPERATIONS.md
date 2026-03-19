@@ -23,6 +23,19 @@ Primary variables:
 .venv\Scripts\python.exe -m src.cli.pipeline --data-dir data --log-level INFO --decision-policy balanceada --environment dev
 ```
 
+### Standalone drift detection
+
+```bash
+.venv\Scripts\python.exe -m scripts.drift_detection --baseline data/baseline.csv --current data/current.csv
+```
+
+### Dependency installation
+
+```bash
+.venv\Scripts\python.exe -m pip install -r requirements-runtime.txt
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```
+
 ### Tests
 
 ```bash

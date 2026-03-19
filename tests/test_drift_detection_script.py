@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from monitoring.drift_detection import run_detection
+from scripts.drift_detection import run_detection
 
 
 def test_run_detection_returns_alert_on_shift() -> None:

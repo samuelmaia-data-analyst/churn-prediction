@@ -41,7 +41,13 @@ The project answers four practical questions:
 ```bash
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install --upgrade pip
-.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m pip install -r requirements-runtime.txt
+```
+
+For local development, tests, and linting:
+
+```bash
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 copy .env.example .env
 ```
 
@@ -158,6 +164,11 @@ Tools in use:
 - `mypy`
 - `pre-commit`
 - `GitHub Actions`
+
+Dependency split:
+
+- `requirements-runtime.txt`: pipeline, API, dashboard, and runtime dependencies
+- `requirements-dev.txt`: lint, tests, hooks, and static analysis
 
 Quality gates are defined in:
 

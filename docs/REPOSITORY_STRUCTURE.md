@@ -9,6 +9,7 @@ The repository is organized to separate:
 - automation
 - documentation
 - execution artifacts
+- operational scripts
 
 ## Annotated Tree
 
@@ -27,6 +28,7 @@ The repository is organized to separate:
 |-- docs/                        # architecture and operations documentation
 |-- notebooks/                   # exploration and analysis
 |-- pages/                       # Streamlit pages
+|-- scripts/                     # operational scripts and batch utilities
 |-- src/
 |   |-- cli/                     # command-line interfaces
 |   |-- compat/                  # explicit backward compatibility

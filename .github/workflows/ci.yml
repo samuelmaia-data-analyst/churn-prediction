@@ -21,17 +21,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-runtime.txt
+          pip install -r requirements-dev.txt
           pip install build
 
       - name: Ruff
-        run: ruff check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+        run: ruff check apps src tests pages scripts monitoring app.py api.py main.py predict_customer.py save_processed_data.py
 
       - name: Black check
-        run: black --check app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+        run: black --check apps src tests pages scripts monitoring app.py api.py main.py predict_customer.py save_processed_data.py
 
       - name: Isort check
-        run: isort --check-only app.py api.py main.py predict_customer.py save_processed_data.py apps src tests pages
+        run: isort --check-only apps src tests pages scripts monitoring app.py api.py main.py predict_customer.py save_processed_data.py
 
       - name: Mypy
         run: mypy src
