@@ -2,75 +2,136 @@
 
 Idioma: [EN principal](README.md) | **PT-BR** | [PT-PT](README.pt-PT.md)
 
-O inglês é o idioma canônico da documentação do repositório. As versões PT-BR e PT-PT são mantidas como referências localizadas.
+O inglês é o idioma canônico da documentação. PT-BR e PT-PT são referências localizadas.
 
-Pipeline de dados e machine learning para churn de clientes, com foco em operação analítica, confiabilidade de execução e tradução do score em ações de retenção.
+Projeto de dados e machine learning para churn com foco em operação real: pipeline em camadas, artefatos reprocessáveis, observabilidade e consumo por API/dashboard.
 
-Este repositório foi estruturado para se comportar como um produto de dados pequeno, mas crível:
+## Por Que Este Repositório Existe
 
-- pipeline em camadas com responsabilidades explícitas
-- artefatos reprocessáveis e observáveis
-- saídas orientadas a negócio, não apenas métricas de modelo
-- contratos testados e automação de qualidade
+A maioria dos projetos de churn de portfólio para no treino. Este vai além:
 
-## Por Que Este Projeto Existe
+- trata churn como sistema de dados, não só classificação
+- separa ingestão, transformação, modelagem, reporting e consumo
+- persiste artefatos reutilizáveis em vez de depender de estado de notebook
+- traduz score em decisão operacional
 
-Em muitos portfólios, churn aparece como notebook e gráfico. Aqui o objetivo é diferente: mostrar como um caso aplicado de ML pode ser implementado como sistema de dados sustentável.
+Perguntas que o repositório responde:
 
-O projeto responde a quatro perguntas práticas:
+1. Quais clientes têm maior risco de churn?
+2. Quais clientes priorizar primeiro?
+3. Como ajustar threshold quando o custo de campanha muda?
+4. Quais artefatos o negócio precisa para agir?
 
-1. Quais clientes apresentam maior risco de churn?
-2. Quais clientes devem ser priorizados primeiro?
-3. Como o threshold muda quando o custo operacional da campanha muda?
-4. Quais artefatos o time de negócio precisa para agir sobre o score?
+## Valor de Negócio
 
-## O Que o Repositório Entrega
+Saídas orientadas ao time de retenção/RevOps:
 
-- ingestão `raw -> bronze`
-- tratamento e validação `bronze -> silver`
-- camada analítica `silver -> gold`
-- treino de modelos com comparação de candidatos
-- thresholding sensível a custo
-- persistência de artefatos de inferência
-- relatórios executivos e playbook de ação
-- monitoramento leve de drift
-- testes automatizados e CI
+- lista priorizada de clientes
+- resumo executivo de KPIs
+- playbook de ação
+- model card
+- monitoramento de drift
+- consumo por API e dashboard
+
+## Arquitetura
+
+Fluxo canônico:
+
+`raw -> bronze -> silver -> gold -> model artifacts -> reporting -> dashboard/api`
+
+Caminhos canônicos:
+
+- `src/runtime/`: configuração e logging
+- `src/pipelines/`: ingestão, transformação, validação, monitoramento e reporting
+- `src/modeling/`: treino, inferência e contrato do predictor
+- `src/compat/`: camada explícita de compatibilidade
+- `scripts/`: rotinas operacionais
+- `analytics_dbt/`: camada opcional dbt para marts analíticos
+
+Compat wrappers existem em `src/*.py` e alguns entrypoints de raiz, mas não são o caminho preferencial para código novo.
+
+Caminhos de UI:
+
+- `app.py`: entrypoint canônico para deploy Streamlit
+- `apps/streamlit_app.py`: control room e score individual
+- `apps/dashboard_ui.py`: shell visual e componentes compartilhados
+- `apps/dashboard_runtime.py`: carga de artefatos e status de runtime
+- `apps/pages/`: páginas executiva, risco, priorização e simulação
+- `pages/`: wrappers de compatibilidade multipage
+
+Veja também:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/DASHBOARD.md](docs/DASHBOARD.md)
+- [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
+
+## Stack Técnica
+
+- Python 3.12
+- Pandas / NumPy
+- scikit-learn
+- Pandera
+- MLflow (opcional)
+- Streamlit
+- FastAPI
+- Pytest, Ruff, Black, Isort, MyPy, Pre-commit
+- GitHub Actions
+
+## Decisões Técnicas
+
+- modelo em camadas (`raw -> bronze -> silver -> gold`) para reprocessamento explícito
+- persistência atômica de JSON/CSV/Markdown
+- padrão artifact-first para dashboard e API
+- compatibilidade preservada, mas isolada
+- retry com limite e fail-fast para erros não-transientes de contrato
+
+## Mapa do Repositório
+
+```text
+.
+|-- .github/                  # CI, templates e ownership
+|-- analytics_dbt/            # projeto dbt opcional
+|-- apps/                     # Streamlit/FastAPI e helpers
+|-- artifacts/                # metadados e artefatos gerados
+|-- data/                     # raw/bronze/silver/gold
+|-- deploy/                   # perfis de ambiente para containers
+|-- docs/                     # arquitetura, operação e convenções
+|-- models/                   # registry local de modelos
+|-- notebooks/                # exploração apenas
+|-- pages/                    # wrappers Streamlit multipage
+|-- scripts/                  # utilitários operacionais
+|-- src/                      # implementação canônica
+|-- tests/                    # testes automatizados
+`-- README.md                 # entrypoint principal
+```
 
 ## Quickstart
 
-### 1. Preparar o ambiente
+### 1. Preparar ambiente
 
 ```bash
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install --upgrade pip
 .venv\Scripts\python.exe -m pip install -r requirements-runtime.txt
-```
-
-Para desenvolvimento local, testes e lint:
-
-```bash
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 copy .env.example .env
 ```
 
-### 2. Adicionar o dataset
+### 2. Adicionar dataset
 
 Arquivo esperado:
-
 `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
 
-Fonte do dataset:
+Fonte:
+- Kaggle `blastchar/telco-customer-churn`
 
-- Kaggle: `blastchar/telco-customer-churn`
-- arquivo utilizado neste projeto: `WA_Fn-UseC_-Telco-Customer-Churn.csv`
-
-### 3. Executar o pipeline
+### 3. Rodar pipeline canônico
 
 ```bash
 .venv\Scripts\python.exe -m src.cli.pipeline --data-dir data --log-level INFO --decision-policy balanceada --environment dev
 ```
 
-### 4. Validar os gates de qualidade
+### 4. Rodar quality gates
 
 ```bash
 make test
@@ -78,143 +139,59 @@ make lint
 make typecheck
 ```
 
-## Estrutura do Repositório
-
-```text
-.
-|-- .github/                  # CI, templates e padrões de colaboração
-|-- analytics_dbt/            # camada opcional dbt para marts analíticos
-|-- apps/                     # Streamlit, FastAPI e helpers compartilhados do dashboard
-|-- assets/                   # imagens e mídia do repositório
-|-- artifacts/                # metadados de execução e artefatos gerados em runtime
-|-- data/                     # datasets e camadas locais de pipeline
-|-- docs/                     # arquitetura, operação e convenções
-|-- deploy/                   # perfis de ambiente para execução containerizada
-|-- models/                   # registry local de modelos e bundles gerados
-|-- notebooks/                # exploração isolada do caminho produtivo
-|-- pages/                    # wrappers de compatibilidade do Streamlit multipágina
-|-- src/                      # código canônico do produto de dados
-|-- tests/                    # contratos e regressão
-|-- .env.example              # configuração base por ambiente
-|-- Makefile                  # comandos padrão
-|-- pyproject.toml            # configuração de ferramentas
-`-- README.md                 # entrada principal do repositório
-```
-
-Mapa detalhado:
-
-- [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
-
-## Arquitetura
-
-Fluxo principal:
-
-`raw -> bronze -> silver -> gold -> model artifacts -> reporting -> dashboard/api`
-
-Componentes centrais:
-
-- `src/runtime/config.py`: configuração de runtime, paths e ambiente
-- `src/pipelines/ingestion.py`: leitura do raw e camada bronze
-- `src/pipelines/transformation.py`: limpeza e silver layer
-- `src/pipelines/feature_engineering.py`: features de negócio reutilizáveis
-- `src/modeling/pipeline.py`: treino, score, persistência e metadata
-- `src/pipelines/reporting.py`: executive report, model card e action playbook
-- `src/pipelines/monitoring.py`: baseline e alerta de drift com PSI/KS
-- `src/cli/pipeline.py`: orquestração ponta a ponta
-- `analytics_dbt/`: modelagem analítica SQL (staging + marts) em estilo dbt
-
-Pastas como `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. A implementação canônica está em `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
-
-Caminhos específicos da UI:
-
-- `app.py`: entrypoint canônico para deploy Streamlit
-- `apps/streamlit_app.py`: entrypoint do control room e score individual
-- `apps/dashboard_ui.py`: shell visual compartilhado, estilos e helpers de layout
-- `apps/dashboard_runtime.py`: carregamento compartilhado de artefatos e status
-- `apps/pages/`: páginas executiva, risco, priorização e simulação
-- `pages/`: wrappers de compatibilidade do Streamlit
-
-Arquitetura detalhada:
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
-## Operação e Confiabilidade
-
-O projeto implementa controles proporcionais ao escopo:
+## Runtime e Confiabilidade
 
 - configuração por `.env` e variáveis de ambiente
-- isolamento de artefatos por contexto de execução
 - logging estruturado com `run_id`
-- persistência atômica de CSV, JSON e Markdown
-- metadados de run em `artifacts/metadata/`
-- lineage versionado em `artifacts/metadata/lineage_run_<run_id>.json`
+- metadados de execução em `artifacts/metadata/`
+- lineage em `artifacts/metadata/lineage_run_<run_id>.json`
 - governança/LGPD em `artifacts/metadata/governance_run_<run_id>.json`
-- manifests versionados para `gold` e model registry
 - validação de schema antes do treino
-- monitoramento simples de drift
-- EDA operacional com `data/gold/eda_profile.json` e `artifacts/reports/eda_report.md`
-- saída pseudonimizada para consumo ampliado: `data/gold/customer_prioritization_public.csv`
-- reprocessamento local sem estado manual oculto
-- deployment opcional com Prefect mantido apenas como exemplo de agendamento, não como caminho canônico
+- camadas bronze/silver/gold regeneráveis
+- drift monitorado com PSI e KS
+- EDA operacional em `data/gold/eda_profile.json` e `artifacts/reports/eda_report.md`
+- visão pseudonimizada: `data/gold/customer_prioritization_public.csv`
 
-Guia operacional:
+Perfis containerizados (`docker-compose.yml`):
 
-- [docs/OPERATIONS.md](docs/OPERATIONS.md)
-
-## Comandos Principais
-
-```bash
-make install
-make train
-make train-cheap
-make train-expensive
-make test
-make lint
-make typecheck
-make predict
-```
+- `dev`: API + dashboard
+- `pipeline`: execução batch
+- `prod`: API com perfil de produção
 
 ## Qualidade de Engenharia
 
-Ferramentas usadas:
+Ferramentas:
+- `pytest`, `ruff`, `black`, `isort`, `mypy`, `pre-commit`, `GitHub Actions`
 
-- `pytest`
-- `ruff`
-- `black`
-- `isort`
-- `mypy`
-- `pre-commit`
-- `GitHub Actions`
+Dependências:
+- `requirements-runtime.txt`: runtime
+- `requirements-dev.txt`: lint/test/static analysis
 
-Separação de dependências:
+## Trade-offs
 
-- `requirements-runtime.txt`: pipeline, API, dashboard e dependências de execução
-- `requirements-dev.txt`: lint, testes, hooks e análise estática
+- artefatos em filesystem local
+- monitoramento leve (sem stack completa de observabilidade)
+- orquestração externa opcional (Prefect), não obrigatória
+- wrappers legados preservados por compatibilidade
 
-Os gates de qualidade estão definidos em:
+## Roadmap
 
-- [.github/workflows/ci.yml](.github/workflows/ci.yml)
-- [.pre-commit-config.yaml](.pre-commit-config.yaml)
+- reduzir superfície legada em `src/models`
+- fortalecer contratos de saída
+- ampliar exemplos de deploy e storage remoto
+- evoluir contrato versionado da API de inferência
 
-## Documentação Complementar
+## Documentação
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [docs/README.md](docs/README.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DASHBOARD.md](docs/DASHBOARD.md)
 - [docs/OPERATIONS.md](docs/OPERATIONS.md)
+- [docs/ANALYTICS_ENGINEERING.md](docs/ANALYTICS_ENGINEERING.md)
+- [docs/GOVERNANCE.md](docs/GOVERNANCE.md)
 - [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
 
-## Roadmap Realista
+## Padrão de Contribuição
 
-- reduzir ou eliminar a camada legada restante em `src/models`
-- adicionar validações de contrato mais estritas para outputs gold e reporting
-- plugar armazenamento remoto para artefatos e tracking
-- expor inferência e metadata por meio de um contrato de API versionado
-
-## Colaboração
-
-Pull requests, bugs e melhorias devem seguir:
-
-- [CONTRIBUTING.md](CONTRIBUTING.md)
-
-Clareza e reprodutibilidade importam mais do que complexidade artificial. O objetivo é manter o repositório legível, testável e defensável em review técnico.
+Mudanças devem aumentar clareza, confiabilidade e manutenção sustentável. O repositório precisa continuar legível, testável e defensável em review técnico.

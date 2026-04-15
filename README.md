@@ -219,6 +219,8 @@ These are conscious scope choices, not hidden gaps.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DASHBOARD.md](docs/DASHBOARD.md)
 - [docs/OPERATIONS.md](docs/OPERATIONS.md)
+- [docs/ANALYTICS_ENGINEERING.md](docs/ANALYTICS_ENGINEERING.md)
+- [docs/GOVERNANCE.md](docs/GOVERNANCE.md)
 - [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
 
 ## Contribution Standard
