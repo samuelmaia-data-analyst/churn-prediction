@@ -71,3 +71,19 @@ def test_engineer_features_adds_business_features() -> None:
         featured.columns
     )
     assert featured["service_count"].ge(0).all()
+
+
+def test_build_silver_layer_rejects_negative_charges() -> None:
+    raw = build_raw_df()
+    raw.loc[0, "MonthlyCharges"] = -10.0
+
+    with pytest.raises(ValueError, match="negativos"):
+        build_silver_layer(build_bronze_layer(raw))
+
+
+def test_build_silver_layer_rejects_empty_customer_id() -> None:
+    raw = build_raw_df()
+    raw.loc[0, "customerID"] = "  "
+
+    with pytest.raises(ValueError, match="customerID"):
+        build_silver_layer(build_bronze_layer(raw))

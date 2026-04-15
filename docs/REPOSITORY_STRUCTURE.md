@@ -26,8 +26,9 @@ The structure separates:
 |   |-- silver/                 # regenerable cleaned layer
 |   `-- gold/                   # regenerable analytics outputs
 |-- docs/                       # architecture, operations, repository conventions
+|   `-- releases/               # release notes and versioned change summaries
 |-- notebooks/                  # exploratory work only
-|-- pages/                      # Streamlit multi-page views
+|-- pages/                      # Streamlit compatibility wrappers for multi-page views
 |-- scripts/                    # operational scripts and standalone utilities
 |-- src/
 |   |-- cli/                    # canonical CLI entrypoints
@@ -50,6 +51,7 @@ New code should target:
 - `src/runtime/`
 - `src/pipelines/`
 - `src/modeling/`
+- `apps/pages/` for Streamlit business pages
 - `src/compat/` only when compatibility is the explicit goal
 - `scripts/` for operational utilities that are not part of the application packages
 
@@ -58,6 +60,7 @@ New code should target:
 The following exist primarily for backward compatibility or convenience:
 
 - root entrypoints such as `app.py`, `api.py`, `main.py`
+- Streamlit wrappers under `pages/`
 - wrappers under `src/*.py`
 - legacy folders such as `src/data`, `src/features`, `src/models`
 

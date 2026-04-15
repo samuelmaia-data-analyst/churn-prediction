@@ -10,6 +10,7 @@ Use this folder to understand how the repository is meant to behave in technical
 2. [OPERATIONS.md](OPERATIONS.md)
 3. [DASHBOARD.md](DASHBOARD.md)
 4. [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md)
+5. [releases/RELEASE_NOTES_v1.0.0.md](releases/RELEASE_NOTES_v1.0.0.md)
 
 ## Document Roles
 
@@ -17,6 +18,7 @@ Use this folder to understand how the repository is meant to behave in technical
 - `OPERATIONS.md`: local setup, execution path, quality gates, and operational expectations
 - `DASHBOARD.md`: Streamlit consumption layer, artifact sources, fallback semantics, and product intent
 - `REPOSITORY_STRUCTURE.md`: ownership of folders, scripts, compatibility wrappers, and root-level conventions
+- `releases/`: release notes and change summaries
 
 ## Maintenance Rule
 

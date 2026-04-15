@@ -90,7 +90,7 @@ make typecheck
 |-- docs/                     # arquitetura, operação e convenções
 |-- models/                   # registry local de modelos e bundles gerados
 |-- notebooks/                # exploração isolada do caminho produtivo
-|-- pages/                    # visões de negócio multipágina no Streamlit
+|-- pages/                    # wrappers de compatibilidade do Streamlit multipágina
 |-- src/                      # código canônico do produto de dados
 |-- tests/                    # contratos e regressão
 |-- .env.example              # configuração base por ambiente
@@ -127,7 +127,8 @@ Caminhos específicos da UI:
 - `apps/streamlit_app.py`: entrypoint do control room e score individual
 - `apps/dashboard_ui.py`: shell visual compartilhado, estilos e helpers de layout
 - `apps/dashboard_runtime.py`: carregamento compartilhado de artefatos e status
-- `pages/`: páginas executiva, risco, priorização e simulação
+- `apps/pages/`: páginas executiva, risco, priorização e simulação
+- `pages/`: wrappers de compatibilidade do Streamlit
 
 Arquitetura detalhada:
 

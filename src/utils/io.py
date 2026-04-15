@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -39,3 +40,11 @@ def write_csv_atomic(path: Path, dataframe: pd.DataFrame) -> None:
         temp_path = Path(handle.name)
     dataframe.to_csv(temp_path, index=False)
     _replace_file(temp_path, path)
+
+
+def file_sha256(path: Path) -> str:
+    hasher = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()

@@ -66,6 +66,7 @@ make typecheck
 
 - `artifacts/metadata/latest_run.json`
 - `artifacts/metadata/pipeline_run_<run_id>.json`
+- metadata now includes input fingerprint (`raw_sha256`) and per-stage telemetry (`stages`)
 
 ### Reports
 
@@ -95,6 +96,11 @@ Practical rules:
 - treat `data/raw/` as input
 - treat `data/bronze`, `data/silver`, and `data/gold` as regenerable layers
 - treat `artifacts/` and `models/` as execution outputs
+
+Retry policy notes:
+
+- transient task failures are retried with backoff
+- non-retryable failures (for example invalid input schema) fail fast
 
 ## Common Incidents
 

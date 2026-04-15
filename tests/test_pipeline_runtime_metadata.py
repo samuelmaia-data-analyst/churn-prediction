@@ -36,5 +36,11 @@ def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Pat
     assert execution_payload["environment"] == "test"
     assert execution_payload["drift_status"] in {"ok", "cold_start", "alert"}
     assert execution_payload["metrics"]["churn_roc_auc"] >= 0.0
+    assert execution_payload["input"]["raw_sha256"]
+    assert set(execution_payload["stages"]).issuperset(
+        {"bronze", "silver", "warehouse", "modeling", "reporting", "monitoring"}
+    )
+    assert execution_payload["stages"]["bronze"]["rows"] > 0
+    assert execution_payload["stages"]["modeling"]["churn_roc_auc"] >= 0.0
     assert quality_payload["rows"] > 0
     assert quality_payload["invalid_churn_labels"] == 0

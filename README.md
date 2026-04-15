@@ -58,13 +58,34 @@ UI-specific paths:
 - `apps/streamlit_app.py`: control room and customer-level scoring entrypoint
 - `apps/dashboard_ui.py`: shared dashboard layout shell, styling, and UI helpers
 - `apps/dashboard_runtime.py`: shared dashboard asset loading and status helpers
-- `pages/`: executive, risk, prioritization, and simulation views
+- `apps/pages/`: executive, risk, prioritization, and simulation views
+- `pages/`: Streamlit compatibility wrappers
 
 See:
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DASHBOARD.md](docs/DASHBOARD.md)
 - [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)
+
+## Tech Stack
+
+- Python 3.12 (package target)
+- Pandas / NumPy for batch data processing
+- scikit-learn for model training and inference pipelines
+- Pandera for dataframe contracts and schema checks
+- MLflow for optional experiment tracking
+- Streamlit for business-facing analytical consumption
+- FastAPI for inference API surface
+- Pytest, Ruff, Black, Isort, MyPy, Pre-commit for quality gates
+- GitHub Actions for CI validation and package build
+
+## Technical Decisions
+
+- Layered local data model (`raw -> bronze -> silver -> gold`) to keep reruns explicit and reproducible.
+- Atomic persistence for JSON/CSV/Markdown outputs to avoid partial writes in runtime artifacts.
+- Artifact-first consumption pattern (dashboard and API consume persisted outputs, not notebook state).
+- Compatibility wrappers are retained, but canonical implementation remains under `src/runtime`, `src/pipelines`, and `src/modeling`.
+- Pipeline retries are bounded and now fail fast for non-retryable data-contract errors.
 
 ## Repository Map
 
@@ -77,7 +98,7 @@ See:
 |-- docs/                     # architecture, operations, repository conventions
 |-- models/                   # local model registry and generated bundles
 |-- notebooks/                # exploratory work only
-|-- pages/                    # Streamlit multi-page business views
+|-- pages/                    # Streamlit compatibility wrappers
 |-- scripts/                  # operational scripts and utilities
 |-- src/                      # canonical implementation
 |-- tests/                    # automated test suite

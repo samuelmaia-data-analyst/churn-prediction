@@ -59,6 +59,17 @@ REQUIRED_COLUMNS = {
     "Churn",
 }
 
+CRITICAL_NON_NULL_COLUMNS = {
+    "customerID",
+    "gender",
+    "Contract",
+    "InternetService",
+    "PaymentMethod",
+    "MonthlyCharges",
+    "TotalCharges",
+    "Churn",
+}
+
 BRONZE_SCHEMA = pa.DataFrameSchema(
     {
         "customerID": pa.Column(str, nullable=False),
@@ -129,11 +140,34 @@ def _validate_columns(df: pd.DataFrame) -> None:
         raise ValueError(f"Colunas obrigatorias ausentes: {missing_str}")
 
 
+def _validate_business_rules(df: pd.DataFrame) -> None:
+    if df.empty:
+        raise ValueError("Camada silver vazia apos transformacao.")
+
+    null_violations = [
+        column for column in sorted(CRITICAL_NON_NULL_COLUMNS) if df[column].isna().any()
+    ]
+    if null_violations:
+        raise ValueError(
+            "Valores nulos encontrados em colunas criticas: " + ", ".join(null_violations)
+        )
+
+    if df["customerID"].astype(str).str.strip().eq("").any():
+        raise ValueError("Coluna customerID contem valores vazios.")
+
+    if (df["tenure"] < 0).any():
+        raise ValueError("Coluna tenure contem valores negativos.")
+    if (df["MonthlyCharges"] < 0).any() or (df["TotalCharges"] < 0).any():
+        raise ValueError("Colunas de cobranca contem valores negativos.")
+
+
 def build_silver_layer(bronze_df: pd.DataFrame) -> pd.DataFrame:
     _validate_columns(bronze_df)
     BRONZE_SCHEMA.validate(bronze_df)
     silver = bronze_df.copy()
 
+    silver["tenure"] = pd.to_numeric(silver["tenure"], errors="coerce")
+    silver["MonthlyCharges"] = pd.to_numeric(silver["MonthlyCharges"], errors="coerce")
     silver["TotalCharges"] = pd.to_numeric(silver["TotalCharges"], errors="coerce")
     silver["TotalCharges"] = silver["TotalCharges"].fillna(silver["TotalCharges"].median())
     silver["Churn"] = silver["Churn"].map({"Yes": 1, "No": 0})
@@ -141,6 +175,7 @@ def build_silver_layer(bronze_df: pd.DataFrame) -> pd.DataFrame:
     if silver["Churn"].isna().any():
         raise ValueError("Coluna Churn contem valores invalidos. Esperado: Yes/No.")
 
+    _validate_business_rules(silver)
     SILVER_SCHEMA.validate(silver)
     return silver
 

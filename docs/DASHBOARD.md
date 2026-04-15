@@ -44,10 +44,11 @@ Fallback mode is intentionally visible because hiding it would weaken technical 
 - `apps/streamlit_app.py`: home page and customer-level inference view
 - `apps/dashboard_ui.py`: shared layout shell, visual language, and reusable UI helpers
 - `apps/dashboard_runtime.py`: shared dashboard asset loading and helper logic
-- `pages/1_Executive_Overview.py`: executive KPI page
-- `pages/2_Risk_and_Growth.py`: portfolio risk distribution and growth page
-- `pages/3_Prioritization.py`: prioritized customer list
-- `pages/4_Simulation.py`: retention impact simulation
+- `apps/pages/executive_overview.py`: executive KPI page
+- `apps/pages/risk_and_growth.py`: portfolio risk distribution and growth page
+- `apps/pages/prioritization.py`: prioritized customer list
+- `apps/pages/simulation.py`: retention impact simulation
+- `pages/`: compatibility wrappers for Streamlit multipage discovery
 
 ## Layout Model
 
