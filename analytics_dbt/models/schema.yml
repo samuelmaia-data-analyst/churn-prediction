@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_customer_churn
+    description: Canonical silver projection for analytical modeling.
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+      - name: churn_label
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fct_contract_risk
+    description: Contract and internet-service risk mart.
+    columns:
+      - name: contract_type
+        tests:
+          - not_null
+      - name: customers
+        tests:
+          - not_null

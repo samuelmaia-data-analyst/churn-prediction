@@ -33,6 +33,9 @@ class PipelineConfig:
     model_registry_dir: Path | None = None
     raw_filename: str = "WA_Fn-UseC_-Telco-Customer-Churn.csv"
     test_size: float = 0.2
+    lgpd_mode: str = "standard"
+    governance_retention_days: int = 365
+    lgpd_salt: str = "churn-local-salt"
 
     @classmethod
     def from_runtime(
@@ -68,6 +71,9 @@ class PipelineConfig:
             model_registry_dir=Path(
                 _setting("CHURN_MODEL_REGISTRY_DIR", str(default_data_dir.parent / "models"))
             ),
+            lgpd_mode=_setting("CHURN_LGPD_MODE", "standard").lower(),
+            governance_retention_days=int(_setting("CHURN_GOV_RETENTION_DAYS", "365")),
+            lgpd_salt=_setting("CHURN_LGPD_SALT", "churn-local-salt"),
         )
 
     @property
@@ -189,6 +195,22 @@ class PipelineConfig:
     @property
     def latest_lineage_manifest_path(self) -> Path:
         return self.metadata_dir / "latest_lineage.json"
+
+    @property
+    def governance_manifest_path(self) -> Path:
+        return self.metadata_dir / f"governance_run_{self.run_id}.json"
+
+    @property
+    def latest_governance_manifest_path(self) -> Path:
+        return self.metadata_dir / "latest_governance.json"
+
+    @property
+    def eda_profile_path(self) -> Path:
+        return self.gold_dir / "eda_profile.json"
+
+    @property
+    def eda_report_path(self) -> Path:
+        return self.reports_dir / "eda_report.md"
 
     @property
     def drift_reference_path(self) -> Path:

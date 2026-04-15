@@ -18,6 +18,7 @@ The structure separates:
 ```text
 .
 |-- .github/                    # CI, issue templates, PR template, ownership
+|-- analytics_dbt/              # optional dbt models for analytical marts
 |-- apps/                       # Streamlit and FastAPI application entrypoints
 |-- assets/                     # images, media, and repository visuals
 |-- data/

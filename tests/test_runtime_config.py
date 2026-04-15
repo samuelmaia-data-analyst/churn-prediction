@@ -16,6 +16,9 @@ def test_pipeline_config_reads_environment_from_dotenv(tmp_path: Path) -> None:
                 "CHURN_ENV=prod",
                 "CHURN_DECISION_POLICY=campanha_cara",
                 "CHURN_MLFLOW_TRACKING_URI=disabled",
+                "CHURN_LGPD_MODE=strict",
+                "CHURN_GOV_RETENTION_DAYS=180",
+                "CHURN_LGPD_SALT=top-secret",
             ]
         ),
         encoding="utf-8",
@@ -29,9 +32,15 @@ def test_pipeline_config_reads_environment_from_dotenv(tmp_path: Path) -> None:
     assert config.environment == "prod"
     assert config.decision_policy == "campanha_cara"
     assert config.mlflow_tracking_uri == "disabled"
+    assert config.lgpd_mode == "strict"
+    assert config.governance_retention_days == 180
+    assert config.lgpd_salt == "top-secret"
     assert config.execution_metadata_path == Path(
         "custom-artifacts/metadata/pipeline_run_test-run.json"
     )
     assert config.lineage_manifest_path == Path(
         "custom-artifacts/metadata/lineage_run_test-run.json"
+    )
+    assert config.governance_manifest_path == Path(
+        "custom-artifacts/metadata/governance_run_test-run.json"
     )

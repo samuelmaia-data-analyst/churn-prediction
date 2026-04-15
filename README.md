@@ -50,6 +50,7 @@ Canonical implementation paths:
 - `src/modeling/`: training, inference, predictor contract
 - `src/compat/`: explicit backward compatibility layer
 - `scripts/`: operational scripts outside the core application packages
+- `analytics_dbt/`: optional dbt layer for analytical marts
 
 Compatibility wrappers still exist under `src/*.py` and some root entrypoints, but they are not the preferred path for new code.
 
@@ -94,6 +95,7 @@ See:
 |-- .github/                  # CI, issue templates, PR template, ownership
 |-- apps/                     # Streamlit, FastAPI, and shared dashboard helpers
 |-- artifacts/                # execution metadata and generated runtime artifacts
+|-- analytics_dbt/            # optional dbt project for analytical marts
 |-- data/                     # raw/bronze/silver/gold local layers
 |-- docs/                     # architecture, operations, repository conventions
 |-- models/                   # local model registry and generated bundles
@@ -153,6 +155,7 @@ The repository implements controls proportional to its scope:
 - structured logging with `run_id`
 - execution metadata persisted under `artifacts/metadata/`
 - lineage manifest persisted under `artifacts/metadata/lineage_run_<run_id>.json`
+- governance manifest persisted under `artifacts/metadata/governance_run_<run_id>.json`
 - atomic persistence for CSV, JSON, and Markdown
 - schema validation before training
 - regenerable bronze, silver, and gold layers
@@ -160,6 +163,8 @@ The repository implements controls proportional to its scope:
 - drift monitoring using PSI and KS
 - dashboard artifact status with explicit fallback signaling
 - multipage dashboard with a shared visual shell and runtime-aware status
+- EDA profile artifacts (`eda_profile.json` + `eda_report.md`) generated from silver layer
+- LGPD-oriented pseudonymized output (`customer_prioritization_public.csv`)
 
 Containerized runtime profiles are available through `docker-compose.yml`:
 

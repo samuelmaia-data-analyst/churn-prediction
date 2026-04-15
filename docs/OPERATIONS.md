@@ -14,6 +14,9 @@ Primary variables:
 - `CHURN_LOG_LEVEL`
 - `CHURN_DECISION_POLICY`
 - `CHURN_MLFLOW_TRACKING_URI`
+- `CHURN_LGPD_MODE` (`standard` or `strict`)
+- `CHURN_GOV_RETENTION_DAYS`
+- `CHURN_LGPD_SALT`
 
 ## Local Execution
 
@@ -88,6 +91,8 @@ make typecheck
 - `artifacts/metadata/pipeline_run_<run_id>.json`
 - `artifacts/metadata/latest_lineage.json`
 - `artifacts/metadata/lineage_run_<run_id>.json`
+- `artifacts/metadata/latest_governance.json`
+- `artifacts/metadata/governance_run_<run_id>.json`
 - metadata now includes input fingerprint (`raw_sha256`) and per-stage telemetry (`stages`)
 
 ### Reports
@@ -97,6 +102,7 @@ make typecheck
 - `artifacts/reports/executive_brief.md`
 - `artifacts/reports/action_playbook.md`
 - `artifacts/reports/data_quality_report.json`
+- `artifacts/reports/eda_report.md`
 
 ### Models
 
@@ -108,6 +114,8 @@ make typecheck
 ### Gold layer manifest
 
 - `data/gold/_manifest.json`
+- `data/gold/eda_profile.json`
+- `data/gold/customer_prioritization_public.csv` (pseudonymized view)
 
 ## Reprocessing
 

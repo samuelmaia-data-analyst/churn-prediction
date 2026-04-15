@@ -23,6 +23,7 @@ from src.pipelines.decisioning import (
     risk_segment,
     threshold_for_value_segment,
 )
+from src.pipelines.governance import build_public_prioritization_view
 from src.runtime.config import PipelineConfig
 from src.utils.io import write_csv_atomic, write_json_atomic, write_text_atomic
 
@@ -306,6 +307,12 @@ def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> 
 
     write_csv_atomic(config.gold_dir / "kpi_summary.csv", outputs.kpi_summary)
     write_csv_atomic(config.gold_dir / "customer_prioritization.csv", outputs.recommendations)
+    public_prioritization = build_public_prioritization_view(
+        outputs.recommendations,
+        salt=config.lgpd_salt,
+        strict_mode=config.lgpd_mode == "strict",
+    )
+    write_csv_atomic(config.gold_dir / "customer_prioritization_public.csv", public_prioritization)
     write_csv_atomic(config.gold_dir / "action_playbook.csv", outputs.action_playbook)
     gold_manifest = ArtifactManifest(
         schema_version="1.0.0",
@@ -325,6 +332,12 @@ def persist_business_outputs(config: PipelineConfig, outputs: ReportOutputs) -> 
                 path=str((config.gold_dir / "customer_prioritization.csv").as_posix()),
                 format="csv",
                 rows=int(len(outputs.recommendations)),
+            ),
+            ArtifactEntry(
+                name="customer_prioritization_public",
+                path=str((config.gold_dir / "customer_prioritization_public.csv").as_posix()),
+                format="csv",
+                rows=int(len(public_prioritization)),
             ),
             ArtifactEntry(
                 name="action_playbook",

@@ -1,0 +1,7 @@
+churn_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../artifacts/warehouse/churn_analytics.duckdb
+      threads: 4

@@ -39,7 +39,16 @@ def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Pat
     assert execution_payload["metrics"]["churn_roc_auc"] >= 0.0
     assert execution_payload["input"]["raw_sha256"]
     assert set(execution_payload["stages"]).issuperset(
-        {"bronze", "silver", "warehouse", "modeling", "reporting", "monitoring"}
+        {
+            "bronze",
+            "silver",
+            "warehouse",
+            "eda",
+            "modeling",
+            "reporting",
+            "governance",
+            "monitoring",
+        }
     )
     assert execution_payload["stages"]["bronze"]["rows"] > 0
     assert execution_payload["stages"]["modeling"]["churn_roc_auc"] >= 0.0
@@ -47,5 +56,6 @@ def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Pat
     assert lineage_payload["lineage_version"] == "2026.04.1"
     assert lineage_payload["input"]["raw_sha256"] == execution_payload["input"]["raw_sha256"]
     assert len(lineage_payload["artifacts"]) > 0
+    assert any(item["name"] == "governance_manifest" for item in lineage_payload["artifacts"])
     assert quality_payload["rows"] > 0
     assert quality_payload["invalid_churn_labels"] == 0

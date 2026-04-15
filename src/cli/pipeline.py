@@ -13,6 +13,8 @@ import pandas as pd
 from src.contracts import LineageArtifact, LineageInput, LineageManifest
 from src.ml import ModelOutputs, train_models_and_score
 from src.pipelines.decisioning import POLICIES
+from src.pipelines.eda import build_eda_profile, persist_eda_outputs
+from src.pipelines.governance import build_governance_manifest, persist_governance_manifest
 from src.pipelines.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
 from src.pipelines.monitoring import run_drift_monitoring
 from src.pipelines.reporting import ReportOutputs, build_business_outputs, persist_business_outputs
@@ -124,6 +126,12 @@ def warehouse_task(config: PipelineConfig, silver_df: pd.DataFrame) -> StarSchem
     return schema
 
 
+def eda_task(config: PipelineConfig, silver_df: pd.DataFrame) -> dict[str, Any]:
+    profile = build_eda_profile(silver_df)
+    persist_eda_outputs(config, profile)
+    return profile
+
+
 def ml_task(config: PipelineConfig, silver_df: pd.DataFrame) -> ModelOutputs:
     return train_models_and_score(config, silver_df)
 
@@ -136,6 +144,16 @@ def reporting_task(config: PipelineConfig, model_outputs: ModelOutputs) -> Repor
 
 def monitoring_task(config: PipelineConfig, model_outputs: ModelOutputs) -> dict[str, object]:
     return run_drift_monitoring(config, model_outputs.scored_df)
+
+
+def governance_task(
+    config: PipelineConfig,
+    silver_df: pd.DataFrame,
+    report_outputs: ReportOutputs,
+) -> dict[str, Any]:
+    manifest = build_governance_manifest(config, silver_df, report_outputs.recommendations)
+    persist_governance_manifest(config, manifest)
+    return manifest
 
 
 def _summarize_stage_result(result: object) -> dict[str, Any]:
@@ -168,6 +186,14 @@ def _summarize_stage_result(result: object) -> dict[str, Any]:
                 summary[key] = result[key]
         if "features" in result and isinstance(result["features"], list):
             summary["features_count"] = len(result["features"])
+        if "rows" in result:
+            summary["rows"] = int(result["rows"])
+        if "columns" in result:
+            summary["columns"] = int(result["columns"])
+        if "counts" in result and isinstance(result["counts"], dict):
+            summary["counts"] = result["counts"]
+        if not summary:
+            summary["keys"] = sorted(result.keys())
         return summary
     return {"result_type": type(result).__name__}
 
@@ -219,9 +245,16 @@ def _build_lineage_manifest(
         _artifact_entry("bronze_layer", config.bronze_output_path, "csv", rows=bronze_rows),
         _artifact_entry("silver_layer", config.silver_output_path, "csv", rows=silver_rows),
         _artifact_entry("gold_manifest", config.gold_manifest_path, "json"),
+        _artifact_entry("eda_profile", config.eda_profile_path, "json"),
+        _artifact_entry("eda_report", config.eda_report_path, "md"),
         _artifact_entry("kpi_summary", config.gold_dir / "kpi_summary.csv", "csv"),
         _artifact_entry(
             "customer_prioritization", config.gold_dir / "customer_prioritization.csv", "csv"
+        ),
+        _artifact_entry(
+            "customer_prioritization_public",
+            config.gold_dir / "customer_prioritization_public.csv",
+            "csv",
         ),
         _artifact_entry("action_playbook_csv", config.gold_dir / "action_playbook.csv", "csv"),
         _artifact_entry("executive_report", config.executive_report_path, "json"),
@@ -229,6 +262,7 @@ def _build_lineage_manifest(
         _artifact_entry("executive_brief", config.executive_brief_path, "md"),
         _artifact_entry("action_playbook_md", config.action_playbook_path, "md"),
         _artifact_entry("drift_alert", config.drift_alert_path, "json"),
+        _artifact_entry("governance_manifest", config.governance_manifest_path, "json"),
         _artifact_entry("enterprise_bundle", config.enterprise_bundle_path, "joblib"),
         _artifact_entry("model_metadata", config.model_metadata_path, "json"),
         _artifact_entry("model_registry_manifest", config.model_registry_manifest_path, "json"),
@@ -305,6 +339,14 @@ def run_pipeline(
             retries=1,
             retry_delay_seconds=2,
         )
+        _, stage_metadata["eda"] = _execute_stage(
+            "eda_task",
+            eda_task,
+            config,
+            silver_df,
+            retries=1,
+            retry_delay_seconds=2,
+        )
         model_outputs, stage_metadata["modeling"] = _execute_stage(
             "ml_task",
             ml_task,
@@ -313,11 +355,20 @@ def run_pipeline(
             retries=1,
             retry_delay_seconds=2,
         )
-        _, stage_metadata["reporting"] = _execute_stage(
+        report_outputs, stage_metadata["reporting"] = _execute_stage(
             "reporting_task",
             reporting_task,
             config,
             model_outputs,
+            retries=1,
+            retry_delay_seconds=2,
+        )
+        _, stage_metadata["governance"] = _execute_stage(
+            "governance_task",
+            governance_task,
+            config,
+            silver_df,
+            report_outputs,
             retries=1,
             retry_delay_seconds=2,
         )

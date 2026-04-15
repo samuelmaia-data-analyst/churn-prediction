@@ -53,3 +53,7 @@ models/enterprise_next_purchase_model.joblib
 # Observabilidade e tracking
 logs/
 mlruns/
+
+# dbt
+analytics_dbt/target/
+analytics_dbt/dbt_packages/
