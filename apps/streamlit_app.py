@@ -18,8 +18,8 @@ from apps.dashboard_runtime import (
     build_filtered_views,
     build_prediction_payload,
     format_risk_level,
+    load_best_available_dataframe,
     load_dashboard_assets,
-    load_data,
     load_predictor,
     summarise_metrics,
 )
@@ -83,6 +83,7 @@ def render_operational_shell() -> None:
 
 
 def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
+    assets = load_dashboard_assets()
     dataframe: pd.DataFrame | None = None
     predictor: ChurnPredictor | None = None
     model_loaded = False
@@ -91,11 +92,17 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
         st.markdown("## Workspace Status")
         st.caption("Runtime health, dataset readiness, and inference bundle availability.")
 
-        if runtime.data_path.exists():
-            dataframe = load_data(runtime.data_path)
+        dataframe, data_source = load_best_available_dataframe(runtime, assets)
+        if dataframe is not None:
             st.success(f"Dataset ready with {len(dataframe):,} rows")
+            if data_source.startswith("raw:"):
+                st.caption(f"Source: {runtime.data_path.name}")
+            elif data_source.startswith("silver:"):
+                st.warning("Using silver layer because raw input is unavailable.")
+            else:
+                st.warning("Using prioritization artifact as fallback data source.")
         else:
-            st.error("Dataset is missing from the configured raw layer.")
+            st.error("No data source available (raw, silver, or prioritization).")
 
         if runtime.bundle_path.exists():
             predictor = load_predictor(runtime.bundle_path)
@@ -109,7 +116,6 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
         else:
             st.warning("Inference bundle not found. Run the training pipeline to enable scoring.")
 
-        assets = load_dashboard_assets()
         if assets.eda_ready:
             st.success("EDA artifacts ready")
         else:
@@ -444,7 +450,10 @@ def main() -> None:
     dataframe = sidebar_state.dataframe
 
     if dataframe is None:
-        st.error(f"Dataset not found at: {DASHBOARD_RUNTIME.data_path}")
+        st.error(
+            "Dashboard data unavailable. Expected at least one source: "
+            f"raw={DASHBOARD_RUNTIME.data_path} or silver={DASHBOARD_RUNTIME.silver_path}."
+        )
         st.stop()
 
     with section_container(

@@ -28,11 +28,16 @@ PUBLIC_PRIORITIZATION_PATH = DEFAULT_CONFIG.gold_dir / "customer_prioritization_
 @dataclass(frozen=True)
 class DashboardRuntime:
     data_path: Path
+    silver_path: Path
     bundle_path: Path
 
     @classmethod
     def from_config(cls, config: PipelineConfig) -> "DashboardRuntime":
-        return cls(data_path=config.raw_input_path, bundle_path=config.enterprise_bundle_path)
+        return cls(
+            data_path=config.raw_input_path,
+            silver_path=config.silver_output_path,
+            bundle_path=config.enterprise_bundle_path,
+        )
 
 
 @dataclass(frozen=True)
@@ -117,6 +122,21 @@ def load_dashboard_assets() -> DashboardAssets:
         kpi_path=KPI_PATH,
         prioritization_path=PRIORITIZATION_PATH,
     )
+
+
+def load_best_available_dataframe(
+    runtime: DashboardRuntime, assets: DashboardAssets
+) -> tuple[pd.DataFrame | None, str]:
+    if runtime.data_path.exists():
+        return load_data(runtime.data_path), f"raw:{runtime.data_path.name}"
+
+    if runtime.silver_path.exists():
+        return load_data(runtime.silver_path), f"silver:{runtime.silver_path.name}"
+
+    if not assets.prioritization.empty:
+        return assets.prioritization.copy(), "prioritization:fallback"
+
+    return None, "missing"
 
 
 def build_dashboard_status(assets: DashboardAssets) -> dict[str, str | bool]:

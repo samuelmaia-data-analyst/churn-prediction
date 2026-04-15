@@ -6,12 +6,14 @@ import pandas as pd
 
 from apps.dashboard_runtime import (
     DashboardAssets,
+    DashboardRuntime,
     build_dashboard_status,
     build_filtered_views,
     build_portfolio_summary,
     build_prediction_payload,
     build_risk_distribution,
     format_risk_level,
+    load_best_available_dataframe,
     normalize_filter_value,
     simulate_retention_impact,
     summarise_metrics,
@@ -168,3 +170,25 @@ def test_simulate_retention_impact_returns_recovered_and_remaining_values() -> N
     assert simulation["baseline_revenue_risk"] == 150.0
     assert simulation["recovered_revenue"] == 30.0
     assert simulation["remaining_revenue_risk"] == 120.0
+
+
+def test_load_best_available_dataframe_falls_back_to_prioritization_when_files_missing() -> None:
+    assets = DashboardAssets(
+        report={"metadata": {"run_id": "dashboard-fallback"}},
+        kpis=pd.DataFrame({"metric": [1]}),
+        prioritization=pd.DataFrame({"customerID": ["C-001"], "MonthlyCharges": [50.0]}),
+        report_path=Path("unused"),
+        kpi_path=Path("unused"),
+        prioritization_path=Path("unused"),
+    )
+    runtime = DashboardRuntime(
+        data_path=Path("missing_raw.csv"),
+        silver_path=Path("missing_silver.csv"),
+        bundle_path=Path("unused"),
+    )
+
+    dataframe, source = load_best_available_dataframe(runtime, assets)
+
+    assert dataframe is not None
+    assert len(dataframe) == 1
+    assert source == "prioritization:fallback"
