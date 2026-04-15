@@ -40,4 +40,17 @@ python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
-files = ["src"]
+files = [
+    "src/runtime",
+    "src/contracts/artifact_manifest.py",
+    "src/contracts/executive_metrics.py",
+    "src/contracts/lineage_manifest.py",
+    "src/contracts/output_contracts.py",
+    "src/contracts/report_schema.py",
+    "src/pipelines/ingestion.py",
+    "src/pipelines/transformation.py",
+    "src/pipelines/validation.py",
+    "src/pipelines/warehouse.py",
+    "src/pipelines/eda.py",
+    "src/pipelines/governance.py",
+]

@@ -33,7 +33,7 @@ format:
 	.venv\Scripts\python.exe -m isort $(PYTHON_TARGETS)
 
 typecheck:
-	.venv\Scripts\python.exe -m mypy src
+	.venv\Scripts\python.exe -m mypy
 
 predict:
 	.venv\Scripts\python.exe -m src.cli.predict_customer

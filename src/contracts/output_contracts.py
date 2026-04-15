@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Mapping, cast
 
 import pandas as pd
 
@@ -66,12 +66,12 @@ def validate_executive_report_contract(report: ExecutiveReport) -> None:
     if set(payload.keys()) != expected_root:
         raise ValueError("executive_report com estrutura raiz invalida.")
 
-    metadata = payload["metadata"]
+    metadata = cast(Mapping[str, object], payload["metadata"])
     expected_metadata = {"schema_version", "generated_at_utc", "run_id", "environment"}
     if set(metadata.keys()) != expected_metadata:
         raise ValueError("executive_report.metadata invalido.")
 
-    kpis = payload["kpis"]
+    kpis = cast(Mapping[str, object], payload["kpis"])
     if set(kpis.keys()) != REQUIRED_KPI_COLUMNS:
         raise ValueError("executive_report.kpis invalido.")
 

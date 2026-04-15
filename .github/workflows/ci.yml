@@ -5,6 +5,9 @@ on:
     branches: ["main", "master"]
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   quality-and-test:
     runs-on: ubuntu-latest
@@ -35,7 +38,7 @@ jobs:
         run: isort --check-only apps src tests pages scripts monitoring app.py api.py main.py predict_customer.py save_processed_data.py
 
       - name: Mypy
-        run: mypy src
+        run: mypy
 
       - name: Run tests
         run: pytest -q
