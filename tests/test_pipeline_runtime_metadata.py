@@ -30,6 +30,7 @@ def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Pat
     )
 
     execution_payload = json.loads(config.execution_metadata_path.read_text(encoding="utf-8"))
+    lineage_payload = json.loads(config.lineage_manifest_path.read_text(encoding="utf-8"))
     quality_payload = json.loads(config.data_quality_report_path.read_text(encoding="utf-8"))
 
     assert execution_payload["run_id"] == summary["run_id"]
@@ -42,5 +43,9 @@ def test_run_pipeline_persists_execution_metadata_and_data_quality(tmp_path: Pat
     )
     assert execution_payload["stages"]["bronze"]["rows"] > 0
     assert execution_payload["stages"]["modeling"]["churn_roc_auc"] >= 0.0
+    assert lineage_payload["run_id"] == summary["run_id"]
+    assert lineage_payload["lineage_version"] == "2026.04.1"
+    assert lineage_payload["input"]["raw_sha256"] == execution_payload["input"]["raw_sha256"]
+    assert len(lineage_payload["artifacts"]) > 0
     assert quality_payload["rows"] > 0
     assert quality_payload["invalid_churn_labels"] == 0

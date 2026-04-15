@@ -1,0 +1,59 @@
+services:
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["pipeline"]
+    env_file:
+      - ./deploy/env/dev.env.example
+    volumes:
+      - ./data:/app/data
+      - ./artifacts:/app/artifacts
+      - ./models:/app/models
+    command: >
+      python -m src.cli.pipeline
+      --data-dir data
+      --log-level INFO
+      --environment ${CHURN_ENV:-dev}
+      --decision-policy ${CHURN_DECISION_POLICY:-balanceada}
+
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["dev"]
+    env_file:
+      - ./deploy/env/dev.env.example
+    volumes:
+      - ./data:/app/data
+      - ./artifacts:/app/artifacts
+      - ./models:/app/models
+    ports:
+      - "8000:8000"
+    command: uvicorn apps.api:app --host 0.0.0.0 --port 8000
+
+  dashboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["dev"]
+    env_file:
+      - ./deploy/env/dev.env.example
+    volumes:
+      - ./data:/app/data
+      - ./artifacts:/app/artifacts
+      - ./models:/app/models
+    ports:
+      - "8501:8501"
+    command: streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+
+  api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["prod"]
+    env_file:
+      - ./deploy/env/prod.env.example
+    ports:
+      - "8000:8000"
+    command: uvicorn apps.api:app --host 0.0.0.0 --port 8000

@@ -5,7 +5,15 @@ from typing import Mapping
 
 import pandas as pd
 
-from src.contracts import ArtifactEntry, ArtifactManifest, ExecutiveReport
+from src.contracts import (
+    ArtifactEntry,
+    ArtifactManifest,
+    ExecutiveReport,
+    validate_action_playbook_contract,
+    validate_executive_report_contract,
+    validate_kpi_contract,
+    validate_prioritization_contract,
+)
 from src.pipelines.decisioning import (
     action_for_segment,
     build_action_playbook,
@@ -88,6 +96,11 @@ def build_business_outputs(
         top_10_priorities=recommendations.head(10).to_dict(orient="records"),
     )
     action_playbook = build_action_playbook(recommendations)
+
+    validate_executive_report_contract(executive_report)
+    validate_prioritization_contract(recommendations)
+    validate_kpi_contract(kpi_summary)
+    validate_action_playbook_contract(action_playbook)
 
     return ReportOutputs(
         executive_report=executive_report,

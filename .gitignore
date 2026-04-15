@@ -4,6 +4,9 @@ venv/
 .venv311/
 env/
 ENV/
+!deploy/
+!deploy/env/
+!deploy/env/*.example
 
 # Python
 __pycache__/
@@ -31,6 +34,7 @@ Thumbs.db
 # Streamlit
 .streamlit/secrets.toml
 .env
+deploy/env/prod.env
 
 # Pipeline outputs gerados
 data/bronze/

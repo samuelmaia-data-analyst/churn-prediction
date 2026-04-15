@@ -25,6 +25,7 @@ The structure separates:
 |   |-- bronze/                 # regenerable ingestion layer
 |   |-- silver/                 # regenerable cleaned layer
 |   `-- gold/                   # regenerable analytics outputs
+|-- deploy/                     # container env profiles and deployment configuration
 |-- docs/                       # architecture, operations, repository conventions
 |   `-- releases/               # release notes and versioned change summaries
 |-- notebooks/                  # exploratory work only

@@ -152,6 +152,7 @@ The repository implements controls proportional to its scope:
 - environment-aware runtime resolution
 - structured logging with `run_id`
 - execution metadata persisted under `artifacts/metadata/`
+- lineage manifest persisted under `artifacts/metadata/lineage_run_<run_id>.json`
 - atomic persistence for CSV, JSON, and Markdown
 - schema validation before training
 - regenerable bronze, silver, and gold layers
@@ -159,6 +160,12 @@ The repository implements controls proportional to its scope:
 - drift monitoring using PSI and KS
 - dashboard artifact status with explicit fallback signaling
 - multipage dashboard with a shared visual shell and runtime-aware status
+
+Containerized runtime profiles are available through `docker-compose.yml`:
+
+- `dev`: API + dashboard
+- `pipeline`: one-shot pipeline execution
+- `prod`: API with production environment profile
 
 The default execution path is local and explicit by design. Prefect is kept only as an optional scheduling example, not as the canonical runtime dependency.
 

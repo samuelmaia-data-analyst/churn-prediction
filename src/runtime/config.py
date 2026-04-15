@@ -183,6 +183,14 @@ class PipelineConfig:
         return self.metadata_dir / "latest_run.json"
 
     @property
+    def lineage_manifest_path(self) -> Path:
+        return self.metadata_dir / f"lineage_run_{self.run_id}.json"
+
+    @property
+    def latest_lineage_manifest_path(self) -> Path:
+        return self.metadata_dir / "latest_lineage.json"
+
+    @property
     def drift_reference_path(self) -> Path:
         return self.monitoring_dir / "drift_reference.csv"
 

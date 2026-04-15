@@ -32,3 +32,6 @@ def test_pipeline_config_reads_environment_from_dotenv(tmp_path: Path) -> None:
     assert config.execution_metadata_path == Path(
         "custom-artifacts/metadata/pipeline_run_test-run.json"
     )
+    assert config.lineage_manifest_path == Path(
+        "custom-artifacts/metadata/lineage_run_test-run.json"
+    )

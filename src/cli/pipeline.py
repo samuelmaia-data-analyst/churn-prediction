@@ -10,6 +10,7 @@ from uuid import uuid4
 
 import pandas as pd
 
+from src.contracts import LineageArtifact, LineageInput, LineageManifest
 from src.ml import ModelOutputs, train_models_and_score
 from src.pipelines.decisioning import POLICIES
 from src.pipelines.ingestion import build_bronze_layer, load_raw_dataset, persist_bronze
@@ -194,6 +195,56 @@ def _execute_stage(
     return result, metadata
 
 
+def _artifact_entry(
+    name: str, path: Path, format_name: str, rows: int | None = None
+) -> LineageArtifact:
+    return LineageArtifact(
+        name=name,
+        path=str(path),
+        format=format_name,
+        sha256=file_sha256(path) if path.exists() else None,
+        rows=rows,
+    )
+
+
+def _build_lineage_manifest(
+    config: PipelineConfig,
+    raw_digest: str,
+    stage_metadata: dict[str, dict[str, Any]],
+    model_outputs: ModelOutputs,
+) -> LineageManifest:
+    bronze_rows = int(stage_metadata["bronze"]["rows"])
+    silver_rows = int(stage_metadata["silver"]["rows"])
+    artifacts: list[LineageArtifact] = [
+        _artifact_entry("bronze_layer", config.bronze_output_path, "csv", rows=bronze_rows),
+        _artifact_entry("silver_layer", config.silver_output_path, "csv", rows=silver_rows),
+        _artifact_entry("gold_manifest", config.gold_manifest_path, "json"),
+        _artifact_entry("kpi_summary", config.gold_dir / "kpi_summary.csv", "csv"),
+        _artifact_entry(
+            "customer_prioritization", config.gold_dir / "customer_prioritization.csv", "csv"
+        ),
+        _artifact_entry("action_playbook_csv", config.gold_dir / "action_playbook.csv", "csv"),
+        _artifact_entry("executive_report", config.executive_report_path, "json"),
+        _artifact_entry("model_card", config.model_card_path, "md"),
+        _artifact_entry("executive_brief", config.executive_brief_path, "md"),
+        _artifact_entry("action_playbook_md", config.action_playbook_path, "md"),
+        _artifact_entry("drift_alert", config.drift_alert_path, "json"),
+        _artifact_entry("enterprise_bundle", config.enterprise_bundle_path, "joblib"),
+        _artifact_entry("model_metadata", config.model_metadata_path, "json"),
+        _artifact_entry("model_registry_manifest", config.model_registry_manifest_path, "json"),
+    ]
+    return LineageManifest(
+        schema_version="1.0.0",
+        lineage_version="2026.04.1",
+        generated_at_utc=pd.Timestamp.utcnow().isoformat(),
+        run_id=config.run_id,
+        environment=config.environment,
+        input=LineageInput(raw_path=str(config.raw_input_path), raw_sha256=raw_digest),
+        stages=stage_metadata,
+        artifacts=artifacts,
+    )
+
+
 def run_pipeline(
     seed: int = 42,
     data_dir: str = "data",
@@ -304,8 +355,11 @@ def run_pipeline(
         "stages": stage_metadata,
         "generated_at": pd.Timestamp.utcnow().isoformat(),
     }
+    lineage_manifest = _build_lineage_manifest(config, raw_digest, stage_metadata, model_outputs)
     write_json_atomic(config.execution_metadata_path, execution_summary)
     write_json_atomic(config.latest_execution_metadata_path, execution_summary)
+    write_json_atomic(config.lineage_manifest_path, lineage_manifest.to_dict())
+    write_json_atomic(config.latest_lineage_manifest_path, lineage_manifest.to_dict())
     logger.info(
         (
             "pipeline_done run_id=%s duration_seconds=%.2f churn_f1=%.4f "

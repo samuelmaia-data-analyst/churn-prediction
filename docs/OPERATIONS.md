@@ -42,6 +42,26 @@ This is the canonical execution path for local runs and for repository evaluatio
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 ```
 
+### Containerized profiles
+
+Dev profile (API + dashboard):
+
+```bash
+docker compose --profile dev up --build
+```
+
+Pipeline profile:
+
+```bash
+docker compose --profile pipeline run --rm pipeline
+```
+
+Prod profile (API only):
+
+```bash
+docker compose --profile prod up --build
+```
+
 ### Tests
 
 ```bash
@@ -66,6 +86,8 @@ make typecheck
 
 - `artifacts/metadata/latest_run.json`
 - `artifacts/metadata/pipeline_run_<run_id>.json`
+- `artifacts/metadata/latest_lineage.json`
+- `artifacts/metadata/lineage_run_<run_id>.json`
 - metadata now includes input fingerprint (`raw_sha256`) and per-stage telemetry (`stages`)
 
 ### Reports
