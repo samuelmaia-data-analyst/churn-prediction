@@ -28,6 +28,14 @@ Primary variables:
 
 This is the canonical execution path for local runs and for repository evaluation.
 
+### Streamlit dashboard (deploy target)
+
+Use `app.py` as the Streamlit entrypoint.
+
+```bash
+streamlit run app.py
+```
+
 ### Standalone drift detection
 
 ```bash

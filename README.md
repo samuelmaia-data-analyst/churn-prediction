@@ -56,6 +56,7 @@ Compatibility wrappers still exist under `src/*.py` and some root entrypoints, b
 
 UI-specific paths:
 
+- `app.py`: canonical Streamlit deploy entrypoint
 - `apps/streamlit_app.py`: control room and customer-level scoring entrypoint
 - `apps/dashboard_ui.py`: shared dashboard layout shell, styling, and UI helpers
 - `apps/dashboard_runtime.py`: shared dashboard asset loading and status helpers

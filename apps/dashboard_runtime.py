@@ -18,6 +18,12 @@ from src.pipelines.dashboard_data import (
 )
 from src.runtime.config import PipelineConfig
 
+DEFAULT_CONFIG = PipelineConfig.from_runtime(mlflow_tracking_uri="disabled", run_id="dashboard")
+EDA_PROFILE_PATH = DEFAULT_CONFIG.eda_profile_path
+EDA_REPORT_PATH = DEFAULT_CONFIG.eda_report_path
+GOVERNANCE_PATH = DEFAULT_CONFIG.latest_governance_manifest_path
+PUBLIC_PRIORITIZATION_PATH = DEFAULT_CONFIG.gold_dir / "customer_prioritization_public.csv"
+
 
 @dataclass(frozen=True)
 class DashboardRuntime:
@@ -44,6 +50,10 @@ class DashboardAssets:
     report_path: Path
     kpi_path: Path
     prioritization_path: Path
+    eda_profile_path: Path = EDA_PROFILE_PATH
+    eda_report_path: Path = EDA_REPORT_PATH
+    governance_path: Path = GOVERNANCE_PATH
+    public_prioritization_path: Path = PUBLIC_PRIORITIZATION_PATH
 
     @property
     def is_ready(self) -> bool:
@@ -69,6 +79,14 @@ class DashboardAssets:
     @property
     def schema_version(self) -> str:
         return str(self.report_metadata.get("schema_version", "unknown"))
+
+    @property
+    def eda_ready(self) -> bool:
+        return self.eda_profile_path.exists() and self.eda_report_path.exists()
+
+    @property
+    def governance_ready(self) -> bool:
+        return self.governance_path.exists() and self.public_prioritization_path.exists()
 
 
 @st.cache_data(show_spinner=False)
@@ -105,6 +123,8 @@ def build_dashboard_status(assets: DashboardAssets) -> dict[str, str | bool]:
     return {
         "ready": assets.is_ready,
         "fallback": assets.is_fallback,
+        "eda_ready": assets.eda_ready,
+        "governance_ready": assets.governance_ready,
         "environment": assets.environment,
         "schema_version": assets.schema_version,
         "generated_at_utc": assets.generated_at_utc,

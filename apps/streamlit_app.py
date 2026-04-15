@@ -76,6 +76,8 @@ def render_operational_shell() -> None:
             ("Schema", str(status["schema_version"])),
             ("Run ID", str(status["run_id"])),
             ("Generated", str(status["generated_at_utc"])),
+            ("EDA", "Ready" if status["eda_ready"] else "Missing"),
+            ("Governance", "Ready" if status["governance_ready"] else "Missing"),
         ],
     )
 
@@ -106,6 +108,17 @@ def render_sidebar(runtime: DashboardRuntime) -> SidebarState:
                 )
         else:
             st.warning("Inference bundle not found. Run the training pipeline to enable scoring.")
+
+        assets = load_dashboard_assets()
+        if assets.eda_ready:
+            st.success("EDA artifacts ready")
+        else:
+            st.warning("EDA artifacts missing (run pipeline to generate eda_profile and report).")
+
+        if assets.governance_ready:
+            st.success("Governance artifacts ready")
+        else:
+            st.warning("Governance artifacts missing (run pipeline to generate public view).")
 
         render_sidebar_summary(RUNTIME_CONFIG)
 

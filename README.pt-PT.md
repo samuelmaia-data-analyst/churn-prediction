@@ -83,11 +83,13 @@ make typecheck
 ```text
 .
 |-- .github/                  # CI, templates e padrões de colaboração
+|-- analytics_dbt/            # camada opcional dbt para marts analíticos
 |-- apps/                     # Streamlit, FastAPI e helpers partilhados do dashboard
 |-- assets/                   # imagens e media do repositório
 |-- artifacts/                # metadados de execução e artefactos gerados em runtime
 |-- data/                     # datasets e camadas locais de pipeline
 |-- docs/                     # arquitetura, operação e convenções
+|-- deploy/                   # perfis de ambiente para execução contentorizada
 |-- models/                   # registry local de modelos e bundles gerados
 |-- notebooks/                # exploração isolada do caminho produtivo
 |-- pages/                    # wrappers de compatibilidade do Streamlit multipágina
@@ -119,11 +121,13 @@ Componentes centrais:
 - `src/pipelines/reporting.py`: executive report, model card e action playbook
 - `src/pipelines/monitoring.py`: baseline e alerta de drift com PSI/KS
 - `src/cli/pipeline.py`: orquestração ponta a ponta
+- `analytics_dbt/`: modelação analítica SQL (staging + marts) em estilo dbt
 
 Pastas como `src/data`, `src/features`, `src/models` e os wrappers em `src/*.py` existem apenas como camada de compatibilidade. A implementação canónica está em `src/runtime/`, `src/pipelines/`, `src/modeling/` e `src/compat/`.
 
 Caminhos específicos da UI:
 
+- `app.py`: entrypoint canónico para deploy Streamlit
 - `apps/streamlit_app.py`: entrypoint do control room e score individual
 - `apps/dashboard_ui.py`: shell visual partilhado, estilos e helpers de layout
 - `apps/dashboard_runtime.py`: carregamento partilhado de artefactos e status
@@ -143,9 +147,13 @@ O projeto implementa controlos proporcionais ao seu âmbito:
 - logging estruturado com `run_id`
 - persistência atómica de CSV, JSON e Markdown
 - metadados de run em `artifacts/metadata/`
+- lineage versionado em `artifacts/metadata/lineage_run_<run_id>.json`
+- governança/LGPD em `artifacts/metadata/governance_run_<run_id>.json`
 - manifests versionados para `gold` e model registry
 - validação de schema antes do treino
 - monitorização simples de drift
+- EDA operacional com `data/gold/eda_profile.json` e `artifacts/reports/eda_report.md`
+- saída pseudonimizada para consumo alargado: `data/gold/customer_prioritization_public.csv`
 - reprocessamento local sem estado manual oculto
 - deployment opcional com Prefect mantido apenas como exemplo de agendamento, não como caminho canónico
 

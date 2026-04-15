@@ -18,9 +18,12 @@ Model the churn use case as a data product, not only as an ML experiment.
 raw
   -> bronze
   -> silver
+  -> eda
   -> gold
+  -> governance
   -> modeling
   -> reporting
+  -> analytics_dbt (optional)
   -> dashboard/api
 ```
 
@@ -61,11 +64,13 @@ Train, evaluate, persist, and serve inference artifacts.
 
 - `src/pipelines/warehouse.py`
 - `src/pipelines/reporting.py`
+- `src/pipelines/eda.py`
+- `src/pipelines/governance.py`
 - `src/pipelines/dashboard_data.py`
 
 Responsibility:
 
-Produce gold layer outputs, prioritization artifacts, KPIs, model card material, and operator-facing playbooks.
+Produce gold outputs, EDA/governance artifacts, prioritization assets, KPIs, and operator-facing playbooks.
 
 ## Key Decisions
 
