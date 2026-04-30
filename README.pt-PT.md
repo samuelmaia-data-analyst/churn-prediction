@@ -195,3 +195,13 @@ Dependências:
 ## Padrão de Contribuição
 
 Mudanças devem aumentar clareza, fiabilidade e manutenção sustentável. O repositório deve manter-se legível, testável e defensável em review técnico.
+
+## License
+
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+To view a copy of this license, visit:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+[![License: CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc/4.0/)
+

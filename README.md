@@ -226,3 +226,13 @@ These are conscious scope choices, not hidden gaps.
 ## Contribution Standard
 
 Changes should increase clarity, reduce maintenance cost, or improve reliability. The repository should stay readable, testable, and defensible in technical review.
+
+## License
+
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+To view a copy of this license, visit:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+[![License: CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc/4.0/)
+
