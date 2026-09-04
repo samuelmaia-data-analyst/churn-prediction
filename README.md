@@ -9,6 +9,16 @@
 
 **Idioma:** `Português (principal)` | [English](README.en.md) se disponível | [PT-BR](README.pt-BR.md)
 
+> Equipes de retenção não precisam apenas de um score de churn: precisam saber quem priorizar, com qual confiança e com rastreabilidade entre dados, modelo e decisão. Para resolver esse problema, construí um produto de dados com camadas Raw/Bronze/Silver/Gold, validação de schema, treinamento e inferência, priorização de clientes, simulação de políticas, monitoramento de drift, dashboard e API. O resultado é um fluxo reproduzível que transforma previsão em uma lista acionável de prioridades, com evidências e controles ao longo do pipeline.
+
+## Método CAR
+
+**Contexto:** um modelo de churn isolado em notebook não resolve o problema de negócio quando não existe processo claro para transformar score em prioridade de ação, nem rastreabilidade suficiente para revisar o resultado.
+
+**Ação:** desenvolvi um pipeline com Python, pandas, NumPy, dbt e scikit-learn, validações de contrato, treinamento e inferência, priorização de clientes, simulação de limiares, Streamlit, FastAPI, monitoramento de drift por PSI/KS, testes e CI/CD.
+
+**Resultado:** o projeto transforma scores em uma lista priorizada para retenção, mantém artefatos e metadados de execução, reduz dependência de notebooks e permite reexecução do fluxo com validações e monitoramento antes do consumo.
+
 > Fluxo principal: dados brutos → bronze → silver → gold → treinamento/inferência → priorização → dashboard/API.
 
 ---
